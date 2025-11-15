@@ -1,0 +1,8 @@
+/* Import CSS */
+@import url('./css/style.css');
+
+/* Additional React-specific styles */
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
