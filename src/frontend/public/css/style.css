@@ -592,7 +592,8 @@ input, textarea, select {
     margin-bottom: 0.5rem;
     color: var(--text-primary);
     display: -webkit-box;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
@@ -679,6 +680,7 @@ input, textarea, select {
     margin-bottom: 0.75rem;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
@@ -1581,7 +1583,6 @@ input, textarea, select {
     gap: 1rem;
 }
 
-/* Responsive for Q&A */
 @media (max-width: 768px) {
     .qa-container {
         grid-template-columns: 1fr;
@@ -1821,7 +1822,6 @@ input, textarea, select {
     box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
 }
 
-/* Responsive for Question Detail */
 @media (max-width: 768px) {
     .question-body {
         flex-direction: column;
@@ -2062,7 +2062,6 @@ input, textarea, select {
     margin-right: 0.5rem;
 }
 
-/* Responsive for Ask Question */
 @media (max-width: 968px) {
     .ask-container {
         grid-template-columns: 1fr;
@@ -2389,7 +2388,6 @@ input, textarea, select {
     color: #fbbf24;
 }
 
-/* Responsive for Document Detail */
 @media (max-width: 968px) {
     .document-detail-container {
         grid-template-columns: 1fr;
@@ -2514,7 +2512,6 @@ input, textarea, select {
     border-bottom: 2px solid var(--border-color);
 }
 
-/* Responsive for Upload */
 @media (max-width: 768px) {
     .upload-area {
         padding: 2rem 1rem;
@@ -2609,7 +2606,7 @@ input, textarea, select {
   color: var(--primary-color);
 }
 
-/* Font Awesome fa-spin already provides spinning animation */.notification-message {
+.notification-message {
     flex: 1;
 }
 
@@ -2653,7 +2650,6 @@ input, textarea, select {
     min-width: 120px;
 }
 
-/* Responsive for Notification */
 @media (max-width: 768px) {
     .notification-content {
         min-width: 300px;
@@ -2717,7 +2713,6 @@ input, textarea, select {
     margin-bottom: 1.5rem;
 }
 
-/* Avatar Upload */
 .avatar-upload {
     display: flex;
     gap: 2rem;
@@ -2753,7 +2748,6 @@ input, textarea, select {
     color: var(--text-muted);
 }
 
-/* Form Groups */
 .form-group {
     margin-bottom: 1.5rem;
 }
@@ -2816,7 +2810,6 @@ input, textarea, select {
     border-radius: 0 0 var(--radius-lg) var(--radius-lg);
 }
 
-/* Responsive */
 @media (max-width: 768px) {
     .form-row {
         grid-template-columns: 1fr;
