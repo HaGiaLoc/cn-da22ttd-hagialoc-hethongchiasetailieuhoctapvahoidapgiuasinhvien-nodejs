@@ -1,16 +1,23 @@
-import { useState, useEffect } from 'react'
-import { useParams, Link } from 'react-router-dom'
-import BoTri from '../components/BoTri'
-import { mockQuestions, mockAnswers } from '../data/mockData'
-import { useNotification } from '../contexts/NotificationContext'
-import { formatDate } from '../utils/helpers'
+import { useState, useEffect, useRef } from 'react'
+import { useParams, Link, useNavigate } from 'react-router-dom'
+import BoTri from '../../components/BoTri'
+import BaoCaoModal from '../../components/user/BaoCaoModal'
+import { mockQuestions, mockAnswers, mockStudents, generateAvatar } from '../../data/mockData'
+import { useNotification } from '../../contexts/NotificationContext'
+import { useAuth } from '../../contexts/AuthContext'
+import { formatDate } from '../../utils/helpers'
 
 export default function ChiTietCauHoi() {
   const { id } = useParams()
+  const navigate = useNavigate()
+  const { user } = useAuth()
   const { showNotification } = useNotification()
   const [question, setQuestion] = useState(null)
   const [answers, setAnswers] = useState([])
   const [answer, setAnswer] = useState('')
+  const [showReportModal, setShowReportModal] = useState(false)
+  const [showDropdown, setShowDropdown] = useState(false)
+  const dropdownRef = useRef(null)
 
   useEffect(() => {
     const q = mockQuestions.find(q => q.id === parseInt(id))
@@ -21,16 +28,38 @@ export default function ChiTietCauHoi() {
     setAnswers(questionAnswers)
   }, [id])
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowDropdown(false)
+      }
+    }
+
+    if (showDropdown) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [showDropdown])
+
   if (!question) return <BoTri><div>Loading...</div></BoTri>
 
   const handleVote = (direction) => {
-    showNotification(`Đã ${direction === 'up' ? 'upvote' : 'downvote'}`, 'success')
+    showNotification(`Đã ${direction === 'up' ? 'upvote' : 'downvote'}`, 'success', 1000)
+  }
+
+  const handleTextareaFocus = () => {
+    if (!user) {
+      showNotification('Vui lòng đăng nhập để trả lời câu hỏi', 'warning')
+    }
   }
 
   const handleSubmitAnswer = (e) => {
     e.preventDefault()
     if (answer.trim()) {
-      showNotification('Đã gửi câu trả lời', 'success')
+      showNotification('Đã gửi câu trả lời', 'success', 1000)
       setAnswer('')
     }
   }
@@ -50,17 +79,46 @@ export default function ChiTietCauHoi() {
           <div className="question-detail">
             <div className="question-main">
               <div className="question-header">
-                <div className="question-title-row">
-                  <h1>{question.title}</h1>
-                  <div className="question-subject-tags">
-                    <span className="subject-tag"><i className="fas fa-book"></i> {question.subject}</span>
-                    <span className="major-tag"><i className="fas fa-graduation-cap"></i> {question.major}</span>
+                <div className="question-header-top">
+                  <div className="question-meta">
+                    <img 
+                      src={mockStudents.find(s => s.hoTenSinhVien === question.author)?.avatar || generateAvatar(question.author)} 
+                      alt={question.author}
+                      className="author-avatar"
+                    />
+                    <div className="author-info">
+                      <span className="author-name">{question.author}</span>
+                      <div className="question-date-views">
+                        <span>Ngày đăng: {formatDate(question.date)}</span>
+                        <span>•</span>
+                        <span>{question.views} lượt xem</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="question-actions" ref={dropdownRef}>
+                    <button 
+                      className="btn-icon-only"
+                      onClick={() => setShowDropdown(!showDropdown)}
+                    >
+                      <i className="fas fa-ellipsis-v"></i>
+                    </button>
+                    {showDropdown && (
+                      <div className="dropdown-menu">
+                        <button onClick={() => {
+                          setShowReportModal(true)
+                          setShowDropdown(false)
+                        }}>
+                          <i className="fas fa-flag"></i>
+                          Báo cáo vi phạm
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
-                <div className="question-meta">
-                  <span>Đăng bởi {question.author}</span>
-                  <span>Ngày đăng: {formatDate(question.date)}</span>
-                  <span>{question.views} lượt xem</span>
+                <h1>{question.title}</h1>
+                <div className="question-subject-tags">
+                  <span className="subject-tag"><i className="fas fa-book"></i> {question.subject}</span>
+                  <span className="major-tag"><i className="fas fa-graduation-cap"></i> {question.major}</span>
                 </div>
               </div>
 
@@ -115,9 +173,14 @@ export default function ChiTietCauHoi() {
                     placeholder="Viết câu trả lời của bạn..."
                     value={answer}
                     onChange={(e) => setAnswer(e.target.value)}
+                    onFocus={handleTextareaFocus}
                     required
                   ></textarea>
-                  <button type="submit" className="btn btn-primary">
+                  <button 
+                    type="submit" 
+                    className="btn btn-primary"
+                    disabled={!answer.trim()}
+                  >
                     Gửi câu trả lời
                   </button>
                 </form>
@@ -126,6 +189,14 @@ export default function ChiTietCauHoi() {
           </div>
         </div>
       </section>
+
+      <BaoCaoModal 
+        isOpen={showReportModal}
+        onClose={() => setShowReportModal(false)}
+        reportType="question"
+        reportedId={question?.id}
+        reportedTitle={question?.title}
+      />
     </BoTri>
   )
 }

@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom'
 import { useState, useEffect } from 'react'
-import { formatDate, formatNumber } from '../utils/helpers'
-import { useAuth } from '../contexts/AuthContext'
-import { useNotification } from '../contexts/NotificationContext'
-import { mockStudents, generateAvatar } from '../data/mockData'
+import { formatDate, formatNumber } from '../../utils/helpers'
+import { useAuth } from '../../contexts/AuthContext'
+import { useNotification } from '../../contexts/NotificationContext'
+import { mockStudents, generateAvatar } from '../../data/mockData'
 
 export default function TheTaiLieu({ document }) {
   const { user } = useAuth()
@@ -37,13 +37,13 @@ export default function TheTaiLieu({ document }) {
       const newSavedDocs = savedDocs.filter(id => id !== document.id)
       localStorage.setItem(`savedDocs_${user.id}`, JSON.stringify(newSavedDocs))
       setIsSaved(false)
-      showNotification('Đã bỏ lưu tài liệu', 'success', 1500)
+      showNotification('Đã bỏ lưu tài liệu', 'success', 1000)
     } else {
       // Lưu tài liệu
       savedDocs.push(document.id)
       localStorage.setItem(`savedDocs_${user.id}`, JSON.stringify(savedDocs))
       setIsSaved(true)
-      showNotification('Đã lưu tài liệu', 'success', 1500)
+      showNotification('Đã lưu tài liệu', 'success', 1000)
     }
   }
 

@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import BoTri from '../components/BoTri'
-import { useAuth } from '../contexts/AuthContext'
-import { useNotification } from '../contexts/NotificationContext'
+import BoTri from '../../components/BoTri'
+import { useAuth } from '../../contexts/AuthContext'
+import { useNotification } from '../../contexts/NotificationContext'
 
 export default function DangKy() {
   const navigate = useNavigate()
@@ -38,7 +38,7 @@ export default function DangKy() {
 
     try {
       await register(formData)
-      showNotification('Đăng ký thành công!', 'success', 2000)
+      showNotification('Đăng ký thành công!', 'success', 1000)
       
       setTimeout(() => {
         navigate('/login')

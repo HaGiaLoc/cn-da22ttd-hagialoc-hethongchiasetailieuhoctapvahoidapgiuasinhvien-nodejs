@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { mockDocuments, mockQuestions, mockStudents } from '../data/mockData'
+import { mockDocuments, mockQuestions, mockStudents } from '../../data/mockData'
 
 export default function KhuVucAnh() {
   const [searchQuery, setSearchQuery] = useState('')

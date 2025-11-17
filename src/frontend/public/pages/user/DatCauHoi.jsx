@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import BoTri from '../components/BoTri'
-import { useAuth } from '../contexts/AuthContext'
-import { useNotification } from '../contexts/NotificationContext'
-import { mockQuestions, mockQuestionCategories } from '../data/mockData'
+import BoTri from '../../components/BoTri'
+import { useAuth } from '../../contexts/AuthContext'
+import { useNotification } from '../../contexts/NotificationContext'
+import { mockQuestions, mockQuestionCategories } from '../../data/mockData'
 
 export default function DatCauHoi() {
   const navigate = useNavigate()
@@ -69,7 +69,7 @@ export default function DatCauHoi() {
   const handleSubmit = (e) => {
     e.preventDefault()
     if (formData.title.trim() && formData.content.trim()) {
-      showNotification('Câu hỏi đã được đăng', 'success')
+      showNotification('Câu hỏi đã được đăng', 'success', 1000)
       navigate('/qa')
     }
   }

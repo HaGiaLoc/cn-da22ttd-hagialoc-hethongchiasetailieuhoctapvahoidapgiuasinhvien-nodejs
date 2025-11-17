@@ -1,5 +1,5 @@
-import ThanhDieuHuong from './ThanhDieuHuong'
-import ChanTrang from './ChanTrang'
+import ThanhDieuHuong from './user/ThanhDieuHuong'
+import ChanTrang from './user/ChanTrang'
 
 export default function BoTri({ children }) {
   return (

@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import BoTri from '../components/BoTri'
-import { useAuth } from '../contexts/AuthContext'
-import { useNotification } from '../contexts/NotificationContext'
-import { getFileIcon, formatFileSize } from '../utils/helpers'
-import { mockDocumentCategories, mockQuestionCategories } from '../data/mockData'
+import BoTri from '../../components/BoTri'
+import { useAuth } from '../../contexts/AuthContext'
+import { useNotification } from '../../contexts/NotificationContext'
+import { getFileIcon, formatFileSize } from '../../utils/helpers'
+import { mockDocumentCategories, mockQuestionCategories } from '../../data/mockData'
 
 export default function TaiLenTaiLieu() {
   const navigate = useNavigate()
@@ -54,7 +54,7 @@ export default function TaiLenTaiLieu() {
     
     // Sau 1.5s, cập nhật thành upload thành công
     setTimeout(() => {
-      showNotification('Upload thành công!', 'success', 2000)
+      showNotification('Upload thành công!', 'success', 1000)
       // Điều hướng sau khi modal đóng (2s)
       setTimeout(() => {
         navigate('/documents')

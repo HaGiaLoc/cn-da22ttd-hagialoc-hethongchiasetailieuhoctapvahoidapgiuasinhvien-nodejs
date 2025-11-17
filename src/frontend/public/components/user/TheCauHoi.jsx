@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { formatDate } from '../utils/helpers'
+import { formatDate } from '../../utils/helpers'
 
 export default function TheCauHoi({ question }) {
   return (

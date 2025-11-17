@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import BoTri from '../components/BoTri'
-import { useAuth } from '../contexts/AuthContext'
-import { useNotification } from '../contexts/NotificationContext'
-import { mockStudents } from '../data/mockData'
+import BoTri from '../../components/BoTri'
+import { useAuth } from '../../contexts/AuthContext'
+import { useNotification } from '../../contexts/NotificationContext'
+import { mockStudents } from '../../data/mockData'
 
 export default function DoiMatKhau() {
   const navigate = useNavigate()
@@ -68,7 +68,7 @@ export default function DoiMatKhau() {
     showNotification('Đang cập nhật mật khẩu...', 'loading', 0)
 
     setTimeout(() => {
-      showNotification('Đổi mật khẩu thành công!', 'success', 2000)
+      showNotification('Đổi mật khẩu thành công!', 'success', 1000)
       
       setTimeout(() => {
         navigate('/profile')

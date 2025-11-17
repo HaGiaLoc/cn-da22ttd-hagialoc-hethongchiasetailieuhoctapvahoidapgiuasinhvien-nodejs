@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useState, useEffect, useRef } from 'react'
-import { useAuth } from '../contexts/AuthContext'
-import { generateAvatar } from '../data/mockData'
+import { useAuth } from '../../contexts/AuthContext'
+import { generateAvatar } from '../../data/mockData'
 
 export default function ThanhDieuHuong() {
   const navigate = useNavigate()
@@ -77,6 +77,14 @@ export default function ThanhDieuHuong() {
                   <Link to="/change-password">
                     <i className="fas fa-key"></i> Đổi mật khẩu
                   </Link>
+                  {user?.role === 'admin' && (
+                    <>
+                      <hr />
+                      <Link to="/admin" className="admin-link">
+                        <i className="fas fa-tachometer-alt"></i> Quản trị
+                      </Link>
+                    </>
+                  )}
                   <hr />
                   <a href="#" onClick={handleLogout}>
                     <i className="fas fa-sign-out-alt"></i> Đăng xuất

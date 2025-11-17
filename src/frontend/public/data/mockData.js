@@ -295,11 +295,35 @@ export const mockReports = [
   {
     id: 1,
     maSinhVien: 3,
-    maCauTraLoi: null,
-    maBinhLuan: null,
-    lyDo: 'Nội dung không phù hợp',
+    reportType: 'document',
+    reportedId: 1,
+    reportedItem: mockDocuments[0],
+    lyDo: 'Tài liệu sai thông tin, nội dung không chính xác',
     ngayBaoCao: new Date('2024-11-15'),
-    trangThaiBaoCao: 'Đang xử lý'
+    trangThaiBaoCao: 'pending',
+    reporter: mockStudents[2]
+  },
+  {
+    id: 2,
+    maSinhVien: 1,
+    reportType: 'question',
+    reportedId: 2,
+    reportedItem: mockQuestions[1],
+    lyDo: 'Câu hỏi trùng lặp, spam',
+    ngayBaoCao: new Date('2024-11-14'),
+    trangThaiBaoCao: 'reviewing',
+    reporter: mockStudents[0]
+  },
+  {
+    id: 3,
+    maSinhVien: 2,
+    reportType: 'answer',
+    reportedId: 2,
+    reportedItem: mockAnswers[1],
+    lyDo: 'Câu trả lời sai, gây hiểu nhầm',
+    ngayBaoCao: new Date('2024-11-13'),
+    trangThaiBaoCao: 'resolved',
+    reporter: mockStudents[1]
   }
 ]
 
@@ -307,8 +331,11 @@ export const mockReports = [
 export const mockAdmins = [
   {
     id: 1,
+    maQuanTriVien: 'AD001',
     hoTenQuanTriVien: 'Admin Hệ thống',
     emailQuanTriVien: 'admin@edushare.vn',
-    matKhauQuanTriVien: 'admin123'
+    matKhauQuanTriVien: 'admin123',
+    role: 'admin',
+    avatar: generateAvatar('Admin Hệ thống')
   }
 ]

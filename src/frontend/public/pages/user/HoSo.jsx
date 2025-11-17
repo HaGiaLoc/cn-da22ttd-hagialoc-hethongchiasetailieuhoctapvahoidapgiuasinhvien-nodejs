@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import BoTri from '../components/BoTri'
-import TheTaiLieu from '../components/TheTaiLieu'
-import TheCauHoi from '../components/TheCauHoi'
-import { useAuth } from '../contexts/AuthContext'
-import { mockDocuments, mockQuestions, mockStudents, generateAvatar } from '../data/mockData'
+import BoTri from '../../components/BoTri'
+import TheTaiLieu from '../../components/user/TheTaiLieu'
+import TheCauHoi from '../../components/user/TheCauHoi'
+import { useAuth } from '../../contexts/AuthContext'
+import { mockDocuments, mockQuestions, mockStudents, generateAvatar } from '../../data/mockData'
 
 export default function HoSo() {
   const navigate = useNavigate()

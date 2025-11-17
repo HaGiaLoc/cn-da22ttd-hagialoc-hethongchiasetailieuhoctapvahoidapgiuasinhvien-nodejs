@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback } from 'react'
-import ThongBao from '../components/ThongBao'
+import ThongBao from '../components/user/ThongBao'
 
 const NotificationContext = createContext()
 

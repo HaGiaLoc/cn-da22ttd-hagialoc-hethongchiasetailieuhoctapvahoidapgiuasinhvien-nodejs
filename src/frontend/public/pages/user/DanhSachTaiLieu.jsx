@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import BoTri from '../components/BoTri'
-import TheTaiLieu from '../components/TheTaiLieu'
-import PhanTrang from '../components/PhanTrang'
-import { mockDocuments, mockDocumentCategories, mockQuestionCategories } from '../data/mockData'
-import { searchMatch } from '../utils/helpers'
+import BoTri from '../../components/BoTri'
+import TheTaiLieu from '../../components/user/TheTaiLieu'
+import PhanTrang from '../../components/user/PhanTrang'
+import { mockDocuments, mockDocumentCategories, mockQuestionCategories } from '../../data/mockData'
+import { searchMatch } from '../../utils/helpers'
 
 export default function DanhSachTaiLieu() {
   const [searchParams] = useSearchParams()

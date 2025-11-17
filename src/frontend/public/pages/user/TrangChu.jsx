@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom'
-import BoTri from '../components/BoTri'
-import KhuVucAnh from '../components/KhuVucAnh'
-import TheTaiLieu from '../components/TheTaiLieu'
-import TheCauHoi from '../components/TheCauHoi'
-import { mockDocuments, mockQuestions } from '../data/mockData'
+import BoTri from '../../components/BoTri'
+import KhuVucAnh from '../../components/user/KhuVucAnh'
+import TheTaiLieu from '../../components/user/TheTaiLieu'
+import TheCauHoi from '../../components/user/TheCauHoi'
+import { mockDocuments, mockQuestions } from '../../data/mockData'
 
 export default function TrangChu() {
   const recentDocuments = mockDocuments.slice(0, 3)
@@ -88,8 +88,8 @@ export default function TrangChu() {
           <h2>Sẵn sàng bắt đầu?</h2>
           <p>Tham gia cộng đồng sinh viên và khám phá hàng ngàn tài liệu học tập</p>
           <div className="cta-buttons">
-            <Link to="/register" className="btn btn-primary btn-lg">Đăng ký ngay</Link>
-            <Link to="/documents" className="btn btn-outline btn-lg">Khám phá tài liệu</Link>
+            <Link to="/register" className="btn btn-white btn-lg">Đăng ký ngay</Link>
+            <Link to="/documents" className="btn btn-white btn-lg">Khám phá tài liệu</Link>
           </div>
         </div>
       </section>

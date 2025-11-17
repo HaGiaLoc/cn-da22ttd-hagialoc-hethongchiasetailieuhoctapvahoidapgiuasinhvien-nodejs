@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import BoTri from '../components/BoTri'
-import { useAuth } from '../contexts/AuthContext'
-import { useNotification } from '../contexts/NotificationContext'
-import { mockStudents, generateAvatar } from '../data/mockData'
+import BoTri from '../../components/BoTri'
+import { useAuth } from '../../contexts/AuthContext'
+import { useNotification } from '../../contexts/NotificationContext'
+import { mockStudents, generateAvatar } from '../../data/mockData'
 
 export default function ChinhSuaHoSo() {
   const navigate = useNavigate()
@@ -112,7 +112,7 @@ export default function ChinhSuaHoSo() {
       setUser(updatedUser)
       localStorage.setItem('user', JSON.stringify(updatedUser))
       
-      showNotification('Cập nhật hồ sơ thành công!', 'success', 2000)
+      showNotification('Cập nhật hồ sơ thành công!', 'success', 1000)
       
       setTimeout(() => {
         navigate('/profile')

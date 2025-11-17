@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import BoTri from '../components/BoTri'
-import { useAuth } from '../contexts/AuthContext'
-import { useNotification } from '../contexts/NotificationContext'
+import BoTri from '../../components/BoTri'
+import { useAuth } from '../../contexts/AuthContext'
+import { useNotification } from '../../contexts/NotificationContext'
 
 export default function DangNhap() {
   const navigate = useNavigate()
@@ -35,7 +35,7 @@ export default function DangNhap() {
 
     try {
       await login(formData.email, formData.password, formData.rememberMe)
-      showNotification('Đăng nhập thành công!', 'success', 2000)
+      showNotification('Đăng nhập thành công!', 'success', 1000)
       
       setTimeout(() => {
         navigate(from, { replace: true })

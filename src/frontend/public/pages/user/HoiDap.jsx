@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import BoTri from '../components/BoTri'
-import TheCauHoi from '../components/TheCauHoi'
-import PhanTrang from '../components/PhanTrang'
-import { mockQuestions, mockQuestionCategories } from '../data/mockData'
-import { searchMatch } from '../utils/helpers'
+import BoTri from '../../components/BoTri'
+import TheCauHoi from '../../components/user/TheCauHoi'
+import PhanTrang from '../../components/user/PhanTrang'
+import { mockQuestions, mockQuestionCategories } from '../../data/mockData'
+import { searchMatch } from '../../utils/helpers'
 
 export default function HoiDap() {
   const [questions, setQuestions] = useState(mockQuestions)

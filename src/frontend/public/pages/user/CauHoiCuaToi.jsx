@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import BoTri from '../components/BoTri'
-import TheCauHoi from '../components/TheCauHoi'
-import PhanTrang from '../components/PhanTrang'
-import { mockQuestions } from '../data/mockData'
-import { useAuth } from '../contexts/AuthContext'
+import BoTri from '../../components/BoTri'
+import TheCauHoi from '../../components/user/TheCauHoi'
+import PhanTrang from '../../components/user/PhanTrang'
+import { mockQuestions } from '../../data/mockData'
+import { useAuth } from '../../contexts/AuthContext'
 
 export default function CauHoiCuaToi() {
   const navigate = useNavigate()

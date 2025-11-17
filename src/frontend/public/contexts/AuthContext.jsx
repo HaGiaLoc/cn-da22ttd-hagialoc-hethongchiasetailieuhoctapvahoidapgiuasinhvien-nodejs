@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react'
-import { mockStudents, generateAvatar } from '../data/mockData'
+import { mockStudents, mockAdmins, generateAvatar } from '../data/mockData'
 
 const AuthContext = createContext()
 
@@ -20,26 +20,68 @@ export function AuthProvider({ children }) {
     const storedUser = localStorage.getItem('user') || sessionStorage.getItem('user')
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser)
-      // Tìm thông tin student đệ lấy avatar mới nhất
-      const student = mockStudents.find(s => s.id === parsedUser.id)
-      if (student) {
-        parsedUser.avatar = student.avatar || generateAvatar(student.hoTenSinhVien)
-        parsedUser.truongHoc = student.truongHoc
-        parsedUser.nganh = student.nganh
-        // Cập nhật lại storage
-        if (localStorage.getItem('user')) {
-          localStorage.setItem('user', JSON.stringify(parsedUser))
-        } else {
-          sessionStorage.setItem('user', JSON.stringify(parsedUser))
+      
+      // Nếu là admin
+      if (parsedUser.role === 'admin') {
+        const admin = mockAdmins.find(a => a.id === parsedUser.id)
+        if (admin) {
+          parsedUser.avatar = admin.avatar || generateAvatar(admin.hoTenQuanTriVien)
+          // Cập nhật lại storage
+          if (localStorage.getItem('user')) {
+            localStorage.setItem('user', JSON.stringify(parsedUser))
+          } else {
+            sessionStorage.setItem('user', JSON.stringify(parsedUser))
+          }
+        }
+      } else {
+        // Nếu là sinh viên
+        const student = mockStudents.find(s => s.id === parsedUser.id)
+        if (student) {
+          parsedUser.avatar = student.avatar || generateAvatar(student.hoTenSinhVien)
+          parsedUser.truongHoc = student.truongHoc
+          parsedUser.nganh = student.nganh
+          // Cập nhật lại storage
+          if (localStorage.getItem('user')) {
+            localStorage.setItem('user', JSON.stringify(parsedUser))
+          } else {
+            sessionStorage.setItem('user', JSON.stringify(parsedUser))
+          }
         }
       }
+      
       setUser(parsedUser)
     }
     setLoading(false)
   }, [])
 
   const login = async (email, password, rememberMe = false) => {
-    // Tìm sinh viên theo email và mật khẩu từ mockStudents
+    // Kiểm tra admin trước
+    const admin = mockAdmins.find(
+      a => a.emailQuanTriVien === email && a.matKhauQuanTriVien === password
+    )
+    
+    if (admin) {
+      const mockUser = {
+        id: admin.id,
+        name: admin.hoTenQuanTriVien,
+        email: admin.emailQuanTriVien,
+        maQuanTriVien: admin.maQuanTriVien,
+        role: admin.role,
+        avatar: admin.avatar || generateAvatar(admin.hoTenQuanTriVien)
+      }
+      setUser(mockUser)
+      
+      // Lưu vào localStorage nếu ghi nhớ, không thì sessionStorage
+      if (rememberMe) {
+        localStorage.setItem('user', JSON.stringify(mockUser))
+      } else {
+        sessionStorage.setItem('user', JSON.stringify(mockUser))
+      }
+      
+      return mockUser
+    }
+    
+    // Nếu không phải admin, tìm sinh viên
     const student = mockStudents.find(
       s => s.email === email && s.matKhauSinhVien === password
     )

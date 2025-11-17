@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import BoTri from '../components/BoTri'
-import { mockDocuments, mockComments, mockStudents, generateAvatar } from '../data/mockData'
-import { useAuth } from '../contexts/AuthContext'
-import { useNotification } from '../contexts/NotificationContext'
-import { formatDate, formatNumber } from '../utils/helpers'
+import BoTri from '../../components/BoTri'
+import BaoCaoModal from '../../components/user/BaoCaoModal'
+import { mockDocuments, mockComments, mockStudents, generateAvatar } from '../../data/mockData'
+import { useAuth } from '../../contexts/AuthContext'
+import { useNotification } from '../../contexts/NotificationContext'
+import { formatDate, formatNumber } from '../../utils/helpers'
 
 export default function ChiTietTaiLieu() {
   const { id } = useParams()
@@ -16,6 +17,7 @@ export default function ChiTietTaiLieu() {
   const [comment, setComment] = useState('')
   const [comments, setComments] = useState([])
   const [isSaved, setIsSaved] = useState(false)
+  const [showReportModal, setShowReportModal] = useState(false)
 
   useEffect(() => {
     const doc = mockDocuments.find(d => d.id === parseInt(id))
@@ -35,7 +37,7 @@ export default function ChiTietTaiLieu() {
   if (!document) return <BoTri><div>Loading...</div></BoTri>
 
   const handleDownload = () => {
-    showNotification('Đang tải xuống tài liệu...', 'success')
+    showNotification('Đang tải xuống tài liệu...', 'success', 1000)
   }
 
   const handleSave = () => {
@@ -52,21 +54,27 @@ export default function ChiTietTaiLieu() {
       const newSavedDocs = savedDocs.filter(id => id !== docId)
       localStorage.setItem(`savedDocs_${user.id}`, JSON.stringify(newSavedDocs))
       setIsSaved(false)
-      showNotification('Đã bỏ lưu tài liệu', 'success', 1500)
+      showNotification('Đã bỏ lưu tài liệu', 'success', 1000)
     } else {
       // Lưu tài liệu
       savedDocs.push(docId)
       localStorage.setItem(`savedDocs_${user.id}`, JSON.stringify(savedDocs))
       setIsSaved(true)
-      showNotification('Đã lưu tài liệu', 'success', 1500)
+      showNotification('Đã lưu tài liệu', 'success', 1000)
     }
   }
 
   const submitComment = (e) => {
     e.preventDefault()
     if (comment.trim()) {
-      showNotification('Đã gửi bình luận', 'success')
+      showNotification('Đã gửi bình luận', 'success', 1000)
       setComment('')
+    }
+  }
+
+  const handleCommentFocus = () => {
+    if (!user) {
+      showNotification('Vui lòng đăng nhập để bình luận', 'warning')
     }
   }
 
@@ -118,6 +126,9 @@ export default function ChiTietTaiLieu() {
                 </button>
                 <button className="btn btn-outline">
                   <i className="fas fa-share"></i> Chia sẻ
+                </button>
+                <button className="btn btn-outline" onClick={() => setShowReportModal(true)}>
+                  <i className="fas fa-flag"></i> Báo cáo
                 </button>
               </div>
 
@@ -172,9 +183,14 @@ export default function ChiTietTaiLieu() {
                     placeholder="Viết bình luận..."
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
+                    onFocus={handleCommentFocus}
                     rows="4"
                   ></textarea>
-                  <button type="submit" className="btn btn-primary">
+                  <button 
+                    type="submit" 
+                    className="btn btn-primary"
+                    disabled={!comment.trim()}
+                  >
                     Gửi bình luận
                   </button>
                 </form>
@@ -205,6 +221,15 @@ export default function ChiTietTaiLieu() {
           </div>
         </div>
       </section>
+
+      {/* Modal báo cáo */}
+      <BaoCaoModal
+        isOpen={showReportModal}
+        onClose={() => setShowReportModal(false)}
+        reportType="document"
+        reportedId={document.id}
+        reportedTitle={document.tieuDeTaiLieu}
+      />
     </BoTri>
   )
 }
