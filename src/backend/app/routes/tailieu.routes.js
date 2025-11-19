@@ -17,6 +17,9 @@ router.get('/filters/mon', TaiLieuController.getMon);
 // Lấy danh sách ngành
 router.get('/filters/nganh', TaiLieuController.getNganh);
 
+// Lấy danh sách định dạng
+router.get('/filters/dinhdang', TaiLieuController.getDinhDang);
+
 // Lấy chi tiết tài liệu
 router.get('/:id', TaiLieuController.getById);
 

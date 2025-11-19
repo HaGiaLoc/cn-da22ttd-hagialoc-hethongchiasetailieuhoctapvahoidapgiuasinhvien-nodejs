@@ -1,21 +1,20 @@
 import CauHoiService from '../services/cauhoi.service.js';
 import MonModel from '../models/mon.model.js';
 import NganhModel from '../models/nganh.model.js';
+import TagModel from '../models/tag.model.js';
 
 class CauHoiController {
   // Tạo câu hỏi
   static async create(req, res, next) {
     try {
-      const { maDanhMuc, tieuDeCH, noiDungCH, Tag, Mon, Nganh } = req.body;
+      const { maMon, tieuDeCH, noiDungCH, tags } = req.body;
       const maSinhVien = req.user.id;
 
       const question = await CauHoiService.create(maSinhVien, {
-        maDanhMuc,
+        maMon,
         tieuDeCH,
         noiDungCH,
-        Tag,
-        Mon,
-        Nganh
+        tags
       });
 
       res.status(201).json({
@@ -215,6 +214,19 @@ class CauHoiController {
       res.json({
         success: true,
         data: nganh
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // Lấy danh sách tags
+  static async getTags(req, res, next) {
+    try {
+      const tags = await TagModel.getAll();
+      res.json({
+        success: true,
+        data: tags
       });
     } catch (error) {
       next(error);

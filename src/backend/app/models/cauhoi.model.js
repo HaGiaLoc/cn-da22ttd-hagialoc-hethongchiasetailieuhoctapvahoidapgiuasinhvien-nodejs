@@ -38,23 +38,28 @@ class CauHoiModel {
   // Lấy tất cả câu hỏi
   static async getAll(filters = {}, limit = 20, offset = 0) {
     let query = `
-      SELECT c.maCauHoi, c.maSinhVien, c.maMon, c.tieuDeCH, 
-             c.noiDungCH, c.trangThaiCH, c.ngayDatCH,
-             MAX(s.hoTenSV) as hoTenSV, 
-             MAX(s.avatarURL) as avatarURL, 
-             MAX(m.tenMon) as tenMon, 
-             MAX(n.tenNganh) as tenNganh,
-             COUNT(DISTINCT ct.maCauTraLoi) as totalAnswers,
-             COALESCE(SUM(CASE WHEN d.Upvote = 1 THEN 1 WHEN d.Downvote = 1 THEN -1 ELSE 0 END), 0) as votes,
-             GROUP_CONCAT(DISTINCT t.tenTag SEPARATOR ',') as tags
+      SELECT c.maCauHoi, c.maSinhVien, c.maMon, 
+             c.tieuDeCH as tieuDeCauHoi, 
+             c.noiDungCH as noiDungCauHoi, 
+             c.trangThaiCH as trangThaiCauHoi, 
+             c.ngayDatCH as ngayDang,
+             c.luotTraLoi,
+             0 as luotXem,
+             s.hoTenSV, 
+             s.avatarURL, 
+             m.tenMon, 
+             n.tenNganh,
+             (SELECT COUNT(*) FROM cautraloi WHERE maCauHoi = c.maCauHoi) as soLuongTraLoi,
+             (SELECT COALESCE(SUM(CASE WHEN Upvote = 1 THEN 1 WHEN Downvote = 1 THEN -1 ELSE 0 END), 0) 
+              FROM danhgiacauhoi WHERE maCauHoi = c.maCauHoi) as votes,
+             (SELECT GROUP_CONCAT(DISTINCT t2.tenTag SEPARATOR ',')
+              FROM danhsachtag dst2
+              LEFT JOIN tag t2 ON dst2.maTag = t2.maTag
+              WHERE dst2.maCauHoi = c.maCauHoi) as tags
       FROM cauhoi c
       LEFT JOIN sinhvien s ON c.maSinhVien = s.maSinhVien
       LEFT JOIN mon m ON c.maMon = m.maMon
       LEFT JOIN nganh n ON m.maNganh = n.maNganh
-      LEFT JOIN cautraloi ct ON c.maCauHoi = ct.maCauHoi
-      LEFT JOIN danhgiacauhoi d ON c.maCauHoi = d.maCauHoi
-      LEFT JOIN danhsachtag dst ON c.maCauHoi = dst.maCauHoi
-      LEFT JOIN tag t ON dst.maTag = t.maTag
       WHERE 1=1
     `;
     const params = [];
@@ -72,7 +77,7 @@ class CauHoiModel {
       params.push(filters.trangThaiCH);
     }
     if (filters.tag) {
-      query += ' AND t.tenTag = ?';
+      query += ' AND EXISTS (SELECT 1 FROM danhsachtag dst JOIN tag t ON dst.maTag = t.maTag WHERE dst.maCauHoi = c.maCauHoi AND t.tenTag = ?)';
       params.push(filters.tag);
     }
     if (filters.search) {
@@ -80,8 +85,7 @@ class CauHoiModel {
       params.push(`%${filters.search}%`, `%${filters.search}%`);
     }
 
-    query += ' GROUP BY c.maCauHoi ORDER BY c.ngayDatCH DESC LIMIT ? OFFSET ?';
-    params.push(limit, offset);
+    query += ` ORDER BY c.ngayDatCH DESC LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}`;
 
     const [rows] = await db.execute(query, params);
     return rows;
@@ -92,20 +96,18 @@ class CauHoiModel {
     const query = `
       SELECT c.maCauHoi, c.maSinhVien, c.maMon, c.tieuDeCH, 
              c.noiDungCH, c.trangThaiCH, c.ngayDatCH,
-             MAX(s.hoTenSV) as hoTenSV, 
-             MAX(s.avatarURL) as avatarURL, 
-             MAX(m.tenMon) as tenMon, 
-             MAX(n.tenNganh) as tenNganh,
-             COUNT(DISTINCT ct.maCauTraLoi) as totalAnswers,
-             COALESCE(SUM(CASE WHEN d.Upvote = 1 THEN 1 WHEN d.Downvote = 1 THEN -1 ELSE 0 END), 0) as votes
+             s.hoTenSV, 
+             s.avatarURL, 
+             m.tenMon, 
+             n.tenNganh,
+             (SELECT COUNT(*) FROM cautraloi WHERE maCauHoi = c.maCauHoi) as totalAnswers,
+             (SELECT COALESCE(SUM(CASE WHEN Upvote = 1 THEN 1 WHEN Downvote = 1 THEN -1 ELSE 0 END), 0) 
+              FROM danhgiacauhoi WHERE maCauHoi = c.maCauHoi) as votes
       FROM cauhoi c
       LEFT JOIN sinhvien s ON c.maSinhVien = s.maSinhVien
       LEFT JOIN mon m ON c.maMon = m.maMon
       LEFT JOIN nganh n ON m.maNganh = n.maNganh
-      LEFT JOIN cautraloi ct ON c.maCauHoi = ct.maCauHoi
-      LEFT JOIN danhgiacauhoi d ON c.maCauHoi = d.maCauHoi
       WHERE c.maCauHoi = ?
-      GROUP BY c.maCauHoi
     `;
     const [rows] = await db.execute(query, [id]);
     
@@ -127,9 +129,9 @@ class CauHoiModel {
       WHERE c.maSinhVien = ?
       GROUP BY c.maCauHoi
       ORDER BY c.ngayDatCH DESC
-      LIMIT ? OFFSET ?
+      LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}
     `;
-    const [rows] = await db.execute(query, [maSinhVien, limit, offset]);
+    const [rows] = await db.execute(query, [maSinhVien]);
     return rows;
   }
 

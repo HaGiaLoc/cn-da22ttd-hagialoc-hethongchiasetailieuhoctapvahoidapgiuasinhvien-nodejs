@@ -13,7 +13,7 @@ class BaoCaoModel {
   }
 
   // Lấy tất cả báo cáo
-  static async getAll(status = null, limit = 20, offset = 0) {
+  static async getAll(status = null, type = null, limit = 20, offset = 0) {
     let query = `
       SELECT b.*, s.hoTenSV, s.emailSV
       FROM baocaovipham b
@@ -27,8 +27,12 @@ class BaoCaoModel {
       params.push(status);
     }
 
-    query += ' ORDER BY b.ngayBC DESC LIMIT ? OFFSET ?';
-    params.push(limit, offset);
+    if (type) {
+      query += ' AND b.loaiBaoCao = ?';
+      params.push(type);
+    }
+
+    query += ` ORDER BY b.ngayBC DESC LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}`;
 
     const [rows] = await db.execute(query, params);
     return rows;

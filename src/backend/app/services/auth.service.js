@@ -6,7 +6,7 @@ import { generateToken } from '../config/jwt.js';
 class AuthService {
   // Đăng ký sinh viên
   static async register(userData) {
-    const { email, password, hoTenSV, MSSV, Nganh } = userData;
+    const { email, password, hoTenSV } = userData;
 
     // Kiểm tra email đã tồn tại
     const existing = await SinhVienModel.findByEmail(email);
@@ -22,8 +22,8 @@ class AuthService {
       emailSV: email,
       matKhauSV: hashedPassword,
       hoTenSV,
-      MSSV,
-      Nganh
+      truongHoc: null,
+      avatarURL: ''
     });
 
     // Lấy thông tin sinh viên
@@ -83,9 +83,9 @@ class AuthService {
     let user;
     
     if (role === 'admin') {
-      user = await QuanTriVienModel.findById(userId);
+      user = await QuanTriVienModel.findByIdWithPassword(userId);
     } else {
-      user = await SinhVienModel.findById(userId);
+      user = await SinhVienModel.findByIdWithPassword(userId);
     }
 
     if (!user) {

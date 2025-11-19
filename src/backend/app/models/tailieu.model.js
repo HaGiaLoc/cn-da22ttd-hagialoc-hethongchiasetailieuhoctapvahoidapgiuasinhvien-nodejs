@@ -7,14 +7,14 @@ class TaiLieuModel {
     try {
       await connection.beginTransaction();
 
-      const { maSinhVien, maMon, maLoai, tieuDeTL, URL, fileSizes, DinhDang } = taiLieuData;
+      const { maSinhVien, maMon, maLoai, tieuDeTL, URL, fileSizes, maDinhDang } = taiLieuData;
       
       // Insert vào bảng tailieu
       const query = `
-        INSERT INTO tailieu (maLoai, maSinhVien, tieuDeTL, URL, fileSizes, DinhDang, trangThaiTL, soLanLuu, luotTaiXuong)
+        INSERT INTO tailieu (maLoai, maSinhVien, maDinhDang, tieuDeTL, URL, fileSizes, trangThaiTL, soLanLuu, luotTaiXuong)
         VALUES (?, ?, ?, ?, ?, ?, 'pending', 0, 0)
       `;
-      const [result] = await connection.execute(query, [maLoai, maSinhVien, tieuDeTL, URL, fileSizes, DinhDang]);
+      const [result] = await connection.execute(query, [maLoai, maSinhVien, maDinhDang, tieuDeTL, URL, fileSizes]);
       const maTaiLieu = result.insertId;
 
       // Insert vào bảng danhsachtailieu
@@ -36,17 +36,19 @@ class TaiLieuModel {
   // Lấy tất cả tài liệu đã được duyệt
   static async getAll(filters = {}, limit = 20, offset = 0) {
     let query = `
-      SELECT t.maTaiLieu, t.maLoai, t.maSinhVien, t.tieuDeTL, t.URL, 
-             t.fileSizes, t.DinhDang, t.trangThaiTL, t.soLanLuu, 
+      SELECT t.maTaiLieu, t.maLoai, t.maSinhVien, t.maDinhDang, t.tieuDeTL, t.URL, 
+             t.fileSizes, t.trangThaiTL, t.soLanLuu, 
              t.luotTaiXuong, t.ngayChiaSe,
              MAX(s.hoTenSV) as hoTenSV, 
              MAX(s.avatarURL) as avatarURL, 
              MAX(l.loaiTaiLieu) as loaiTaiLieu,
+             MAX(d.tenDinhDang) as tenDinhDang,
              MAX(m.tenMon) as tenMon, 
              MAX(n.tenNganh) as tenNganh
       FROM tailieu t
       LEFT JOIN sinhvien s ON t.maSinhVien = s.maSinhVien
       LEFT JOIN loaitailieu l ON t.maLoai = l.maLoai
+      LEFT JOIN dinhdang d ON t.maDinhDang = d.maDinhDang
       LEFT JOIN danhsachtailieu dst ON t.maTaiLieu = dst.maTaiLieu
       LEFT JOIN mon m ON dst.maMon = m.maMon
       LEFT JOIN nganh n ON m.maNganh = n.maNganh
@@ -71,21 +73,56 @@ class TaiLieuModel {
       params.push(`%${filters.search}%`);
     }
 
-    query += ' GROUP BY t.maTaiLieu ORDER BY t.ngayChiaSe DESC LIMIT ? OFFSET ?';
-    params.push(limit, offset);
+    query += ` GROUP BY t.maTaiLieu ORDER BY t.ngayChiaSe DESC LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}`;
 
     const [rows] = await db.execute(query, params);
     return rows;
+  }
+
+  // Lấy tài liệu cho admin (tất cả trạng thái)
+  static async getAllForAdmin(status = null, limit = 20, offset = 0) {
+    let query = `
+      SELECT t.maTaiLieu, t.maLoai, t.maSinhVien, t.maDinhDang, t.tieuDeTL, t.URL, 
+             t.fileSizes, t.trangThaiTL, t.soLanLuu, 
+             t.luotTaiXuong as luotTai, t.ngayChiaSe as ngayTai,
+             MAX(s.hoTenSV) as hoTenSV, 
+             MAX(s.avatarURL) as avatarURL, 
+             MAX(l.loaiTaiLieu) as tenLoai,
+             MAX(d.tenDinhDang) as tenDinhDang,
+             MAX(m.tenMon) as tenMon, 
+             MAX(n.tenNganh) as tenNganh
+      FROM tailieu t
+      LEFT JOIN sinhvien s ON t.maSinhVien = s.maSinhVien
+      LEFT JOIN loaitailieu l ON t.maLoai = l.maLoai
+      LEFT JOIN dinhdang d ON t.maDinhDang = d.maDinhDang
+      LEFT JOIN danhsachtailieu dst ON t.maTaiLieu = dst.maTaiLieu
+      LEFT JOIN mon m ON dst.maMon = m.maMon
+      LEFT JOIN nganh n ON m.maNganh = n.maNganh
+    `;
+    
+    const params = [];
+    
+    if (status) {
+      query += ' WHERE t.trangThaiTL = ?';
+      params.push(status);
+    }
+
+    query += ` GROUP BY t.maTaiLieu ORDER BY t.ngayChiaSe DESC LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}`;
+
+    const [rows] = await db.execute(query, params);
+    // Thêm trường luotXem mặc định vì chưa có trong DB
+    return rows.map(row => ({ ...row, luotXem: 0 }));
   }
 
   // Lấy chi tiết tài liệu
   static async getById(id) {
     const query = `
       SELECT t.*, s.hoTenSV, s.avatarURL, l.loaiTaiLieu,
-             m.tenMon, n.tenNganh
+             d.tenDinhDang, m.tenMon, n.tenNganh
       FROM tailieu t
       LEFT JOIN sinhvien s ON t.maSinhVien = s.maSinhVien
       LEFT JOIN loaitailieu l ON t.maLoai = l.maLoai
+      LEFT JOIN dinhdang d ON t.maDinhDang = d.maDinhDang
       LEFT JOIN danhsachtailieu dst ON t.maTaiLieu = dst.maTaiLieu
       LEFT JOIN mon m ON dst.maMon = m.maMon
       LEFT JOIN nganh n ON m.maNganh = n.maNganh
@@ -114,9 +151,9 @@ class TaiLieuModel {
       FROM tailieu t
       WHERE t.maSinhVien = ?
       ORDER BY t.ngayChiaSe DESC
-      LIMIT ? OFFSET ?
+      LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}
     `;
-    const [rows] = await db.execute(query, [maSinhVien, limit, offset]);
+    const [rows] = await db.execute(query, [maSinhVien]);
     return rows;
   }
 
@@ -135,14 +172,19 @@ class TaiLieuModel {
   }
 
   // Đếm tổng số tài liệu
-  static async count(status = 'approved') {
-    // Đếm từ subquery để match với logic getAll() có GROUP BY
-    const query = `
+  static async count(status = null) {
+    let query = `
       SELECT COUNT(DISTINCT t.maTaiLieu) as total 
       FROM tailieu t
-      WHERE t.trangThaiTL = ?
     `;
-    const [rows] = await db.execute(query, [status]);
+    const params = [];
+    
+    if (status) {
+      query += ' WHERE t.trangThaiTL = ?';
+      params.push(status);
+    }
+    
+    const [rows] = await db.execute(query, params);
     return rows[0].total;
   }
 }

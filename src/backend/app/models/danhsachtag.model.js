@@ -34,9 +34,9 @@ class DanhSachTagModel {
       WHERE dst.maTag = ?
       GROUP BY c.maCauHoi
       ORDER BY c.ngayDatCH DESC
-      LIMIT ? OFFSET ?
+      LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}
     `;
-    const [rows] = await db.execute(query, [maTag, limit, offset]);
+    const [rows] = await db.execute(query, [maTag]);
     return rows;
   }
 

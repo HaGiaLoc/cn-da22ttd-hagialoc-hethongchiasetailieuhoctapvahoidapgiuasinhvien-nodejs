@@ -13,6 +13,9 @@ router.get('/filters/mon', CauHoiController.getMon);
 // Lấy danh sách ngành (public)
 router.get('/filters/nganh', CauHoiController.getNganh);
 
+// Lấy danh sách tags (public)
+router.get('/filters/tags', CauHoiController.getTags);
+
 // Lấy chi tiết câu hỏi
 router.get('/:id', CauHoiController.getById);
 

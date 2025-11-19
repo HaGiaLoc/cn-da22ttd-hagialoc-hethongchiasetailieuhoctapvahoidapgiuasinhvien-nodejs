@@ -63,6 +63,20 @@ class AuthController {
       const { oldPassword, newPassword } = req.body;
       const { id, role } = req.user;
 
+      console.log('Change password request:', { 
+        userId: id, 
+        role, 
+        hasOldPassword: !!oldPassword, 
+        hasNewPassword: !!newPassword 
+      });
+
+      if (!oldPassword || !newPassword) {
+        return res.status(400).json({
+          success: false,
+          message: 'Vui lòng nhập đầy đủ mật khẩu cũ và mật khẩu mới'
+        });
+      }
+
       await AuthService.changePassword(id, role, oldPassword, newPassword);
 
       res.json({

@@ -8,7 +8,7 @@ const pool = mysql.createPool({
   port: process.env.DB_PORT || 3306,
   user: process.env.DB_USER || 'root',
   password: process.env.DB_PASSWORD || '',
-  database: process.env.DB_NAME || 'htcstlvhd',
+  database: process.env.DB_NAME || 'kef_db',
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
@@ -22,7 +22,7 @@ pool.getConnection((err, connection) => {
     console.error('⚠️  Server will continue but database features will not work');
     console.error('⚠️  Please check:');
     console.error('   - MySQL/XAMPP is running');
-    console.error('   - Database "htcstlvhd" exists');
+    console.error('   - Database "kef_db" exists');
     console.error('   - DB_PASSWORD in .env is correct (empty for XAMPP)');
     return;
   }

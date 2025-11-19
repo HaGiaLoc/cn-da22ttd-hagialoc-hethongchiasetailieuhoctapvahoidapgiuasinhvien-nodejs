@@ -35,9 +35,9 @@ class LuuTaiLieuModel {
       WHERE l.maSinhVien = ?
       GROUP BY t.maTaiLieu
       ORDER BY l.ngayLuu DESC
-      LIMIT ? OFFSET ?
+      LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}
     `;
-    const [rows] = await db.execute(query, [maSinhVien, limit, offset]);
+    const [rows] = await db.execute(query, [maSinhVien]);
     return rows;
   }
 }

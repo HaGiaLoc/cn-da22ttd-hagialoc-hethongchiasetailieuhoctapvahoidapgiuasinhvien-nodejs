@@ -5,7 +5,7 @@ class CauTraLoiModel {
   static async create(cauTraLoiData) {
     const { maSinhVien, maCauHoi, noiDungCTL } = cauTraLoiData;
     const query = `
-      INSERT INTO cautraloi (maSinhVien, maCauHoi, noiDungCTL, ChapNhan)
+      INSERT INTO cautraloi (maSinhVien, maCauHoi, noiDungCTL, trangThaiTL)
       VALUES (?, ?, ?, 0)
     `;
     const [result] = await db.execute(query, [maSinhVien, maCauHoi, noiDungCTL]);
@@ -16,13 +16,13 @@ class CauTraLoiModel {
   static async getByQuestion(maCauHoi) {
     const query = `
       SELECT ct.*, s.hoTenSV, s.avatarURL,
-             COALESCE(SUM(d.Upvote - d.Downvote), 0) as votes
+             COALESCE(SUM(CAST(d.Upvote AS SIGNED) - CAST(d.Downvote AS SIGNED)), 0) as votes
       FROM cautraloi ct
       LEFT JOIN sinhvien s ON ct.maSinhVien = s.maSinhVien
       LEFT JOIN danhgiacautraloi d ON ct.maCauTraLoi = d.maCauTraLoi
       WHERE ct.maCauHoi = ?
       GROUP BY ct.maCauTraLoi
-      ORDER BY ct.ChapNhan DESC, votes DESC, ct.ngayTraLoi DESC
+      ORDER BY ct.trangThaiTL DESC, votes DESC, ct.ngayTraLoi DESC
     `;
     const [rows] = await db.execute(query, [maCauHoi]);
     return rows;
@@ -31,10 +31,10 @@ class CauTraLoiModel {
   // Chấp nhận câu trả lời
   static async accept(id, maCauHoi) {
     // Bỏ chấp nhận các câu trả lời khác của câu hỏi này
-    await db.execute('UPDATE cautraloi SET ChapNhan = 0 WHERE maCauHoi = ?', [maCauHoi]);
+    await db.execute('UPDATE cautraloi SET trangThaiTL = 0 WHERE maCauHoi = ?', [maCauHoi]);
     
     // Chấp nhận câu trả lời mới
-    const query = 'UPDATE cautraloi SET ChapNhan = 1 WHERE maCauTraLoi = ?';
+    const query = 'UPDATE cautraloi SET trangThaiTL = 1 WHERE maCauTraLoi = ?';
     const [result] = await db.execute(query, [id]);
     
     // Cập nhật trạng thái câu hỏi

@@ -2,6 +2,7 @@ import TaiLieuService from '../services/tailieu.service.js';
 import LoaiTaiLieuModel from '../models/loaitailieu.model.js';
 import MonModel from '../models/mon.model.js';
 import NganhModel from '../models/nganh.model.js';
+import DinhDangModel from '../models/dinhdang.model.js';
 
 class TaiLieuController {
   // Tải lên tài liệu
@@ -212,6 +213,19 @@ class TaiLieuController {
       res.json({
         success: true,
         data: nganh
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // Lấy danh sách định dạng
+  static async getDinhDang(req, res, next) {
+    try {
+      const dinhDang = await DinhDangModel.getAll();
+      res.json({
+        success: true,
+        data: dinhDang
       });
     } catch (error) {
       next(error);
