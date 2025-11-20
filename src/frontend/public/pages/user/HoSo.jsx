@@ -4,38 +4,58 @@ import BoTri from '../../components/BoTri'
 import TheTaiLieu from '../../components/user/TheTaiLieu'
 import TheCauHoi from '../../components/user/TheCauHoi'
 import { useAuth } from '../../contexts/AuthContext'
-import { mockDocuments, mockQuestions, mockStudents, generateAvatar } from '../../data/mockData'
+import { generateAvatar } from '../../utils/helpers'
+import { taiLieuService, cauHoiService } from '../../services'
 
 export default function HoSo() {
   const navigate = useNavigate()
   const location = useLocation()
   const { user, loading } = useAuth()
   const [activeTab, setActiveTab] = useState('documents')
+  const [userDocuments, setUserDocuments] = useState([])
+  const [userQuestions, setUserQuestions] = useState([])
+  const [savedDocuments, setSavedDocuments] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     if (loading) return
     if (!user) {
       navigate('/login', { state: { from: location } })
+    } else {
+      loadUserData()
     }
   }, [user, navigate, loading])
 
-  // Tìm thông tin sinh viên đầy đủ
-  const student = mockStudents.find(s => s.id === user?.id)
+  const loadUserData = async () => {
+    try {
+      setIsLoading(true)
+      const [docsRes, questionsRes] = await Promise.all([
+        taiLieuService.getAll(),
+        cauHoiService.getAll()
+      ])
+      
+      const docs = docsRes.documents || docsRes.data || []
+      const questions = questionsRes.questions || questionsRes.data || []
+      
+      setUserDocuments(docs.filter(d => d.author === user?.name))
+      setUserQuestions(questions.filter(q => q.author === user?.name))
+      
+      const savedDocIds = JSON.parse(localStorage.getItem(`savedDocs_${user.id}`) || '[]')
+      setSavedDocuments(docs.filter(doc => savedDocIds.includes(doc.id)))
+    } catch (error) {
+      console.error('Error loading user data:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
   
-  // Lọc tài liệu và câu hỏi của người dùng hiện tại
-  const userDocuments = mockDocuments.filter(doc => doc.author === user?.name)
-  const userQuestions = mockQuestions.filter(q => q.author === user?.name)
-  
-  // Lấy tài liệu đã lưu
-  const savedDocIds = user ? JSON.parse(localStorage.getItem(`savedDocs_${user.id}`) || '[]') : []
-  const savedDocuments = mockDocuments.filter(doc => savedDocIds.includes(doc.id))
-  
-  // Tính toán số liệu thống kê từ dữ liệu thực
   const stats = {
     documents: userDocuments.length,
     questions: userQuestions.length,
-    answers: userQuestions.reduce((sum, q) => sum + q.answers, 0)
+    answers: userQuestions.reduce((sum, q) => sum + (q.answers || 0), 0)
   }
+
+  const student = { nganh: 'Chưa cập nhật', truongHoc: 'Chưa cập nhật' }
 
   return (
     <BoTri>
@@ -117,7 +137,7 @@ export default function HoSo() {
                   {userDocuments.length > 0 ? (
                     <div className="documents-grid">
                       {userDocuments.map(doc => (
-                        <TheTaiLieu key={doc.id} document={doc} />
+                        <TheTaiLieu key={doc.maTaiLieu} document={doc} />
                       ))}
                     </div>
                   ) : (
@@ -163,7 +183,7 @@ export default function HoSo() {
                   {savedDocuments.length > 0 ? (
                     <div className="documents-grid">
                       {savedDocuments.map(doc => (
-                        <TheTaiLieu key={doc.id} document={doc} />
+                        <TheTaiLieu key={doc.maTaiLieu} document={doc} />
                       ))}
                     </div>
                   ) : (

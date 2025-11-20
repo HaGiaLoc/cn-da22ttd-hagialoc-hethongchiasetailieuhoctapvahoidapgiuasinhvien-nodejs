@@ -1,37 +1,90 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 import BoTriQuanTri from '../../components/admin/BoTriQuanTri'
-import { mockReports, mockDocuments, mockQuestions, mockAnswers } from '../../data/mockData'
+import { adminService } from '../../services'
 import { useNotification } from '../../contexts/NotificationContext'
 import { formatDate } from '../../utils/helpers'
 
 export default function QuanTriBaoCao() {
   const { showNotification } = useNotification()
-  const [reports, setReports] = useState(mockReports)
+  const [reports, setReports] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
   const [filterStatus, setFilterStatus] = useState('all')
   const [filterType, setFilterType] = useState('all')
 
-  const handleResolve = (reportId, action) => {
-    const updatedReports = reports.map(r =>
-      r.id === reportId ? { ...r, trangThaiBaoCao: 'resolved' } : r
-    )
-    setReports(updatedReports)
-    
-    const actionText = action === 'approve' ? 'chấp nhận' : 'từ chối'
-    showNotification(`Đã ${actionText} báo cáo #${reportId}`, 'success', 1000)
-  }
+  useEffect(() => {
+    loadReports()
+  }, [filterStatus, filterType])
 
-  const handleDelete = (reportId) => {
-    if (window.confirm('Bạn có chắc muốn xóa báo cáo này?')) {
-      setReports(reports.filter(r => r.id !== reportId))
-      showNotification('Đã xóa báo cáo', 'success', 1000)
+  const loadReports = async () => {
+    try {
+      setIsLoading(true)
+      const res = await adminService.getAllReports(
+        filterStatus === 'all' ? null : filterStatus,
+        filterType === 'all' ? null : filterType
+      )
+      
+      console.log('Full response:', res)
+      console.log('res.data:', res.data)
+      console.log('res.data.reports:', res.data?.reports)
+      
+      // Backend trả về: { success: true, data: { reports: [...], pagination: {...} } }
+      // Sau khi qua interceptor: { success: true, data: { reports: [...], pagination: {...} } }
+      setReports(res.data?.reports || [])
+    } catch (error) {
+      console.error('Error loading reports:', error)
+      showNotification(error.message || 'Không thể tải danh sách báo cáo', 'error', 3000)
+    } finally {
+      setIsLoading(false)
     }
   }
 
+  const handleApprove = async (reportId) => {
+    try {
+      await adminService.approveReport(reportId)
+      await loadReports()
+      showNotification('Đã duyệt báo cáo', 'success', 2000)
+    } catch (error) {
+      showNotification('Duyệt báo cáo thất bại', 'error', 3000)
+    }
+  }
+
+  const handleReject = async (reportId) => {
+    try {
+      await adminService.rejectReport(reportId)
+      await loadReports()
+      showNotification('Đã từ chối báo cáo', 'success', 2000)
+    } catch (error) {
+      showNotification('Từ chối báo cáo thất bại', 'error', 3000)
+    }
+  }
+
+  const handleDelete = async (reportId) => {
+    if (window.confirm('Bạn có chắc muốn xóa báo cáo này?')) {
+      try {
+        await adminService.deleteReport(reportId)
+        setReports(reports.filter(r => r.maBaoCao !== reportId))
+        showNotification('Đã xóa báo cáo', 'success', 2000)
+      } catch (error) {
+        showNotification('Xóa báo cáo thất bại', 'error', 3000)
+      }
+    }
+  }
+
+  const getReasonText = (reason) => {
+    const reasons = {
+      'invalid_content': 'Nội dung không phù hợp',
+      'spam': 'Spam',
+      'copyrigth_violation': 'Vi phạm bản quyền',
+      'misinformation': 'Thông tin sai lệch',
+      'inapproriate_language': 'Ngôn ngữ không phù hợp',
+      'other': 'Khác'
+    }
+    return reasons[reason] || reason
+  }
+
   const filteredReports = reports.filter(r => {
-    const statusMatch = filterStatus === 'all' || r.trangThaiBaoCao === filterStatus
-    const typeMatch = filterType === 'all' || r.reportType === filterType
-    return statusMatch && typeMatch
+    const typeMatch = filterType === 'all' || r.loaiBaoCao === filterType
+    return typeMatch
   })
 
   return (
@@ -51,8 +104,8 @@ export default function QuanTriBaoCao() {
               <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
                 <option value="all">Tất cả</option>
                 <option value="pending">Chờ xử lý</option>
-                <option value="reviewing">Đang xem xét</option>
-                <option value="resolved">Đã xử lý</option>
+                <option value="approved">Đã duyệt</option>
+                <option value="rejected">Từ chối</option>
               </select>
             </div>
 
@@ -63,7 +116,6 @@ export default function QuanTriBaoCao() {
                 <option value="document">Tài liệu</option>
                 <option value="question">Câu hỏi</option>
                 <option value="answer">Câu trả lời</option>
-                <option value="comment">Bình luận</option>
               </select>
             </div>
 
@@ -74,71 +126,85 @@ export default function QuanTriBaoCao() {
 
           {/* Reports Table */}
           <div className="admin-card">
+            {isLoading && (
+              <div className="empty-state" style={{ padding: '40px', textAlign: 'center' }}>
+                <i className="fas fa-spinner fa-spin" style={{ fontSize: '48px', color: '#666', marginBottom: '20px' }}></i>
+                <p>Đang tải danh sách báo cáo...</p>
+              </div>
+            )}
+            
+            {!isLoading && filteredReports.length === 0 && (
+              <div className="empty-state" style={{ padding: '40px', textAlign: 'center' }}>
+                <i className="fas fa-inbox" style={{ fontSize: '48px', color: '#ccc', marginBottom: '20px' }}></i>
+                <h3>Không có báo cáo nào</h3>
+                <p>Chưa có báo cáo vi phạm nào được gửi lên hệ thống.</p>
+              </div>
+            )}
+            
+            {!isLoading && filteredReports.length > 0 && (
             <div className="table-responsive">
               <table className="admin-table">
                 <thead>
                   <tr>
-                    <th>ID</th>
+                    <th>Đối tượng báo cáo</th>
                     <th>Loại</th>
-                    <th>Nội dung bị báo cáo</th>
                     <th>Lý do</th>
                     <th>Người báo cáo</th>
-                    <th>Ngày báo cáo</th>
+                    <th>Thời gian báo cáo</th>
                     <th>Trạng thái</th>
                     <th>Thao tác</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredReports.length > 0 ? filteredReports.map(report => (
-                    <tr key={report.id}>
-                      <td>#{report.id}</td>
+                  {filteredReports.map(report => (
+                    <tr key={report.maBaoCao}>
+                      <td>
+                        <div className="report-target-cell">
+                          <strong>
+                            {report.loaiBaoCao === 'document' ? 'Tài liệu' :
+                             report.loaiBaoCao === 'question' ? 'Câu hỏi' :
+                             report.loaiBaoCao === 'answer' ? 'Câu trả lời' : 'Khác'}
+                          </strong>
+                          <div className="report-target-id">#{report.maBaoCao}</div>
+                        </div>
+                      </td>
                       <td>
                         <span className="badge badge-info">
-                          {report.reportType === 'document' ? 'Tài liệu' :
-                           report.reportType === 'question' ? 'Câu hỏi' :
-                           report.reportType === 'answer' ? 'Câu trả lời' : 'Bình luận'}
+                          {report.loaiBaoCao === 'document' ? 'Tài liệu' :
+                           report.loaiBaoCao === 'question' ? 'Câu hỏi' :
+                           report.loaiBaoCao === 'answer' ? 'Câu trả lời' : 'Khác'}
                         </span>
                       </td>
                       <td>
-                        <div className="reported-item">
-                          <strong>
-                            {report.reportedItem?.tieuDeTaiLieu || 
-                             report.reportedItem?.title || 
-                             report.reportedItem?.content?.substring(0, 50) + '...' ||
-                             'Đã xóa'}
-                          </strong>
-                        </div>
-                      </td>
-                      <td>
                         <div className="report-reason-cell">
-                          {report.lyDo}
+                          {getReasonText(report.lyDo)}
                         </div>
                       </td>
-                      <td>{report.reporter?.hoTenSinhVien || 'N/A'}</td>
-                      <td>{formatDate(report.ngayBaoCao)}</td>
+                      <td>{report.hoTenSV || 'N/A'}</td>
+                      <td>{formatDate(report.ngayBC)}</td>
                       <td>
                         <span className={`badge badge-${
-                          report.trangThaiBaoCao === 'pending' ? 'warning' :
-                          report.trangThaiBaoCao === 'reviewing' ? 'info' : 'success'
+                          report.trangThaiBC === 'pending' ? 'warning' :
+                          report.trangThaiBC === 'approved' ? 'success' : 'danger'
                         }`}>
-                          {report.trangThaiBaoCao === 'pending' ? 'Chờ xử lý' :
-                           report.trangThaiBaoCao === 'reviewing' ? 'Đang xem xét' : 'Đã xử lý'}
+                          {report.trangThaiBC === 'pending' ? 'Chờ xử lý' :
+                           report.trangThaiBC === 'approved' ? 'Đã duyệt' : 'Từ chối'}
                         </span>
                       </td>
                       <td>
                         <div className="action-buttons">
-                          {report.trangThaiBaoCao !== 'resolved' && (
+                          {report.trangThaiBC === 'pending' && (
                             <>
                               <button
                                 className="btn btn-sm btn-success"
-                                onClick={() => handleResolve(report.id, 'approve')}
+                                onClick={() => handleApprove(report.maBaoCao)}
                                 title="Chấp nhận báo cáo"
                               >
                                 <i className="fas fa-check"></i>
                               </button>
                               <button
                                 className="btn btn-sm btn-danger"
-                                onClick={() => handleResolve(report.id, 'reject')}
+                                onClick={() => handleReject(report.maBaoCao)}
                                 title="Từ chối báo cáo"
                               >
                                 <i className="fas fa-times"></i>
@@ -147,7 +213,7 @@ export default function QuanTriBaoCao() {
                           )}
                           <button
                             className="btn btn-sm btn-outline"
-                            onClick={() => handleDelete(report.id)}
+                            onClick={() => handleDelete(report.maBaoCao)}
                             title="Xóa báo cáo"
                           >
                             <i className="fas fa-trash"></i>
@@ -155,16 +221,11 @@ export default function QuanTriBaoCao() {
                         </div>
                       </td>
                     </tr>
-                  )) : (
-                    <tr>
-                      <td colSpan="8" className="empty-state">
-                        Không có báo cáo nào
-                      </td>
-                    </tr>
-                  )}
+                  ))}
                 </tbody>
               </table>
             </div>
+            )}
           </div>
       </section>
     </BoTriQuanTri>

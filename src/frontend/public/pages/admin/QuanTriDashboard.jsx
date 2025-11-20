@@ -1,23 +1,59 @@
 import { Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 import BoTriQuanTri from '../../components/admin/BoTriQuanTri'
-import { mockDocuments, mockQuestions, mockStudents, mockReports } from '../../data/mockData'
 import { formatNumber } from '../../utils/helpers'
+import { adminService } from '../../services'
 
 export default function QuanTriDashboard() {
-  // Thống kê
-  const stats = {
-    totalDocuments: mockDocuments.length,
-    totalQuestions: mockQuestions.length,
-    totalStudents: mockStudents.length,
-    pendingReports: mockReports.filter(r => r.trangThaiBaoCao === 'pending').length,
-    pendingDocuments: mockDocuments.filter(d => d.trangThaiTL === 'pending').length || 0
+  const [stats, setStats] = useState({
+    totalDocuments: 0,
+    totalQuestions: 0,
+    totalStudents: 0,
+    pendingReports: 0,
+    pendingDocuments: 0
+  })
+  const [recentReports, setRecentReports] = useState([])
+  const [pendingDocs, setPendingDocs] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    loadDashboardData()
+  }, [])
+
+  const loadDashboardData = async () => {
+    try {
+      setIsLoading(true)
+      
+      // Lấy thống kê
+      const data = await adminService.getDashboardStats()
+      
+      if (data.data) {
+        setStats({
+          totalDocuments: data.data.totalDocuments || 0,
+          totalQuestions: data.data.totalQuestions || 0,
+          totalStudents: data.data.totalStudents || 0,
+          pendingReports: data.data.pendingReports || 0,
+          pendingDocuments: data.data.pendingDocuments || 0
+        })
+      }
+
+      // Lấy báo cáo mới nhất (chờ xử lý)
+      const reportsResponse = await adminService.getAllReports('pending', null, 1, 5)
+      if (reportsResponse.data && reportsResponse.data.reports) {
+        setRecentReports(reportsResponse.data.reports)
+      }
+
+      // Lấy tài liệu chờ duyệt
+      const docsResponse = await adminService.getPendingDocuments(1, 5)
+      if (docsResponse.data && docsResponse.data.documents) {
+        setPendingDocs(docsResponse.data.documents)
+      }
+    } catch (error) {
+      console.error('Error loading dashboard:', error)
+    } finally {
+      setIsLoading(false)
+    }
   }
-
-  // Báo cáo mới nhất
-  const recentReports = mockReports.slice(0, 5)
-
-  // Tài liệu chờ duyệt
-  const pendingDocs = mockDocuments.filter(d => d.trangThaiTL === 'pending').slice(0, 5)
 
   return (
     <BoTriQuanTri>
@@ -95,27 +131,23 @@ export default function QuanTriDashboard() {
                 {recentReports.length > 0 ? (
                   <div className="reports-list">
                     {recentReports.map(report => (
-                      <div key={report.id} className="report-item">
+                      <div key={report.maBaoCao} className="report-item">
                         <div className="report-icon">
-                          <i className={`fas fa-${
-                            report.reportType === 'document' ? 'file-alt' :
-                            report.reportType === 'question' ? 'question-circle' :
-                            report.reportType === 'answer' ? 'comment' : 'message'
-                          }`}></i>
+                          <i className="fas fa-flag"></i>
                         </div>
                         <div className="report-info">
-                          <h4>{report.reportedItem?.tieuDeTaiLieu || report.reportedItem?.title || 'Nội dung đã xóa'}</h4>
+                          <h4>{report.loaiBaoCao || 'Báo cáo vi phạm'}</h4>
                           <p className="report-reason">{report.lyDo}</p>
                           <span className="report-meta">
-                            Bởi {report.reporter?.hoTenSinhVien} - {new Date(report.ngayBaoCao).toLocaleDateString('vi-VN')}
+                            Bởi {report.hoTenSV} - {new Date(report.ngayBC).toLocaleDateString('vi-VN')}
                           </span>
                         </div>
                         <span className={`badge badge-${
-                          report.trangThaiBaoCao === 'pending' ? 'warning' :
-                          report.trangThaiBaoCao === 'reviewing' ? 'info' : 'success'
+                          report.trangThaiBC === 'pending' ? 'warning' :
+                          report.trangThaiBC === 'reviewing' ? 'info' : 'success'
                         }`}>
-                          {report.trangThaiBaoCao === 'pending' ? 'Chờ xử lý' :
-                           report.trangThaiBaoCao === 'reviewing' ? 'Đang xem xét' : 'Đã xử lý'}
+                          {report.trangThaiBC === 'pending' ? 'Chờ xử lý' :
+                           report.trangThaiBC === 'reviewing' ? 'Đang xem xét' : 'Đã xử lý'}
                         </span>
                       </div>
                     ))}
@@ -135,17 +167,17 @@ export default function QuanTriDashboard() {
                 </Link>
               </div>
               <div className="card-body">
-                {stats.pendingDocuments > 0 ? (
+                {pendingDocs.length > 0 ? (
                   <div className="pending-docs-list">
                     {pendingDocs.map(doc => (
-                      <div key={doc.id} className="doc-item">
+                      <div key={doc.maTaiLieu} className="doc-item">
                         <div className="doc-icon">
                           <i className="fas fa-file-pdf"></i>
                         </div>
                         <div className="doc-info">
-                          <h4>{doc.tieuDeTaiLieu}</h4>
+                          <h4>{doc.tieuDeTL}</h4>
                           <span className="doc-meta">
-                            Tải lên bởi {doc.author} - {new Date(doc.date).toLocaleDateString('vi-VN')}
+                            Tải lên bởi {doc.hoTenSV} - {new Date(doc.ngayTai).toLocaleDateString('vi-VN')}
                           </span>
                         </div>
                         <div className="doc-actions">

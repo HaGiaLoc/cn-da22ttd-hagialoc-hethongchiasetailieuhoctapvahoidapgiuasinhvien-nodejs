@@ -6,7 +6,7 @@ export default defineConfig({
   root: 'public',
   publicDir: 'assets',
   server: {
-    port: 3000,
+    port: 8080,
     proxy: {
       '/api': {
         target: 'http://localhost:5000',

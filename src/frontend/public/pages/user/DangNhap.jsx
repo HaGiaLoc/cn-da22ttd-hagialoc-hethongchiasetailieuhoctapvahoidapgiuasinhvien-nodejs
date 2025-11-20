@@ -73,6 +73,7 @@ export default function DangNhap() {
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       placeholder="your.email@example.com"
+                      autoComplete="on"
                     />
                     {errors.email && <span className="error-text">{errors.email}</span>}
                   </div>
@@ -84,6 +85,7 @@ export default function DangNhap() {
                       value={formData.password}
                       onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                       placeholder="••••••••"
+                      autoComplete="on"
                     />
                     {errors.password && <span className="error-text">{errors.password}</span>}
                   </div>

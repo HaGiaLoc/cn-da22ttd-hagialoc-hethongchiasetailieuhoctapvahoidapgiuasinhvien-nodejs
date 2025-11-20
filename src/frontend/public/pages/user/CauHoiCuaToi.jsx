@@ -3,13 +3,15 @@ import { Link, useNavigate, useLocation } from 'react-router-dom'
 import BoTri from '../../components/BoTri'
 import TheCauHoi from '../../components/user/TheCauHoi'
 import PhanTrang from '../../components/user/PhanTrang'
-import { mockQuestions } from '../../data/mockData'
+import { cauHoiService } from '../../services'
 import { useAuth } from '../../contexts/AuthContext'
 
 export default function CauHoiCuaToi() {
   const navigate = useNavigate()
   const location = useLocation()
   const { user, loading } = useAuth()
+  const [myQuestions, setMyQuestions] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
   const [filterStatus, setFilterStatus] = useState('all')
   const itemsPerPage = 10
@@ -18,21 +20,33 @@ export default function CauHoiCuaToi() {
     if (loading) return
     if (!user) {
       navigate('/login', { state: { from: location } })
+    } else {
+      loadQuestions()
     }
   }, [user, navigate, loading])
 
-  // Lọc câu hỏi của người dùng hiện tại
-  let myQuestions = mockQuestions.filter(q => q.author === user?.name)
-
-  // Lọc theo trạng thái
-  if (filterStatus === 'solved') {
-    myQuestions = myQuestions.filter(q => q.status === 'solved')
-  } else if (filterStatus === 'open') {
-    myQuestions = myQuestions.filter(q => q.status === 'open')
+  const loadQuestions = async () => {
+    try {
+      setIsLoading(true)
+      const res = await cauHoiService.getAll()
+      const questions = res.questions || res.data || []
+      setMyQuestions(questions.filter(q => q.author === user?.name))
+    } catch (error) {
+      console.error('Error loading questions:', error)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
-  const totalPages = Math.ceil(myQuestions.length / itemsPerPage)
-  const currentQuestions = myQuestions.slice(
+  let filteredQuestions = [...myQuestions]
+  if (filterStatus === 'solved') {
+    filteredQuestions = filteredQuestions.filter(q => q.status === 'solved')
+  } else if (filterStatus === 'open') {
+    filteredQuestions = filteredQuestions.filter(q => q.status === 'open')
+  }
+
+  const totalPages = Math.ceil(filteredQuestions.length / itemsPerPage)
+  const currentQuestions = filteredQuestions.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   )
@@ -83,7 +97,7 @@ export default function CauHoiCuaToi() {
             <>
               <div className="questions-list">
                 {currentQuestions.map(question => (
-                  <TheCauHoi key={question.id} question={question} />
+                  <TheCauHoi key={question.maCauHoi} question={question} />
                 ))}
               </div>
 

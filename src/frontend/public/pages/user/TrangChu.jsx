@@ -1,13 +1,38 @@
 import { Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 import BoTri from '../../components/BoTri'
 import KhuVucAnh from '../../components/user/KhuVucAnh'
 import TheTaiLieu from '../../components/user/TheTaiLieu'
 import TheCauHoi from '../../components/user/TheCauHoi'
-import { mockDocuments, mockQuestions } from '../../data/mockData'
+import { taiLieuService, cauHoiService } from '../../services'
 
 export default function TrangChu() {
-  const recentDocuments = mockDocuments.slice(0, 3)
-  const recentQuestions = mockQuestions.slice(0, 3)
+  const [recentDocuments, setRecentDocuments] = useState([])
+  const [recentQuestions, setRecentQuestions] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    loadData()
+  }, [])
+
+  const loadData = async () => {
+    try {
+      setLoading(true)
+      const [docsRes, questionsRes] = await Promise.all([
+        taiLieuService.getAll({ limit: 3 }),
+        cauHoiService.getAll({ limit: 3 })
+      ])
+      
+      setRecentDocuments(docsRes.documents || docsRes.data || [])
+      setRecentQuestions(questionsRes.questions || questionsRes.data || [])
+    } catch (error) {
+      console.error('Error loading homepage data:', error)
+      setRecentDocuments([])
+      setRecentQuestions([])
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <BoTri>
@@ -59,11 +84,17 @@ export default function TrangChu() {
             <h2>Tài liệu mới nhất</h2>
             <Link to="/documents" className="btn btn-outline">Xem tất cả</Link>
           </div>
-          <div className="documents-grid">
-            {recentDocuments.map(doc => (
-              <TheTaiLieu key={doc.id} document={doc} />
-            ))}
-          </div>
+          {loading ? (
+            <div className="loading-message">Đang tải...</div>
+          ) : recentDocuments.length > 0 ? (
+            <div className="documents-grid">
+              {recentDocuments.map(doc => (
+                <TheTaiLieu key={doc.maTaiLieu || doc.id} document={doc} />
+              ))}
+            </div>
+          ) : (
+            <div className="empty-message">Chưa có tài liệu nào</div>
+          )}
         </div>
       </section>
 
@@ -74,11 +105,17 @@ export default function TrangChu() {
             <h2>Câu hỏi mới nhất</h2>
             <Link to="/qa" className="btn btn-outline">Xem tất cả</Link>
           </div>
-          <div className="questions-list">
-            {recentQuestions.map(question => (
-              <TheCauHoi key={question.id} question={question} />
-            ))}
-          </div>
+          {loading ? (
+            <div className="loading-message">Đang tải...</div>
+          ) : recentQuestions.length > 0 ? (
+            <div className="questions-list">
+              {recentQuestions.map(question => (
+                <TheCauHoi key={question.maCauHoi || question.id} question={question} />
+              ))}
+            </div>
+          ) : (
+            <div className="empty-message">Chưa có câu hỏi nào</div>
+          )}
         </div>
       </section>
 

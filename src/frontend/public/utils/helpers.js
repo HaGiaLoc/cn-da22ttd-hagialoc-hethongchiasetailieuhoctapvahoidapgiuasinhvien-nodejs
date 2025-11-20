@@ -1,6 +1,15 @@
 export function formatDate(date) {
+  if (!date) {
+    return 'Ch\u01b0a c\u1eadp nh\u1eadt'
+  }
+  
   if (!(date instanceof Date)) {
     date = new Date(date)
+  }
+  
+  // Ki\u1ec3m tra date h\u1ee3p l\u1ec7
+  if (isNaN(date.getTime())) {
+    return 'Ch\u01b0a c\u1eadp nh\u1eadt'
   }
   
   const now = new Date()
@@ -23,6 +32,9 @@ export function formatDate(date) {
 }
 
 export function formatNumber(num) {
+  if (num === undefined || num === null) {
+    return '0'
+  }
   if (num >= 1000000) {
     return (num / 1000000).toFixed(1) + 'M'
   } else if (num >= 1000) {
@@ -82,4 +94,26 @@ export function searchMatch(text, searchTerm) {
   const normalizedSearch = normalizeString(searchTerm)
   
   return normalizedText.includes(normalizedSearch)
+}
+
+/**
+ * Tạo avatar URL từ tên đầy đủ
+ * @param {string} fullName - Tên đầy đủ của người dùng
+ * @returns {string} URL avatar
+ */
+export function generateAvatar(fullName) {
+  if (!fullName) return 'https://ui-avatars.com/api/?name=User&background=4F46E5&color=fff&size=150'
+  
+  const words = fullName.trim().split(' ')
+  let initials = ''
+  
+  if (words.length >= 2) {
+    // Lấy chữ cái đầu của họ (từ đầu) và tên (từ cuối)
+    initials = words[0].charAt(0) + words[words.length - 1].charAt(0)
+  } else {
+    // Nếu chỉ có 1 từ, lấy 2 ký tự đầu
+    initials = fullName.substring(0, 2)
+  }
+  
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=4F46E5&color=fff&size=150`
 }

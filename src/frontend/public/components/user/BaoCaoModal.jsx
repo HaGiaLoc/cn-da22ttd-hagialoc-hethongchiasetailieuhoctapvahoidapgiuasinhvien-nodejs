@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { useNotification } from '../../contexts/NotificationContext'
-import { mockReports } from '../../data/mockData'
+import { baoCaoService } from '../../services'
 
 export default function BaoCaoModal({ isOpen, onClose, reportType, reportedId, reportedTitle }) {
   const { user } = useAuth()
@@ -40,7 +40,7 @@ export default function BaoCaoModal({ isOpen, onClose, reportType, reportedId, r
     ]
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     
     if (!user) {
@@ -55,9 +55,7 @@ export default function BaoCaoModal({ isOpen, onClose, reportType, reportedId, r
       return
     }
 
-    // Tạo báo cáo mới (mock)
     const newReport = {
-      id: mockReports.length + 1,
       maSinhVien: user.id,
       reportType,
       reportedId,
@@ -66,8 +64,13 @@ export default function BaoCaoModal({ isOpen, onClose, reportType, reportedId, r
       trangThaiBaoCao: 'pending'
     }
 
-    // Lưu vào mockReports (trong thực tế sẽ gọi API)
-    mockReports.push(newReport)
+    try {
+      await baoCaoService.create(newReport)
+    } catch (error) {
+      console.error('Error creating report:', error)
+      showNotification('Có lỗi xảy ra khi gửi báo cáo', 'error', 2000)
+      return
+    }
 
     showNotification('Đã gửi báo cáo. Chúng tôi sẽ xem xét sớm nhất.', 'success', 1000)
     setReason('')

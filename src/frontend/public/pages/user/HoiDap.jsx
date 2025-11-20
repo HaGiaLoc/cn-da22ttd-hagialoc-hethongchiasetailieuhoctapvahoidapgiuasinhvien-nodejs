@@ -3,11 +3,13 @@ import { Link } from 'react-router-dom'
 import BoTri from '../../components/BoTri'
 import TheCauHoi from '../../components/user/TheCauHoi'
 import PhanTrang from '../../components/user/PhanTrang'
-import { mockQuestions, mockQuestionCategories } from '../../data/mockData'
+import { cauHoiService } from '../../services'
 import { searchMatch } from '../../utils/helpers'
 
 export default function HoiDap() {
-  const [questions, setQuestions] = useState(mockQuestions)
+  const [allQuestions, setAllQuestions] = useState([])
+  const [questions, setQuestions] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
   const [filters, setFilters] = useState({
     search: '',
     status: 'all',
@@ -15,32 +17,74 @@ export default function HoiDap() {
     major: '',
     sort: 'newest'
   })
+  const [filterOptions, setFilterOptions] = useState({
+    subjects: [],
+    majors: []
+  })
   const [selectedTag, setSelectedTag] = useState('')
   const [currentTab, setCurrentTab] = useState('all')
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
 
+  useEffect(() => {
+    loadQuestions()
+    loadFilterOptions()
+  }, [])
+
+  const loadFilterOptions = async () => {
+    try {
+      const [monRes, nganhRes] = await Promise.all([
+        cauHoiService.getMon(),
+        cauHoiService.getNganh()
+      ])
+
+      console.log('Filter options loaded:', { monRes, nganhRes })
+
+      setFilterOptions({
+        subjects: monRes?.data || monRes || [],
+        majors: nganhRes?.data || nganhRes || []
+      })
+    } catch (error) {
+      console.error('Error loading filter options:', error)
+    }
+  }
+
+  const loadQuestions = async () => {
+    try {
+      setIsLoading(true)
+      const res = await cauHoiService.getAll()
+      console.log('Questions loaded:', res)
+      const qs = res.data?.questions || res.questions || res.data || []
+      setAllQuestions(qs)
+      setQuestions(qs)
+    } catch (error) {
+      console.error('Error loading questions:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   const applyFilters = () => {
-    let filtered = [...mockQuestions]
+    let filtered = [...allQuestions]
 
     if (filters.search) {
       filtered = filtered.filter(q =>
-        searchMatch(q.title, filters.search)
+        searchMatch(q.tieuDeCH, filters.search) || searchMatch(q.noiDungCH, filters.search)
       )
     }
 
     if (filters.status === 'solved') {
-      filtered = filtered.filter(q => q.status === 'solved')
+      filtered = filtered.filter(q => q.trangThaiCH === 'solved')
     } else if (filters.status === 'open') {
-      filtered = filtered.filter(q => q.status === 'open')
+      filtered = filtered.filter(q => q.trangThaiCH === 'open')
     }
 
     if (filters.subject) {
-      filtered = filtered.filter(q => q.subject === filters.subject)
+      filtered = filtered.filter(q => q.tenMon === filters.subject)
     }
 
     if (filters.major) {
-      filtered = filtered.filter(q => q.major === filters.major)
+      filtered = filtered.filter(q => q.tenNganh === filters.major)
     }
 
     if (selectedTag) {
@@ -48,9 +92,11 @@ export default function HoiDap() {
     }
 
     if (filters.sort === 'newest') {
-      filtered.sort((a, b) => b.date - a.date)
+      filtered.sort((a, b) => new Date(b.ngayDatCH) - new Date(a.ngayDatCH))
     } else if (filters.sort === 'votes') {
-      filtered.sort((a, b) => b.votes - a.votes)
+      filtered.sort((a, b) => (b.votes || 0) - (a.votes || 0))
+    } else if (filters.sort === 'answers') {
+      filtered.sort((a, b) => (b.soLuongTraLoi || 0) - (a.soLuongTraLoi || 0))
     }
 
     setQuestions(filtered)
@@ -61,20 +107,37 @@ export default function HoiDap() {
     applyFilters()
   }, [filters, selectedTag])
 
+  const handleMajorChange = (value) => {
+    setFilters(prev => ({ ...prev, major: value, subject: '' }))
+  }
+
   const handleTagClick = (tag) => {
     setSelectedTag(selectedTag === tag ? '' : tag)
   }
 
-  // Lấy tất cả tags duy nhất từ các câu hỏi
   const getAllTags = () => {
     const tagsSet = new Set()
-    mockQuestions.forEach(question => {
-      question.tags.forEach(tag => tagsSet.add(tag))
+    allQuestions.forEach(question => {
+      if (question.tags) {
+        // tags là chuỗi từ backend (comma-separated)
+        const tagArray = typeof question.tags === 'string' 
+          ? question.tags.split(',').filter(t => t.trim())
+          : (Array.isArray(question.tags) ? question.tags : [])
+        tagArray.forEach(tag => tagsSet.add(tag.trim()))
+      }
     })
     return Array.from(tagsSet).sort()
   }
 
   const allTags = getAllTags()
+
+  // Lọc môn học theo ngành được chọn
+  const filteredSubjects = filters.major
+    ? filterOptions.subjects.filter(mon => {
+        const nganh = filterOptions.majors.find(n => n.tenNganh === filters.major)
+        return nganh ? mon.maNganh === nganh.maNganh : true
+      })
+    : filterOptions.subjects
 
   const totalPages = Math.ceil(questions.length / itemsPerPage)
   const currentQuestions = questions.slice(
@@ -135,26 +198,31 @@ export default function HoiDap() {
                 </div>
 
                 <div className="filter-group">
-                  <label>Môn học</label>
+                  <label>Ngành</label>
                   <select
-                    value={filters.subject}
-                    onChange={(e) => setFilters({ ...filters, subject: e.target.value })}
+                    value={filters.major}
+                    onChange={(e) => handleMajorChange(e.target.value)}
                   >
-                    <option value="">Tất cả</option>
-                    {mockQuestionCategories.map(cat => (
-                      <option key={cat.id} value={cat.name}>{cat.name}</option>
+                    <option value="" key="all-majors">Tất cả ngành</option>
+                    {filterOptions.majors.map(nganh => (
+                      <option key={nganh.maNganh} value={nganh.tenNganh}>{nganh.tenNganh}</option>
                     ))}
                   </select>
                 </div>
 
                 <div className="filter-group">
-                  <label>Ngành</label>
+                  <label>Môn học</label>
                   <select
-                    value={filters.major}
-                    onChange={(e) => setFilters({ ...filters, major: e.target.value })}
+                    value={filters.subject}
+                    onChange={(e) => setFilters({ ...filters, subject: e.target.value })}
+                    disabled={!filters.major && filterOptions.subjects.length > 0}
                   >
-                    <option value="">Tất cả</option>
-                    <option value="Công nghệ thông tin">Công nghệ thông tin</option>
+                    <option value="" key="all-subjects">
+                      {filters.major ? 'Tất cả môn học' : 'Chọn ngành trước'}
+                    </option>
+                    {filteredSubjects.map(mon => (
+                      <option key={mon.maMon} value={mon.tenMon}>{mon.tenMon}</option>
+                    ))}
                   </select>
                 </div>
 
@@ -213,7 +281,7 @@ export default function HoiDap() {
 
               <div className="questions-list">
                 {currentQuestions.map(question => (
-                  <TheCauHoi key={question.id} question={question} />
+                  <TheCauHoi key={question.maCauHoi} question={question} />
                 ))}
               </div>
 

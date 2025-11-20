@@ -7,7 +7,7 @@ export default function ChanTrang() {
         <div className="footer-content">
           <div className="footer-section">
             <h3>
-              <i className="fas fa-graduation-cap"></i> EduShare
+              <i className="fas fa-graduation-cap"></i> KEF
             </h3>
             <p>Nền tảng chia sẻ tài liệu học tập và hỏi đáp dành cho sinh viên</p>
           </div>
@@ -43,7 +43,7 @@ export default function ChanTrang() {
         </div>
         
         <div className="footer-bottom">
-          <p>&copy; 2024 EduShare. All rights reserved.</p>
+          <p>&copy; 2024-2025 KEF - Knowledge Exchange Forum. All rights reserved.</p>
         </div>
       </div>
     </footer>

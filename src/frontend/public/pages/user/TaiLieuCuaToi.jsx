@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom'
 import BoTri from '../../components/BoTri'
 import TheTaiLieu from '../../components/user/TheTaiLieu'
 import PhanTrang from '../../components/user/PhanTrang'
-import { mockDocuments } from '../../data/mockData'
+import { taiLieuService } from '../../services'
 import { useAuth } from '../../contexts/AuthContext'
 
 export default function TaiLieuCuaToi() {
@@ -12,17 +12,31 @@ export default function TaiLieuCuaToi() {
   const { user, loading } = useAuth()
   const [currentPage, setCurrentPage] = useState(1)
   const [sortBy, setSortBy] = useState('newest')
+  const [myDocuments, setMyDocuments] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
   const itemsPerPage = 12
 
   useEffect(() => {
     if (loading) return
     if (!user) {
       navigate('/login', { state: { from: location } })
+    } else {
+      loadDocuments()
     }
   }, [user, navigate, loading])
 
-  // Lọc tài liệu của người dùng hiện tại
-  const myDocuments = mockDocuments.filter(doc => doc.author === user?.name)
+  const loadDocuments = async () => {
+    try {
+      setIsLoading(true)
+      const res = await taiLieuService.getAll()
+      const docs = res.documents || res.data || []
+      setMyDocuments(docs.filter(d => d.author === user?.name))
+    } catch (error) {
+      console.error('Error loading documents:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   // Sắp xếp
   let sortedDocuments = [...myDocuments]
@@ -68,7 +82,7 @@ export default function TaiLieuCuaToi() {
             <>
               <div className="documents-grid">
                 {currentDocuments.map(doc => (
-                  <TheTaiLieu key={doc.id} document={doc} />
+                  <TheTaiLieu key={doc.maTaiLieu} document={doc} />
                 ))}
               </div>
 

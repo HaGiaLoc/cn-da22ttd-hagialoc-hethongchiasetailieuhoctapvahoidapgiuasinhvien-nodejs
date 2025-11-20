@@ -2,10 +2,10 @@ import { useState, useEffect, useRef } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import BoTri from '../../components/BoTri'
 import BaoCaoModal from '../../components/user/BaoCaoModal'
-import { mockQuestions, mockAnswers, mockStudents, generateAvatar } from '../../data/mockData'
+import { cauHoiService } from '../../services'
 import { useNotification } from '../../contexts/NotificationContext'
 import { useAuth } from '../../contexts/AuthContext'
-import { formatDate } from '../../utils/helpers'
+import { formatDate, generateAvatar } from '../../utils/helpers'
 
 export default function ChiTietCauHoi() {
   const { id } = useParams()
@@ -13,6 +13,7 @@ export default function ChiTietCauHoi() {
   const { user } = useAuth()
   const { showNotification } = useNotification()
   const [question, setQuestion] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
   const [answers, setAnswers] = useState([])
   const [answer, setAnswer] = useState('')
   const [showReportModal, setShowReportModal] = useState(false)
@@ -20,13 +21,21 @@ export default function ChiTietCauHoi() {
   const dropdownRef = useRef(null)
 
   useEffect(() => {
-    const q = mockQuestions.find(q => q.id === parseInt(id))
-    setQuestion(q || mockQuestions[0])
-    
-    // Lấy các câu trả lời cho câu hỏi này
-    const questionAnswers = mockAnswers.filter(a => a.questionId === parseInt(id))
-    setAnswers(questionAnswers)
+    loadQuestion()
   }, [id])
+
+  const loadQuestion = async () => {
+    try {
+      setIsLoading(true)
+      const q = await cauHoiService.getById(id)
+      setQuestion(q)
+      setAnswers(q.answers || [])
+    } catch (error) {
+      console.error('Error loading question:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -46,8 +55,25 @@ export default function ChiTietCauHoi() {
 
   if (!question) return <BoTri><div>Loading...</div></BoTri>
 
-  const handleVote = (direction) => {
-    showNotification(`Đã ${direction === 'up' ? 'upvote' : 'downvote'}`, 'success', 1000)
+  const handleVote = async (direction, type = 'question', targetId = null) => {
+    if (!user) {
+      showNotification('Vui lòng đăng nhập để vote', 'warning')
+      return
+    }
+
+    try {
+      const isUpvote = direction === 'up'
+      if (type === 'question') {
+        await cauHoiService.voteQuestion(id, isUpvote)
+        await loadQuestion()
+      } else {
+        await cauHoiService.voteAnswer(targetId, isUpvote)
+        await loadQuestion()
+      }
+      showNotification(`Đã ${direction === 'up' ? 'upvote' : 'downvote'}`, 'success', 1000)
+    } catch (error) {
+      showNotification(error.message || 'Không thể vote', 'error')
+    }
   }
 
   const handleTextareaFocus = () => {
@@ -56,11 +82,22 @@ export default function ChiTietCauHoi() {
     }
   }
 
-  const handleSubmitAnswer = (e) => {
+  const handleSubmitAnswer = async (e) => {
     e.preventDefault()
+    if (!user) {
+      showNotification('Vui lòng đăng nhập để trả lời câu hỏi', 'warning')
+      return
+    }
+    
     if (answer.trim()) {
-      showNotification('Đã gửi câu trả lời', 'success', 1000)
-      setAnswer('')
+      try {
+        await cauHoiService.answer(id, answer.trim())
+        showNotification('Đã gửi câu trả lời', 'success', 1000)
+        setAnswer('')
+        await loadQuestion()
+      } catch (error) {
+        showNotification(error.message || 'Không thể gửi câu trả lời', 'error')
+      }
     }
   }
 
@@ -73,7 +110,7 @@ export default function ChiTietCauHoi() {
             <i className="fas fa-chevron-right"></i>
             <Link to="/qa">Hỏi đáp</Link>
             <i className="fas fa-chevron-right"></i>
-            <span>{question.title}</span>
+            <span>{question.tieuDeCH}</span>
           </div>
 
           <div className="question-detail">
@@ -82,16 +119,14 @@ export default function ChiTietCauHoi() {
                 <div className="question-header-top">
                   <div className="question-meta">
                     <img 
-                      src={mockStudents.find(s => s.hoTenSinhVien === question.author)?.avatar || generateAvatar(question.author)} 
-                      alt={question.author}
+                      src={generateAvatar(question.hoTenSV)} 
+                      alt={question.hoTenSV}
                       className="author-avatar"
                     />
                     <div className="author-info">
-                      <span className="author-name">{question.author}</span>
+                      <span className="author-name">{question.hoTenSV}</span>
                       <div className="question-date-views">
-                        <span>Ngày đăng: {formatDate(question.date)}</span>
-                        <span>•</span>
-                        <span>{question.views} lượt xem</span>
+                        <span>Ngày đăng: {formatDate(question.ngayDatCH)}</span>
                       </div>
                     </div>
                   </div>
@@ -115,29 +150,40 @@ export default function ChiTietCauHoi() {
                     )}
                   </div>
                 </div>
-                <h1>{question.title}</h1>
+                <h1>{question.tieuDeCH}</h1>
                 <div className="question-subject-tags">
-                  <span className="subject-tag"><i className="fas fa-book"></i> {question.subject}</span>
-                  <span className="major-tag"><i className="fas fa-graduation-cap"></i> {question.major}</span>
+                  <span className="subject-tag"><i className="fas fa-book"></i> {question.tenMon}</span>
+                  <span className="major-tag"><i className="fas fa-graduation-cap"></i> {question.tenNganh}</span>
                 </div>
               </div>
 
               <div className="question-body">
                 <div className="question-voting">
-                  <button onClick={() => handleVote('up')}>
+                  <button 
+                    onClick={() => handleVote('up', 'question')}
+                    className={user && question.userVote?.Upvote ? 'active' : ''}
+                    title={!user ? 'Đăng nhập để vote' : 'Upvote'}
+                  >
                     <i className="fas fa-arrow-up"></i>
                   </button>
-                  <span className="vote-count">{question.votes}</span>
-                  <button onClick={() => handleVote('down')}>
+                  <span className="vote-count">{question.votes || 0}</span>
+                  <button 
+                    onClick={() => handleVote('down', 'question')}
+                    className={user && question.userVote?.Downvote ? 'active' : ''}
+                    title={!user ? 'Đăng nhập để vote' : 'Downvote'}
+                  >
                     <i className="fas fa-arrow-down"></i>
                   </button>
                 </div>
 
                 <div className="question-content">
-                  <p>{question.content}</p>
+                  <p>{question.noiDungCH}</p>
                   <div className="question-tags">
-                    {question.tags.map((tag, index) => (
-                      <span key={index} className="tag">{tag}</span>
+                    {question.tags && (Array.isArray(question.tags) 
+                      ? question.tags 
+                      : (typeof question.tags === 'string' ? question.tags.split(',').filter(t => t.trim()) : [])
+                    ).map((tag, index) => (
+                      <span key={index} className="tag">{typeof tag === 'string' ? tag : tag.tenTag || tag}</span>
                     ))}
                   </div>
                 </div>
@@ -147,17 +193,27 @@ export default function ChiTietCauHoi() {
                 <h3>{answers.length} Câu trả lời</h3>
                 <div className="answers-list">
                   {answers.map(ans => (
-                    <div key={ans.id} className="answer-item">
+                    <div key={ans.maCauTraLoi} className="answer-item">
                       <div className="answer-voting">
-                        <button><i className="fas fa-arrow-up"></i></button>
-                        <span className="vote-count">{ans.votes}</span>
-                        <button><i className="fas fa-arrow-down"></i></button>
+                        <button 
+                          onClick={() => handleVote('up', 'answer', ans.maCauTraLoi)}
+                          title={!user ? 'Đăng nhập để vote' : 'Upvote'}
+                        >
+                          <i className="fas fa-arrow-up"></i>
+                        </button>
+                        <span className="vote-count">{ans.votes || 0}</span>
+                        <button 
+                          onClick={() => handleVote('down', 'answer', ans.maCauTraLoi)}
+                          title={!user ? 'Đăng nhập để vote' : 'Downvote'}
+                        >
+                          <i className="fas fa-arrow-down"></i>
+                        </button>
                       </div>
                       <div className="answer-content">
-                        <p>{ans.content}</p>
+                        <p>{ans.noiDungCTL}</p>
                         <div className="answer-meta">
-                          <span>Trả lời bởi {ans.author}</span>
-                          <span>{formatDate(ans.date)}</span>
+                          <span>Trả lời bởi {ans.hoTenSV}</span>
+                          <span>{formatDate(ans.ngayTraLoi)}</span>
                         </div>
                       </div>
                     </div>
@@ -167,23 +223,28 @@ export default function ChiTietCauHoi() {
 
               <div className="answer-form-section">
                 <h3>Câu trả lời của bạn</h3>
-                <form onSubmit={handleSubmitAnswer} className="answer-form">
-                  <textarea
-                    rows="6"
-                    placeholder="Viết câu trả lời của bạn..."
-                    value={answer}
-                    onChange={(e) => setAnswer(e.target.value)}
-                    onFocus={handleTextareaFocus}
-                    required
-                  ></textarea>
-                  <button 
-                    type="submit" 
-                    className="btn btn-primary"
-                    disabled={!answer.trim()}
-                  >
-                    Gửi câu trả lời
-                  </button>
-                </form>
+                {user ? (
+                  <form onSubmit={handleSubmitAnswer} className="answer-form">
+                    <textarea
+                      rows="6"
+                      placeholder="Viết câu trả lời của bạn..."
+                      value={answer}
+                      onChange={(e) => setAnswer(e.target.value)}
+                      required
+                    ></textarea>
+                    <button 
+                      type="submit" 
+                      className="btn btn-primary"
+                      disabled={!answer.trim()}
+                    >
+                      Gửi câu trả lời
+                    </button>
+                  </form>
+                ) : (
+                  <div className="login-prompt">
+                    <p>Vui lòng <Link to="/dang-nhap">đăng nhập</Link> để trả lời câu hỏi</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -194,8 +255,8 @@ export default function ChiTietCauHoi() {
         isOpen={showReportModal}
         onClose={() => setShowReportModal(false)}
         reportType="question"
-        reportedId={question?.id}
-        reportedTitle={question?.title}
+        reportedId={question?.maCauHoi}
+        reportedTitle={question?.tieuDeCH}
       />
     </BoTri>
   )

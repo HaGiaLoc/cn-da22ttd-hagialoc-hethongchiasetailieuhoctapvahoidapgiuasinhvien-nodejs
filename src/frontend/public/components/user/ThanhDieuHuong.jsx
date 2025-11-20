@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
-import { generateAvatar } from '../../data/mockData'
+
 
 export default function ThanhDieuHuong() {
   const navigate = useNavigate()
@@ -42,7 +42,7 @@ export default function ThanhDieuHuong() {
         <div className="nav-brand">
           <Link to="/">
             <i className="fas fa-graduation-cap"></i>
-            <span>EduShare</span>
+            <span>KEF</span>
           </Link>
         </div>
         

@@ -1,11 +1,55 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
+import { useRef, useEffect } from 'react'
 
 export default function AdminSidebar() {
   const location = useLocation()
   const { user, logout } = useAuth()
+  const navRef = useRef(null)
+  const scrollPositionRef = useRef(0)
 
   const isActive = (path) => location.pathname === path
+
+  // Lưu vị trí cuộn khi component unmount hoặc route thay đổi
+  useEffect(() => {
+    const navElement = navRef.current
+    if (!navElement) return
+
+    const handleScroll = () => {
+      scrollPositionRef.current = navElement.scrollTop
+    }
+
+    navElement.addEventListener('scroll', handleScroll)
+    
+    // Khôi phục vị trí cuộn
+    if (scrollPositionRef.current > 0) {
+      navElement.scrollTop = scrollPositionRef.current
+    }
+
+    return () => {
+      navElement.removeEventListener('scroll', handleScroll)
+    }
+  }, [])
+
+  // Cuộn đến item active khi lần đầu load
+  useEffect(() => {
+    const navElement = navRef.current
+    if (!navElement) return
+
+    const activeItem = navElement.querySelector('.nav-item.active')
+    if (activeItem && scrollPositionRef.current === 0) {
+      const navRect = navElement.getBoundingClientRect()
+      const activeRect = activeItem.getBoundingClientRect()
+      const offset = activeRect.top - navRect.top - (navRect.height / 2) + (activeRect.height / 2)
+      
+      if (offset > 0 || offset < -activeRect.height) {
+        navElement.scrollTo({
+          top: navElement.scrollTop + offset,
+          behavior: 'smooth'
+        })
+      }
+    }
+  }, [location.pathname])
 
   const handleLogout = () => {
     logout()
@@ -17,7 +61,7 @@ export default function AdminSidebar() {
       <div className="sidebar-header">
         <div className="sidebar-logo">
           <i className="fas fa-graduation-cap"></i>
-          <h2>EduShare Admin</h2>
+          <h2>KEF Admin</h2>
         </div>
       </div>
 
@@ -29,7 +73,7 @@ export default function AdminSidebar() {
         </div>
       </div>
 
-      <nav className="sidebar-nav">
+      <nav className="sidebar-nav" ref={navRef}>
         <Link 
           to="/admin" 
           className={`nav-item ${isActive('/admin') ? 'active' : ''}`}
@@ -38,12 +82,32 @@ export default function AdminSidebar() {
           <span>Dashboard</span>
         </Link>
 
+        <div className="nav-section-title">
+          <span>CHỨC NĂNG CƠ BẢN</span>
+        </div>
+
         <Link 
           to="/admin/documents" 
           className={`nav-item ${isActive('/admin/documents') ? 'active' : ''}`}
         >
           <i className="fas fa-file-alt"></i>
           <span>Quản lý tài liệu</span>
+        </Link>
+
+        <Link 
+          to="/admin/questions" 
+          className={`nav-item ${isActive('/admin/questions') ? 'active' : ''}`}
+        >
+          <i className="fas fa-question-circle"></i>
+          <span>Quản lý câu hỏi</span>
+        </Link>
+
+        <Link 
+          to="/admin/answers" 
+          className={`nav-item ${isActive('/admin/answers') ? 'active' : ''}`}
+        >
+          <i className="fas fa-comments"></i>
+          <span>Quản lý câu trả lời</span>
         </Link>
 
         <Link 
@@ -60,6 +124,70 @@ export default function AdminSidebar() {
         >
           <i className="fas fa-users"></i>
           <span>Người dùng</span>
+        </Link>
+
+        <div className="nav-section-title">
+          <span>DANH MỤC</span>
+        </div>
+
+        <Link 
+          to="/admin/categories/subjects" 
+          className={`nav-item ${isActive('/admin/categories/subjects') ? 'active' : ''}`}
+        >
+          <i className="fas fa-book"></i>
+          <span>Môn học</span>
+        </Link>
+
+        <Link 
+          to="/admin/categories/majors" 
+          className={`nav-item ${isActive('/admin/categories/majors') ? 'active' : ''}`}
+        >
+          <i className="fas fa-graduation-cap"></i>
+          <span>Ngành</span>
+        </Link>
+
+        <Link 
+          to="/admin/categories/tags" 
+          className={`nav-item ${isActive('/admin/categories/tags') ? 'active' : ''}`}
+        >
+          <i className="fas fa-tags"></i>
+          <span>Tags</span>
+        </Link>
+
+        <Link 
+          to="/admin/categories/document-types" 
+          className={`nav-item ${isActive('/admin/categories/document-types') ? 'active' : ''}`}
+        >
+          <i className="fas fa-folder"></i>
+          <span>Loại tài liệu</span>
+        </Link>
+
+        <Link 
+          to="/admin/categories/formats" 
+          className={`nav-item ${isActive('/admin/categories/formats') ? 'active' : ''}`}
+        >
+          <i className="fas fa-file-code"></i>
+          <span>Định dạng</span>
+        </Link>
+
+        <div className="nav-section-title">
+          <span>HỆ THỐNG</span>
+        </div>
+
+        <Link 
+          to="/admin/admins" 
+          className={`nav-item ${isActive('/admin/admins') ? 'active' : ''}`}
+        >
+          <i className="fas fa-user-shield"></i>
+          <span>Quản trị viên</span>
+        </Link>
+
+        <Link 
+          to="/admin/statistics" 
+          className={`nav-item ${isActive('/admin/statistics') ? 'active' : ''}`}
+        >
+          <i className="fas fa-chart-bar"></i>
+          <span>Thống kê</span>
         </Link>
       </nav>
 

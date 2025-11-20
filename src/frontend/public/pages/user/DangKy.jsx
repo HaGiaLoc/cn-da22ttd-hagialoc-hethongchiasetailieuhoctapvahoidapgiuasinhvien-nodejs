@@ -9,8 +9,7 @@ export default function DangKy() {
   const { register } = useAuth()
   const { showNotification } = useNotification()
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
+    hoTenSV: '',
     email: '',
     password: '',
     confirmPassword: ''
@@ -23,10 +22,10 @@ export default function DangKy() {
 
     // Validation
     let newErrors = {}
-    if (!formData.firstName) newErrors.firstName = 'Vui lòng nhập họ'
-    if (!formData.lastName) newErrors.lastName = 'Vui lòng nhập tên'
+    if (!formData.hoTenSV) newErrors.hoTenSV = 'Vui lòng nhập họ tên'
     if (!formData.email) newErrors.email = 'Vui lòng nhập email'
     if (!formData.password) newErrors.password = 'Vui lòng nhập mật khẩu'
+    if (formData.password.length < 6) newErrors.password = 'Mật khẩu phải có ít nhất 6 ký tự'
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Mật khẩu xác nhận không khớp'
     }
@@ -69,27 +68,16 @@ export default function DangKy() {
                 </p>
 
                 <form onSubmit={handleSubmit} className="form">
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label>Họ *</label>
-                      <input
-                        type="text"
-                        value={formData.firstName}
-                        onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                        placeholder="Nguyễn"
-                      />
-                      {errors.firstName && <span className="error-text">{errors.firstName}</span>}
-                    </div>
-                    <div className="form-group">
-                      <label>Tên *</label>
-                      <input
-                        type="text"
-                        value={formData.lastName}
-                        onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                        placeholder="Văn A"
-                      />
-                      {errors.lastName && <span className="error-text">{errors.lastName}</span>}
-                    </div>
+                  <div className="form-group">
+                    <label>Họ tên *</label>
+                    <input
+                      type="text"
+                      value={formData.hoTenSV}
+                      onChange={(e) => setFormData({ ...formData, hoTenSV: e.target.value })}
+                      placeholder="Nguyễn Văn A"
+                      autoComplete="on"
+                    />
+                    {errors.hoTenSV && <span className="error-text">{errors.hoTenSV}</span>}
                   </div>
 
                   <div className="form-group">
@@ -99,6 +87,7 @@ export default function DangKy() {
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       placeholder="your.email@example.com"
+                      autoComplete="on"
                     />
                     {errors.email && <span className="error-text">{errors.email}</span>}
                   </div>
@@ -110,6 +99,7 @@ export default function DangKy() {
                       value={formData.password}
                       onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                       placeholder="••••••••"
+                      autoComplete="new-password"
                     />
                     {errors.password && <span className="error-text">{errors.password}</span>}
                   </div>
@@ -121,6 +111,7 @@ export default function DangKy() {
                       value={formData.confirmPassword}
                       onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                       placeholder="••••••••"
+                      autoComplete="new-password"
                     />
                     {errors.confirmPassword && <span className="error-text">{errors.confirmPassword}</span>}
                   </div>

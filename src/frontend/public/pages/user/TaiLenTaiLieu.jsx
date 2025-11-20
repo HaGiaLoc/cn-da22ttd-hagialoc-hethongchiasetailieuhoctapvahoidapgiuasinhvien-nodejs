@@ -4,7 +4,7 @@ import BoTri from '../../components/BoTri'
 import { useAuth } from '../../contexts/AuthContext'
 import { useNotification } from '../../contexts/NotificationContext'
 import { getFileIcon, formatFileSize } from '../../utils/helpers'
-import { mockDocumentCategories, mockQuestionCategories } from '../../data/mockData'
+import { taiLieuService } from '../../services'
 
 export default function TaiLenTaiLieu() {
   const navigate = useNavigate()
@@ -18,48 +18,99 @@ export default function TaiLenTaiLieu() {
       navigate('/login', { state: { from: location } })
     }
   }, [user, navigate, loading])
-  const [selectedFiles, setSelectedFiles] = useState([])
+  const [selectedFile, setSelectedFile] = useState(null)
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    type: '',
-    subject: '',
-    major: ''
+    tieuDeTL: '',
+    moTa: '',
+    maLoai: '',
+    maMon: ''
+  })
+  const [isUploading, setIsUploading] = useState(false)
+  const [filterOptions, setFilterOptions] = useState({
+    types: [],
+    subjects: [],
+    majors: []
   })
 
+  useEffect(() => {
+    loadFilterOptions()
+  }, [])
+
+  const loadFilterOptions = async () => {
+    try {
+      const [loaiRes, monRes, nganhRes] = await Promise.all([
+        taiLieuService.getLoaiTaiLieu(),
+        taiLieuService.getMon(),
+        taiLieuService.getNganh()
+      ])
+
+      console.log('Filter options loaded:', { loaiRes, monRes, nganhRes })
+
+      setFilterOptions({
+        types: loaiRes?.data || loaiRes || [],
+        subjects: monRes?.data || monRes || [],
+        majors: nganhRes?.data || nganhRes || []
+      })
+    } catch (error) {
+      console.error('Error loading filter options:', error)
+    }
+  }
+
   const handleFileSelect = (e) => {
-    const files = Array.from(e.target.files)
-    setSelectedFiles(files)
+    const file = e.target.files[0]
+    if (file) {
+      setSelectedFile(file)
+    }
   }
 
   const handleDrop = (e) => {
     e.preventDefault()
-    const files = Array.from(e.dataTransfer.files)
-    setSelectedFiles(files)
+    const file = e.dataTransfer.files[0]
+    if (file) {
+      setSelectedFile(file)
+    }
   }
 
   const handleDragOver = (e) => {
     e.preventDefault()
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    if (selectedFiles.length === 0) {
+    
+    if (!selectedFile) {
       showNotification('Vui lòng chọn file để upload', 'error')
       return
     }
+
+    if (!formData.tieuDeTL.trim() || !formData.maLoai || !formData.maMon) {
+      showNotification('Vui lòng điền đầy đủ thông tin', 'warning')
+      return
+    }
     
-    // Hiển thị modal đang upload với icon loading
-    showNotification('Đang upload tài liệu...', 'loading', 0)
-    
-    // Sau 1.5s, cập nhật thành upload thành công
-    setTimeout(() => {
-      showNotification('Upload thành công!', 'success', 1000)
-      // Điều hướng sau khi modal đóng (2s)
+    try {
+      setIsUploading(true)
+      showNotification('Đang upload tài liệu...', 'info')
+
+      const uploadData = new FormData()
+      uploadData.append('file', selectedFile)
+      uploadData.append('tieuDeTL', formData.tieuDeTL.trim())
+      uploadData.append('moTa', formData.moTa.trim())
+      uploadData.append('maLoai', parseInt(formData.maLoai))
+      uploadData.append('maMon', parseInt(formData.maMon))
+
+      await taiLieuService.upload(uploadData)
+      
+      showNotification('Upload tài liệu thành công!', 'success')
       setTimeout(() => {
         navigate('/documents')
-      }, 2000)
-    }, 1500)
+      }, 1000)
+    } catch (error) {
+      console.error('Error uploading document:', error)
+      showNotification(error.message || 'Không thể upload tài liệu', 'error')
+    } finally {
+      setIsUploading(false)
+    }
   }
 
   return (
@@ -94,18 +145,23 @@ export default function TaiLenTaiLieu() {
                 />
               </div>
 
-              {selectedFiles.length > 0 && (
+              {selectedFile && (
                 <div className="file-list">
                   <h3>File đã chọn:</h3>
-                  {selectedFiles.map((file, index) => (
-                    <div key={index} className="file-item">
-                      <i className={`fas ${getFileIcon(file.name)}`}></i>
-                      <div className="file-info">
-                        <h4>{file.name}</h4>
-                        <p>{formatFileSize(file.size)}</p>
-                      </div>
+                  <div className="file-item">
+                    <i className={`fas ${getFileIcon(selectedFile.name)}`}></i>
+                    <div className="file-info">
+                      <h4>{selectedFile.name}</h4>
+                      <p>{formatFileSize(selectedFile.size)}</p>
                     </div>
-                  ))}
+                    <button 
+                      type="button" 
+                      className="btn-remove"
+                      onClick={() => setSelectedFile(null)}
+                    >
+                      <i className="fas fa-times"></i>
+                    </button>
+                  </div>
                 </div>
               )}
 
@@ -117,8 +173,8 @@ export default function TaiLenTaiLieu() {
                   <input
                     type="text"
                     required
-                    value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    value={formData.tieuDeTL}
+                    onChange={(e) => setFormData({ ...formData, tieuDeTL: e.target.value })}
                     placeholder="Nhập tiêu đề tài liệu"
                   />
                 </div>
@@ -127,23 +183,23 @@ export default function TaiLenTaiLieu() {
                   <label>Mô tả</label>
                   <textarea
                     rows="4"
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    value={formData.moTa}
+                    onChange={(e) => setFormData({ ...formData, moTa: e.target.value })}
                     placeholder="Mô tả chi tiết về tài liệu"
                   ></textarea>
                 </div>
 
-                <div className="form-row" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
+                <div className="form-row" style={{ gridTemplateColumns: '1fr 1fr' }}>
                   <div className="form-group">
                     <label>Loại tài liệu *</label>
                     <select
                       required
-                      value={formData.type}
-                      onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                      value={formData.maLoai}
+                      onChange={(e) => setFormData({ ...formData, maLoai: e.target.value })}
                     >
                       <option value="">Chọn loại</option>
-                      {mockDocumentCategories.map(cat => (
-                        <option key={cat.id} value={cat.name}>{cat.name}</option>
+                      {filterOptions.types.map(type => (
+                        <option key={type.maLoai} value={type.maLoai}>{type.loaiTaiLieu}</option>
                       ))}
                     </select>
                   </div>
@@ -152,36 +208,25 @@ export default function TaiLenTaiLieu() {
                     <label>Môn học *</label>
                     <select
                       required
-                      value={formData.subject}
-                      onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                      value={formData.maMon}
+                      onChange={(e) => setFormData({ ...formData, maMon: e.target.value })}
                     >
                       <option value="">Chọn môn học</option>
-                      {mockQuestionCategories.map(cat => (
-                        <option key={cat.id} value={cat.name}>{cat.name}</option>
+                      {filterOptions.subjects.map(mon => (
+                        <option key={mon.maMon} value={mon.maMon}>{mon.tenMon}</option>
                       ))}
-                    </select>
-                  </div>
-
-                  <div className="form-group">
-                    <label>Ngành *</label>
-                    <select
-                      required
-                      value={formData.major}
-                      onChange={(e) => setFormData({ ...formData, major: e.target.value })}
-                    >
-                      <option value="">Chọn ngành</option>
-                      <option value="Công nghệ thông tin">Công nghệ thông tin</option>
                     </select>
                   </div>
                 </div>
               </div>
 
               <div className="form-actions">
-                <button type="button" className="btn btn-outline" onClick={() => navigate('/documents')}>
+                <button type="button" className="btn btn-outline" onClick={() => navigate('/documents')} disabled={isUploading}>
                   Hủy
                 </button>
-                <button type="submit" className="btn btn-primary">
-                  <i className="fas fa-upload"></i> Upload tài liệu
+                <button type="submit" className="btn btn-primary" disabled={isUploading}>
+                  <i className={`fas ${isUploading ? 'fa-spinner fa-spin' : 'fa-upload'}`}></i> 
+                  {isUploading ? 'Đang upload...' : 'Upload tài liệu'}
                 </button>
               </div>
             </form>

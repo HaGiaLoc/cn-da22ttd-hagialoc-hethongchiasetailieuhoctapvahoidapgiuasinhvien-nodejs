@@ -1,45 +1,77 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import BoTriQuanTri from '../../components/admin/BoTriQuanTri'
-import { mockDocuments } from '../../data/mockData'
+import { adminService } from '../../services'
 import { useNotification } from '../../contexts/NotificationContext'
 import { formatDate, formatNumber } from '../../utils/helpers'
 
 export default function QuanTriTaiLieu() {
   const { showNotification } = useNotification()
-  const [documents, setDocuments] = useState(mockDocuments)
+  const [documents, setDocuments] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
   const [filterStatus, setFilterStatus] = useState('all')
   const [searchTerm, setSearchTerm] = useState('')
 
-  const handleApprove = (docId) => {
-    const updated = documents.map(d =>
-      d.id === docId ? { ...d, trangThaiTL: 'approved' } : d
-    )
-    setDocuments(updated)
-    showNotification('Đã duyệt tài liệu', 'success', 1000)
+  useEffect(() => {
+    loadDocuments()
+  }, [])
+
+  const loadDocuments = async () => {
+    try {
+      setIsLoading(true)
+      const res = await adminService.getAllDocuments(filterStatus === 'all' ? null : filterStatus)
+      setDocuments(res.data?.documents || [])
+    } catch (error) {
+      console.error('Error loading documents:', error)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
-  const handleReject = (docId) => {
-    const updated = documents.map(d =>
-      d.id === docId ? { ...d, trangThaiTL: 'rejected' } : d
-    )
-    setDocuments(updated)
-    showNotification('Đã từ chối tài liệu', 'success', 1000)
+  useEffect(() => {
+    loadDocuments()
+  }, [filterStatus])
+
+  const handleApprove = async (docId) => {
+    try {
+      await adminService.approveDocument(docId)
+      await loadDocuments()
+      showNotification('Đã duyệt tài liệu', 'success', 2000)
+    } catch (error) {
+      showNotification('Duyệt tài liệu thất bại', 'error', 3000)
+    }
   }
 
-  const handleDelete = (docId) => {
+  const handleReject = async (docId) => {
+    try {
+      await adminService.rejectDocument(docId)
+      await loadDocuments()
+      showNotification('Đã từ chối tài liệu', 'success', 2000)
+    } catch (error) {
+      showNotification('Từ chối tài liệu thất bại', 'error', 3000)
+    }
+  }
+
+  const handleDelete = async (docId) => {
     if (window.confirm('Bạn có chắc muốn xóa tài liệu này?')) {
-      setDocuments(documents.filter(d => d.id !== docId))
-      showNotification('Đã xóa tài liệu', 'success', 1000)
+      try {
+        await adminService.deleteDocument(docId)
+        setDocuments(documents.filter(d => d.maTaiLieu !== docId))
+        showNotification('Đã xóa tài liệu', 'success', 2000)
+      } catch (error) {
+        showNotification('Xóa tài liệu thất bại', 'error', 3000)
+      }
     }
   }
 
   const filteredDocs = documents.filter(d => {
     const statusMatch = filterStatus === 'all' || d.trangThaiTL === filterStatus
-    const searchMatch = d.tieuDeTaiLieu.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const searchMatch = d.tieuDeTL.toLowerCase().includes(searchTerm.toLowerCase()) ||
                        d.author.toLowerCase().includes(searchTerm.toLowerCase())
     return statusMatch && searchMatch
   })
+  // sort by numeric document ID ascending
+  const sortedDocs = filteredDocs.slice().sort((a, b) => Number(a.maTaiLieu) - Number(b.maTaiLieu))
 
   return (
     <BoTriQuanTri>
@@ -80,6 +112,22 @@ export default function QuanTriTaiLieu() {
 
           {/* Documents Table */}
           <div className="admin-card">
+            {isLoading && (
+              <div className="empty-state" style={{ padding: '40px', textAlign: 'center' }}>
+                <i className="fas fa-spinner fa-spin" style={{ fontSize: '48px', color: '#666', marginBottom: '20px' }}></i>
+                <p>Đang tải danh sách tài liệu...</p>
+              </div>
+            )}
+            
+            {!isLoading && filteredDocs.length === 0 && (
+              <div className="empty-state" style={{ padding: '40px', textAlign: 'center' }}>
+                <i className="fas fa-file-alt" style={{ fontSize: '48px', color: '#ccc', marginBottom: '20px' }}></i>
+                <h3>Không có tài liệu nào</h3>
+                <p>{searchTerm ? 'Không tìm thấy tài liệu phù hợp với từ khóa tìm kiếm.' : 'Chưa có tài liệu nào trong hệ thống.'}</p>
+              </div>
+            )}
+            
+            {!isLoading && filteredDocs.length > 0 && (
             <div className="table-responsive">
               <table className="admin-table">
                 <thead>
@@ -90,33 +138,29 @@ export default function QuanTriTaiLieu() {
                     <th>Loại</th>
                     <th>Lượt xem</th>
                     <th>Tải xuống</th>
-                    <th>Đánh giá</th>
-                    <th>Ngày tải</th>
+                    <th>Ngày đăng</th>
                     <th>Trạng thái</th>
                     <th>Thao tác</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredDocs.length > 0 ? filteredDocs.map(doc => (
-                    <tr key={doc.id}>
-                      <td>#{doc.id}</td>
+                  {sortedDocs.map(doc => (
+                    <tr key={doc.maTaiLieu}>
+                      <td><strong>{doc.maTaiLieu}</strong></td>
                       <td>
                         <div className="doc-title">
-                          <Link to={`/documents/${doc.id}`} target="_blank">
-                            {doc.tieuDeTaiLieu}
-                          </Link>
+                          <a href={doc.URL} target="_blank" rel="noopener noreferrer">
+                            {doc.tieuDeTL}
+                          </a>
                         </div>
                       </td>
-                      <td>{doc.author}</td>
+                      <td>{doc.hoTenSV}</td>
                       <td>
-                        <span className="badge badge-info">{doc.type}</span>
+                        <span className="badge badge-info">{doc.tenLoai}</span>
                       </td>
-                      <td>{formatNumber(doc.views)}</td>
-                      <td>{formatNumber(doc.downloads)}</td>
-                      <td>
-                        <i className="fas fa-star" style={{ color: '#ffc107' }}></i> {doc.rating}
-                      </td>
-                      <td>{formatDate(doc.date)}</td>
+                      <td>{formatNumber(doc.luotXem || 0)}</td>
+                      <td>{formatNumber(doc.luotTai || 0)}</td>
+                      <td>{formatDate(doc.ngayTai)}</td>
                       <td>
                         <span className={`badge badge-${
                           doc.trangThaiTL === 'approved' ? 'success' :
@@ -132,48 +176,37 @@ export default function QuanTriTaiLieu() {
                             <>
                               <button
                                 className="btn btn-sm btn-success"
-                                onClick={() => handleApprove(doc.id)}
+                                onClick={() => handleApprove(doc.maTaiLieu)}
                                 title="Duyệt"
                               >
                                 <i className="fas fa-check"></i>
                               </button>
                               <button
                                 className="btn btn-sm btn-danger"
-                                onClick={() => handleReject(doc.id)}
+                                onClick={() => handleReject(doc.maTaiLieu)}
                                 title="Từ chối"
                               >
                                 <i className="fas fa-times"></i>
                               </button>
                             </>
                           )}
-                          <Link
-                            to={`/documents/${doc.id}`}
-                            className="btn btn-sm btn-outline"
-                            target="_blank"
-                            title="Xem chi tiết"
-                          >
-                            <i className="fas fa-eye"></i>
-                          </Link>
-                          <button
-                            className="btn btn-sm btn-outline"
-                            onClick={() => handleDelete(doc.id)}
-                            title="Xóa"
-                          >
-                            <i className="fas fa-trash"></i>
-                          </button>
+                          {doc.trangThaiTL !== 'pending' && (
+                            <button
+                              className="btn btn-sm btn-outline"
+                              onClick={() => handleDelete(doc.maTaiLieu)}
+                              title="Xóa"
+                            >
+                              <i className="fas fa-trash"></i>
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
-                  )) : (
-                    <tr>
-                      <td colSpan="10" className="empty-state">
-                        Không tìm thấy tài liệu nào
-                      </td>
-                    </tr>
-                  )}
+                  ))}
                 </tbody>
               </table>
             </div>
+            )}
           </div>
       </section>
     </BoTriQuanTri>

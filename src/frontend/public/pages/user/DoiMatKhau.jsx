@@ -3,7 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import BoTri from '../../components/BoTri'
 import { useAuth } from '../../contexts/AuthContext'
 import { useNotification } from '../../contexts/NotificationContext'
-import { mockStudents } from '../../data/mockData'
+import authService from '../../services/authService'
+
 
 export default function DoiMatKhau() {
   const navigate = useNavigate()
@@ -32,12 +33,6 @@ export default function DoiMatKhau() {
 
     if (!formData.matKhauCu) {
       newErrors.matKhauCu = 'Vui lòng nhập mật khẩu cũ'
-    } else {
-      // Kiểm tra mật khẩu cũ có đúng không
-      const student = mockStudents.find(s => s.id === user.id)
-      if (student && student.matKhauSinhVien !== formData.matKhauCu) {
-        newErrors.matKhauCu = 'Mật khẩu cũ không đúng'
-      }
     }
 
     if (!formData.matKhauMoi) {
@@ -58,22 +53,24 @@ export default function DoiMatKhau() {
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     
     if (!validateForm()) {
       return
     }
 
-    showNotification('Đang cập nhật mật khẩu...', 'loading', 0)
-
-    setTimeout(() => {
-      showNotification('Đổi mật khẩu thành công!', 'success', 1000)
+    try {
+      await authService.changePassword(formData.matKhauCu, formData.matKhauMoi)
+      
+      showNotification('Đổi mật khẩu thành công!', 'success', 2000)
       
       setTimeout(() => {
         navigate('/profile')
       }, 2000)
-    }, 1500)
+    } catch (error) {
+      showNotification(error.message || 'Đổi mật khẩu thất bại', 'error', 3000)
+    }
   }
 
   return (

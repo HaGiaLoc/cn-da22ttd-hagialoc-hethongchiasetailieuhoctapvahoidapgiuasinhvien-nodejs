@@ -3,7 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import BoTri from '../../components/BoTri'
 import { useAuth } from '../../contexts/AuthContext'
 import { useNotification } from '../../contexts/NotificationContext'
-import { mockQuestions, mockQuestionCategories } from '../../data/mockData'
+import { cauHoiService } from '../../services'
+
 
 export default function DatCauHoi() {
   const navigate = useNavigate()
@@ -20,22 +21,51 @@ export default function DatCauHoi() {
   const [formData, setFormData] = useState({
     title: '',
     content: '',
-    subject: '',
-    major: '',
+    maNganh: '',
+    maMon: '',
+    tags: []
+  })
+  const [filterOptions, setFilterOptions] = useState({
+    subjects: [],
+    majors: [],
     tags: []
   })
   const [tagInput, setTagInput] = useState('')
 
-  // Lấy tất cả tags duy nhất từ các câu hỏi
+  useEffect(() => {
+    loadFilterOptions()
+  }, [])
+
+  const loadFilterOptions = async () => {
+    try {
+      const [monRes, nganhRes, tagsRes] = await Promise.all([
+        cauHoiService.getMon(),
+        cauHoiService.getNganh(),
+        cauHoiService.getTags()
+      ])
+
+      console.log('Filter options loaded:', { monRes, nganhRes, tagsRes })
+
+      setFilterOptions({
+        subjects: monRes?.data || monRes || [],
+        majors: nganhRes?.data || nganhRes || [],
+        tags: tagsRes?.data || tagsRes || []
+      })
+    } catch (error) {
+      console.error('Error loading filter options:', error)
+    }
+  }
+
   const getAllTags = () => {
-    const tagsSet = new Set()
-    mockQuestions.forEach(question => {
-      question.tags.forEach(tag => tagsSet.add(tag))
-    })
-    return Array.from(tagsSet).sort()
+    return filterOptions.tags.map(tag => tag.tenTag || tag).filter(Boolean)
   }
 
   const allTags = getAllTags()
+
+  // Lọc môn học theo ngành được chọn
+  const filteredSubjects = formData.maNganh
+    ? filterOptions.subjects.filter(mon => mon.maNganh === parseInt(formData.maNganh))
+    : filterOptions.subjects
 
   const addTag = (e) => {
     if (e.key === 'Enter' && tagInput.trim()) {
@@ -66,11 +96,28 @@ export default function DatCauHoi() {
     }
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    if (formData.title.trim() && formData.content.trim()) {
-      showNotification('Câu hỏi đã được đăng', 'success', 1000)
+    
+    if (!formData.title.trim() || !formData.content.trim() || !formData.maMon) {
+      showNotification('Vui lòng điền đầy đủ thông tin', 'warning')
+      return
+    }
+
+    try {
+      const questionData = {
+        tieuDeCH: formData.title.trim(),
+        noiDungCH: formData.content.trim(),
+        maMon: parseInt(formData.maMon),
+        tags: formData.tags
+      }
+
+      await cauHoiService.create(questionData)
+      showNotification('Câu hỏi đã được đăng thành công', 'success')
       navigate('/qa')
+    } catch (error) {
+      console.error('Error creating question:', error)
+      showNotification(error.message || 'Không thể đăng câu hỏi', 'error')
     }
   }
 
@@ -113,31 +160,35 @@ export default function DatCauHoi() {
                   <small>{formData.content.length} ký tự</small>
                 </div>
 
-                <div className="form-row" style={{ gridTemplateColumns: '1fr 1fr' }}>
+                <div className="form-row" style={{ gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                   <div className="form-section">
-                    <label>Môn học *</label>
+                    <label>Ngành *</label>
                     <select
                       required
-                      value={formData.subject}
-                      onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                      value={formData.maNganh}
+                      onChange={(e) => setFormData({ ...formData, maNganh: e.target.value, maMon: '' })}
                     >
-                      <option value="">Chọn môn học</option>
-                      {mockQuestionCategories.map(cat => (
-                        <option key={cat.id} value={cat.name}>{cat.name}</option>
+                      <option value="">Chọn ngành</option>
+                      {filterOptions.majors.map(nganh => (
+                        <option key={nganh.maNganh} value={nganh.maNganh}>{nganh.tenNganh}</option>
                       ))}
                     </select>
                   </div>
 
                   <div className="form-section">
-                    <label>Ngành *</label>
+                    <label>Môn học *</label>
                     <select
                       required
-                      value={formData.major}
-                      onChange={(e) => setFormData({ ...formData, major: e.target.value })}
+                      value={formData.maMon}
+                      onChange={(e) => setFormData({ ...formData, maMon: e.target.value })}
+                      disabled={!formData.maNganh}
                     >
-                      <option value="">Chọn ngành</option>
-                      <option value="Công nghệ thông tin">Công nghệ thông tin</option>
+                      <option value="">Chọn môn học</option>
+                      {filteredSubjects.map(mon => (
+                        <option key={mon.maMon} value={mon.maMon}>{mon.tenMon}</option>
+                      ))}
                     </select>
+                    {!formData.maNganh && <small style={{ color: 'var(--text-muted)' }}>Vui lòng chọn ngành trước</small>}
                   </div>
                 </div>
 

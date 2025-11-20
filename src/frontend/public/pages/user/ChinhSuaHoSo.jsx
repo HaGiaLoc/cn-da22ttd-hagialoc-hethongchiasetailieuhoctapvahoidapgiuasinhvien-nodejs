@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import BoTri from '../../components/BoTri'
 import { useAuth } from '../../contexts/AuthContext'
 import { useNotification } from '../../contexts/NotificationContext'
-import { mockStudents, generateAvatar } from '../../data/mockData'
+import { generateAvatar } from '../../utils/helpers'
 
 export default function ChinhSuaHoSo() {
   const navigate = useNavigate()
@@ -20,7 +20,6 @@ export default function ChinhSuaHoSo() {
   const [errors, setErrors] = useState({})
 
   useEffect(() => {
-    // Đợi loading xong mới kiểm tra user
     if (loading) return
     
     if (!user) {
@@ -28,17 +27,13 @@ export default function ChinhSuaHoSo() {
       return
     }
 
-    // Tìm thông tin sinh viên từ mockStudents
-    const student = mockStudents.find(s => s.id === user.id)
-    if (student) {
-      setFormData({
-        hoTenSinhVien: student.hoTenSinhVien,
-        email: student.email,
-        truongHoc: student.truongHoc || '',
-        nganh: student.nganh || ''
-      })
-      setAvatarPreview(student.avatar || generateAvatar(student.hoTenSinhVien))
-    }
+    setFormData({
+      hoTenSinhVien: user.name || '',
+      email: user.email || '',
+      truongHoc: 'Chưa cập nhật',
+      nganh: 'Chưa cập nhật'
+    })
+    setAvatarPreview(user.avatar || generateAvatar(user.name))
   }, [user, navigate, loading])
 
   const handleAvatarChange = (e) => {
@@ -82,24 +77,9 @@ export default function ChinhSuaHoSo() {
       return
     }
 
-    // Giả lập cập nhật thông tin
     showNotification('Đang cập nhật hồ sơ...', 'loading', 0)
 
     setTimeout(() => {
-      // Cập nhật thông tin trong mockStudents
-      const studentIndex = mockStudents.findIndex(s => s.id === user.id)
-      if (studentIndex !== -1) {
-        mockStudents[studentIndex] = {
-          ...mockStudents[studentIndex],
-          hoTenSinhVien: formData.hoTenSinhVien,
-          email: formData.email,
-          truongHoc: formData.truongHoc,
-          nganh: formData.nganh,
-          avatar: avatarPreview
-        }
-      }
-      
-      // Cập nhật user trong context và localStorage
       const updatedUser = {
         ...user,
         name: formData.hoTenSinhVien,
