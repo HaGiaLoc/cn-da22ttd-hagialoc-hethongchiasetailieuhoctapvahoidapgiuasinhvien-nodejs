@@ -14,6 +14,7 @@ export default function HoSo() {
   const [activeTab, setActiveTab] = useState('documents')
   const [userDocuments, setUserDocuments] = useState([])
   const [userQuestions, setUserQuestions] = useState([])
+  const [userAnswers, setUserAnswers] = useState([])
   const [savedDocuments, setSavedDocuments] = useState([])
   const [isLoading, setIsLoading] = useState(true)
 
@@ -29,19 +30,24 @@ export default function HoSo() {
   const loadUserData = async () => {
     try {
       setIsLoading(true)
-      const [docsRes, questionsRes] = await Promise.all([
-        taiLieuService.getAll(),
-        cauHoiService.getAll()
+      // Fetch user's documents and questions from authenticated endpoints
+      const [docsRes, questionsRes, answersRes, savedRes] = await Promise.all([
+        taiLieuService.getMyDocuments(1, 1000),
+        cauHoiService.getMyQuestions(1, 1000),
+        cauHoiService.getMyAnswers(1, 1000),
+        taiLieuService.getSavedDocuments(1, 1000)
       ])
-      
-      const docs = docsRes.documents || docsRes.data || []
-      const questions = questionsRes.questions || questionsRes.data || []
-      
-      setUserDocuments(docs.filter(d => d.author === user?.name))
-      setUserQuestions(questions.filter(q => q.author === user?.name))
-      
-      const savedDocIds = JSON.parse(localStorage.getItem(`savedDocs_${user.id}`) || '[]')
-      setSavedDocuments(docs.filter(doc => savedDocIds.includes(doc.id)))
+
+      // normalize response shapes
+      const docs = docsRes?.documents || docsRes?.data?.documents || docsRes?.data || docsRes || []
+      const questions = questionsRes?.questions || questionsRes?.data?.questions || questionsRes?.data || questionsRes || []
+      const answers = answersRes?.answers || answersRes?.data?.answers || answersRes?.data || answersRes || []
+      const saved = savedRes?.documents || savedRes?.data?.documents || savedRes?.data || savedRes || []
+
+      setUserDocuments(docs)
+      setUserQuestions(questions)
+      setUserAnswers(answers)
+      setSavedDocuments(saved)
     } catch (error) {
       console.error('Error loading user data:', error)
     } finally {
@@ -52,7 +58,7 @@ export default function HoSo() {
   const stats = {
     documents: userDocuments.length,
     questions: userQuestions.length,
-    answers: userQuestions.reduce((sum, q) => sum + (q.answers || 0), 0)
+    answers: userAnswers.length
   }
 
   const student = { nganh: 'Chưa cập nhật', truongHoc: 'Chưa cập nhật' }
@@ -137,7 +143,24 @@ export default function HoSo() {
                   {userDocuments.length > 0 ? (
                     <div className="documents-grid">
                       {userDocuments.map(doc => (
-                        <TheTaiLieu key={doc.maTaiLieu} document={doc} />
+                        <TheTaiLieu
+                          key={doc.maTaiLieu}
+                          document={doc}
+                          onSaveChange={(id, saved) => {
+                            // If saved, add to savedDocuments; if unsaved, remove
+                            setSavedDocuments(prev => {
+                              const exists = prev.some(d => (d.maTaiLieu || d.id) === id)
+                              if (saved) {
+                                if (exists) return prev
+                                // find the doc in userDocuments to add
+                                const toAdd = userDocuments.find(d => (d.maTaiLieu || d.id) === id)
+                                return toAdd ? [toAdd, ...prev] : prev
+                              } else {
+                                return prev.filter(d => (d.maTaiLieu || d.id) !== id)
+                              }
+                            })
+                          }}
+                        />
                       ))}
                     </div>
                   ) : (
@@ -155,7 +178,7 @@ export default function HoSo() {
                   {userQuestions.length > 0 ? (
                     <div className="questions-list">
                       {userQuestions.map(q => (
-                        <TheCauHoi key={q.id} question={q} />
+                        <TheCauHoi key={q.maCauHoi || q.id} question={q} />
                       ))}
                     </div>
                   ) : (
@@ -170,11 +193,30 @@ export default function HoSo() {
 
               {activeTab === 'answers' && (
                 <div className="tab-pane">
-                  <div className="empty-state">
-                    <i className="fas fa-comments"></i>
-                    <h3>Chưa có câu trả lời nào</h3>
-                    <p>Bạn chưa trả lời câu hỏi nào.</p>
-                  </div>
+                  {userAnswers.length > 0 ? (
+                    <div className="answers-list">
+                      {userAnswers.map(ans => (
+                        <div key={ans.maCauTraLoi} className="answer-item">
+                          <div className="answer-voting">
+                            <span className="vote-count">{ans.votes || 0}</span>
+                          </div>
+                          <div className="answer-content">
+                            <p>{ans.noiDungCTL}</p>
+                            <div className="answer-meta">
+                              <Link to={`/qa/${ans.maCauHoi}`} className="question-link">{ans.tieuDeCH || 'Câu hỏi liên quan'}</Link>
+                              <span>{new Date(ans.ngayTraLoi).toLocaleString()}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="empty-state">
+                      <i className="fas fa-comments"></i>
+                      <h3>Chưa có câu trả lời nào</h3>
+                      <p>Bạn chưa trả lời câu hỏi nào.</p>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -183,7 +225,20 @@ export default function HoSo() {
                   {savedDocuments.length > 0 ? (
                     <div className="documents-grid">
                       {savedDocuments.map(doc => (
-                        <TheTaiLieu key={doc.maTaiLieu} document={doc} />
+                        <TheTaiLieu
+                          key={doc.maTaiLieu}
+                          document={doc}
+                          onSaveChange={(id, saved) => {
+                            // If unsaved from the saved tab, remove it; if saved, ensure it remains
+                            setSavedDocuments(prev => {
+                              if (saved) {
+                                const exists = prev.some(d => (d.maTaiLieu || d.id) === id)
+                                return exists ? prev : [doc, ...prev]
+                              }
+                              return prev.filter(d => (d.maTaiLieu || d.id) !== id)
+                            })
+                          }}
+                        />
                       ))}
                     </div>
                   ) : (

@@ -70,6 +70,15 @@ class CauHoiService {
     return { questions };
   }
 
+  // Lấy câu trả lời của tôi
+  static async getMyAnswers(maSinhVien, page = 1, limit = 20) {
+    const offset = (page - 1) * limit;
+    const answers = await CauTraLoiModel.getByStudent(maSinhVien, limit, offset);
+
+    // If you want pagination totals you may implement a count query in the model; for now return answers only
+    return { answers };
+  }
+
   // Trả lời câu hỏi
   static async answer(maSinhVien, maCauHoi, noiDungCTL) {
     const question = await CauHoiModel.getById(maCauHoi);

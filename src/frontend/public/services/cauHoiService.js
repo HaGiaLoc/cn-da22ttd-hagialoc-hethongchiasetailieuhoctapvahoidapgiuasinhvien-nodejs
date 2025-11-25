@@ -33,6 +33,12 @@ const cauHoiService = {
     return response.data;
   },
 
+  // Lấy câu trả lời của tôi
+  async getMyAnswers(page = 1, limit = 20) {
+    const response = await api.get(`/cauhoi/my/answers?page=${page}&limit=${limit}`);
+    return response.data;
+  },
+
   // Trả lời câu hỏi
   async answer(id, noiDungCTL) {
     const response = await api.post(`/cauhoi/${id}/answer`, { noiDungCTL });

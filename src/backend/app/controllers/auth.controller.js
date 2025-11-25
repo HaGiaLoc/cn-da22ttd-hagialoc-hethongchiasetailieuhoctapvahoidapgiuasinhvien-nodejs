@@ -57,6 +57,23 @@ class AuthController {
     }
   }
 
+  // Cập nhật hồ sơ người dùng (sinh viên)
+  static async updateProfile(req, res, next) {
+    try {
+      const { id, role } = req.user;
+      const updateData = req.body;
+
+      const updated = await AuthService.updateProfile(id, role, updateData);
+
+      res.json({
+        success: true,
+        data: updated
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   // Đổi mật khẩu
   static async changePassword(req, res, next) {
     try {

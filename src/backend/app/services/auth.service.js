@@ -109,6 +109,28 @@ class AuthService {
 
     return true;
   }
+
+  // Cập nhật thông tin người dùng (sinh viên)
+  static async updateProfile(userId, role, updateData) {
+    if (role === 'admin') {
+      throw new Error('Not implemented for admin');
+    }
+
+    // Map frontend fields to model fields
+    const payload = {
+      hoTenSV: updateData.hoTenSinhVien || updateData.name || undefined,
+      emailSV: updateData.email || undefined,
+      truongHoc: updateData.truongHoc || undefined,
+      avatarPath: updateData.avatar || undefined,
+      maNganh: updateData.maNganh || updateData.nganh || undefined
+    };
+
+    const updated = await SinhVienModel.update(userId, payload);
+    if (!updated) throw new Error('Không thể cập nhật hồ sơ');
+
+    const student = await SinhVienModel.findById(userId);
+    return student;
+  }
 }
 
 export default AuthService;

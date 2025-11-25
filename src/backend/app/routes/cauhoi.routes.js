@@ -27,6 +27,8 @@ router.post('/', CauHoiController.create);
 
 // Lấy câu hỏi của tôi
 router.get('/my/list', CauHoiController.getMyQuestions);
+// Lấy câu trả lời của tôi
+router.get('/my/answers', CauHoiController.getMyAnswers);
 
 // Trả lời câu hỏi
 router.post('/:id/answer', CauHoiController.answer);

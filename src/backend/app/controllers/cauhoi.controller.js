@@ -86,6 +86,27 @@ class CauHoiController {
     }
   }
 
+  // Lấy câu trả lời của tôi
+  static async getMyAnswers(req, res, next) {
+    try {
+      const { page = 1, limit = 20 } = req.query;
+      const maSinhVien = req.user.id;
+
+      const result = await CauHoiService.getMyAnswers(
+        maSinhVien,
+        parseInt(page),
+        parseInt(limit)
+      );
+
+      res.json({
+        success: true,
+        data: result
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   // Trả lời câu hỏi
   static async answer(req, res, next) {
     try {

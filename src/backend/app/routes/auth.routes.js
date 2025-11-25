@@ -15,5 +15,7 @@ router.get('/me', authenticate, AuthController.getCurrentUser);
 
 // Đổi mật khẩu
 router.put('/change-password', authenticate, AuthController.changePassword);
+// Cập nhật hồ sơ
+router.put('/me', authenticate, AuthController.updateProfile);
 
 export default router;

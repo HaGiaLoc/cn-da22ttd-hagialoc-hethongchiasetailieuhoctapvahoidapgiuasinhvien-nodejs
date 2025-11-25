@@ -19,6 +19,12 @@ const authService = {
     return response.data;
   },
 
+  // Cập nhật hồ sơ người dùng hiện tại
+  async updateProfile(profileData) {
+    const response = await api.put('/auth/me', profileData);
+    return response.data;
+  },
+
   // Đổi mật khẩu
   async changePassword(oldPassword, newPassword) {
     const response = await api.put('/auth/change-password', {
