@@ -15,8 +15,8 @@ class AdminService {
   // Lấy thống kê dashboard
   static async getDashboardStats() {
     const totalStudents = await SinhVienModel.count();
-    const totalDocuments = await TaiLieuModel.count('approved');
-    const pendingDocuments = await TaiLieuModel.count('pending');
+    const totalDocuments = await TaiLieuModel.count('show');
+    const pendingDocuments = await TaiLieuModel.count('hidden');
     const totalQuestions = await CauHoiModel.count();
     const pendingReports = await BaoCaoModel.count('pending');
 
@@ -77,8 +77,8 @@ class AdminService {
   // Lấy tài liệu chờ duyệt
   static async getPendingDocuments(page = 1, limit = 20) {
     const offset = (page - 1) * limit;
-    const documents = await TaiLieuModel.getAllForAdmin('pending', limit, offset);
-    const total = await TaiLieuModel.count('pending');
+    const documents = await TaiLieuModel.getAllForAdmin('hidden', limit, offset);
+    const total = await TaiLieuModel.count('hidden');
 
     return {
       documents,
@@ -95,7 +95,7 @@ class AdminService {
   static async getAllDocuments(status = null, page = 1, limit = 20) {
     const offset = (page - 1) * limit;
     const documents = await TaiLieuModel.getAllForAdmin(status, limit, offset);
-    const total = await TaiLieuModel.count(status || 'approved');
+    const total = await TaiLieuModel.count(status || 'show');
 
     return {
       documents,
@@ -278,7 +278,7 @@ class AdminService {
              ctl.trangThaiCTL,
              ch.tieuDeCH as tieuDeCauHoi, 
              sv.hoTenSV,
-             CASE WHEN ctl.trangThaiCTL = 'approved' THEN 'accepted' ELSE 'normal' END as trangThaiDuyet,
+            CASE WHEN ctl.trangThaiCTL = 'show' THEN 'accepted' ELSE 'normal' END as trangThaiDuyet,
              (SELECT COALESCE(SUM(CASE WHEN Upvote = '1' THEN 1 WHEN Downvote = '1' THEN -1 ELSE 0 END), 0)
               FROM danhgiacautraloi 
               WHERE maCauTraLoi = ctl.maCauTraLoi) as danhGia
@@ -314,11 +314,11 @@ class AdminService {
   static async getStatistics() {
     const [[users]] = await db.execute('SELECT COUNT(*) as count FROM sinhvien');
     const [[docs]] = await db.execute('SELECT COUNT(*) as count FROM tailieu');
-    const [[questions]] = await db.execute('SELECT COUNT(*) as count FROM cauhoi');
+    const [[questions]] = await db.execute("SELECT COUNT(*) as count FROM cauhoi");
     const [[answers]] = await db.execute('SELECT COUNT(*) as count FROM cautraloi');
-    const [[pending]] = await db.execute("SELECT COUNT(*) as count FROM tailieu WHERE trangThaiTL = 'pending'");
-    const [[approved]] = await db.execute("SELECT COUNT(*) as count FROM tailieu WHERE trangThaiTL = 'approved'");
-    const [[rejected]] = await db.execute("SELECT COUNT(*) as count FROM tailieu WHERE trangThaiTL = 'rejected'");
+    const [[pending]] = await db.execute("SELECT COUNT(*) as count FROM tailieu WHERE trangThaiTL = 'hidden'");
+    const [[approved]] = await db.execute("SELECT COUNT(*) as count FROM tailieu WHERE trangThaiTL = 'show'");
+    const rejected = { count: 0 };
     const [[saved]] = await db.execute('SELECT SUM(soLanLuu) as total FROM tailieu');
     const [[downloads]] = await db.execute('SELECT SUM(luotTaiXuong) as total FROM tailieu');
     const [[totalReports]] = await db.execute('SELECT COUNT(*) as count FROM baocaovipham');

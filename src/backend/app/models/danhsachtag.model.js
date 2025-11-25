@@ -24,7 +24,7 @@ class DanhSachTagModel {
   // Lấy tất cả câu hỏi có tag
   static async getQuestionsByTag(maTag, limit = 20, offset = 0) {
     const query = `
-      SELECT c.*, s.hoTenSV, s.avatarURL, m.tenMon,
+      SELECT c.*, s.hoTenSV, s.avatarPath, m.tenMon,
              COUNT(DISTINCT ct.maCauTraLoi) as totalAnswers
       FROM cauhoi c
       INNER JOIN danhsachtag dst ON c.maCauHoi = dst.maCauHoi

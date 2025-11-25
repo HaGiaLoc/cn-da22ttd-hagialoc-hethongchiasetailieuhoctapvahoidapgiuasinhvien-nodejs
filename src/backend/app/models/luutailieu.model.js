@@ -25,13 +25,10 @@ class LuuTaiLieuModel {
   // Lấy tài liệu đã lưu của sinh viên
   static async getSavedDocuments(maSinhVien, limit = 20, offset = 0) {
     const query = `
-      SELECT t.*, s.hoTenSV, l.ngayLuu,
-             COALESCE(AVG(d.DiemDanhGia), 0) as avgRating,
-             COUNT(DISTINCT d.maSinhVien) as totalRatings
+      SELECT t.*, s.hoTenSV, l.ngayLuu
       FROM luutailieu l
       LEFT JOIN tailieu t ON l.maTaiLieu = t.maTaiLieu
       LEFT JOIN sinhvien s ON t.maSinhVien = s.maSinhVien
-      LEFT JOIN danhgiatailieu d ON t.maTaiLieu = d.maTaiLieu
       WHERE l.maSinhVien = ?
       GROUP BY t.maTaiLieu
       ORDER BY l.ngayLuu DESC

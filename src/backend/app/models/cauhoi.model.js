@@ -37,6 +37,10 @@ class CauHoiModel {
 
   // Lấy tất cả câu hỏi
   static async getAll(filters = {}, limit = 20, offset = 0) {
+    // Map possible query params from controller
+    if (filters.Mon) filters.maMon = filters.Mon;
+    if (filters.Nganh) filters.maNganh = filters.Nganh;
+
     let query = `
       SELECT c.maCauHoi, c.maSinhVien, c.maMon, 
              c.tieuDeCH as tieuDeCauHoi, 
@@ -46,7 +50,7 @@ class CauHoiModel {
              c.luotTraLoi,
              0 as luotXem,
              s.hoTenSV, 
-             s.avatarURL, 
+             s.avatarPath, 
              m.tenMon, 
              n.tenNganh,
              (SELECT COUNT(*) FROM cautraloi WHERE maCauHoi = c.maCauHoi) as soLuongTraLoi,
@@ -63,6 +67,10 @@ class CauHoiModel {
       WHERE 1=1
     `;
     const params = [];
+    // By default exclude questions marked as 'hidden' unless caller explicitly filters by trangThaiCH
+    if (!filters.trangThaiCH) {
+      query += " AND (c.trangThaiCH IS NULL OR c.trangThaiCH <> 'hidden')";
+    }
 
     if (filters.maMon) {
       query += ' AND c.maMon = ?';
@@ -97,7 +105,7 @@ class CauHoiModel {
       SELECT c.maCauHoi, c.maSinhVien, c.maMon, c.tieuDeCH, 
              c.noiDungCH, c.trangThaiCH, c.ngayDatCH,
              s.hoTenSV, 
-             s.avatarURL, 
+             s.avatarPath, 
              m.tenMon, 
              n.tenNganh,
              (SELECT COUNT(*) FROM cautraloi WHERE maCauHoi = c.maCauHoi) as totalAnswers,
@@ -149,10 +157,36 @@ class CauHoiModel {
     return result.affectedRows > 0;
   }
 
-  // Đếm tổng số câu hỏi
-  static async count() {
-    const query = 'SELECT COUNT(*) as total FROM cauhoi';
-    const [rows] = await db.execute(query);
+  // Đếm tổng số câu hỏi (hỗ trợ filter giống getAll)
+  static async count(filters = {}) {
+    // Map controller params
+    if (filters.Mon) filters.maMon = filters.Mon;
+    if (filters.Nganh) filters.maNganh = filters.Nganh;
+
+    let query = `SELECT COUNT(*) as total FROM cauhoi c LEFT JOIN mon m ON c.maMon = m.maMon WHERE 1=1`;
+    const params = [];
+
+    if (!filters.trangThaiCH) {
+      query += " AND (c.trangThaiCH IS NULL OR c.trangThaiCH <> 'hidden')";
+    }
+    if (filters.maMon) {
+      query += ' AND c.maMon = ?';
+      params.push(filters.maMon);
+    }
+    if (filters.maNganh) {
+      query += ' AND m.maNganh = ?';
+      params.push(filters.maNganh);
+    }
+    if (filters.trangThaiCH) {
+      query += ' AND c.trangThaiCH = ?';
+      params.push(filters.trangThaiCH);
+    }
+    if (filters.search) {
+      query += ' AND (c.tieuDeCH LIKE ? OR c.noiDungCH LIKE ?)';
+      params.push(`%${filters.search}%`, `%${filters.search}%`);
+    }
+
+    const [rows] = await db.execute(query, params);
     return rows[0].total;
   }
 }

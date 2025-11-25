@@ -3,12 +3,12 @@ import db from '../config/database.js';
 class SinhVienModel {
   // Tạo sinh viên mới
   static async create(sinhVienData) {
-    const { hoTenSV, emailSV, matKhauSV, truongHoc, avatarURL } = sinhVienData;
+    const { hoTenSV, emailSV, matKhauSV, truongHoc, avatarPath, maNganh = null } = sinhVienData;
     const query = `
-      INSERT INTO sinhvien (hoTenSV, emailSV, matKhauSV, truongHoc, avatarURL)
-      VALUES (?, ?, ?, ?, ?)
+      INSERT INTO sinhvien (maNganh, hoTenSV, emailSV, matKhauSV, truongHoc, avatarPath)
+      VALUES (?, ?, ?, ?, ?, ?)
     `;
-    const [result] = await db.execute(query, [hoTenSV, emailSV, matKhauSV, truongHoc, avatarURL]);
+    const [result] = await db.execute(query, [maNganh, hoTenSV, emailSV, matKhauSV, truongHoc, avatarPath]);
     return result.insertId;
   }
 
@@ -21,7 +21,7 @@ class SinhVienModel {
 
   // Tìm sinh viên theo ID
   static async findById(id) {
-    const query = 'SELECT maSinhVien, hoTenSV, emailSV, truongHoc, avatarURL, ngayTao FROM sinhvien WHERE maSinhVien = ?';
+    const query = 'SELECT maSinhVien, maNganh, hoTenSV, emailSV, truongHoc, avatarPath, ngayTao, trangThaiTK FROM sinhvien WHERE maSinhVien = ?';
     const [rows] = await db.execute(query, [id]);
     return rows[0];
   }
@@ -35,17 +35,18 @@ class SinhVienModel {
 
   // Cập nhật thông tin sinh viên
   static async update(id, updateData) {
-    const { hoTenSV, emailSV, truongHoc, avatarURL } = updateData;
+    const { hoTenSV, emailSV, truongHoc, avatarPath, maNganh } = updateData;
     
-    // Nếu có avatarURL thì update, nếu không thì giữ nguyên
+    // Nếu có avatarPath thì update, nếu không thì giữ nguyên
     let query, params;
-    if (avatarURL !== undefined) {
+    if (avatarPath !== undefined || maNganh !== undefined) {
+      // Update including optional avatarPath/maNganh
       query = `
         UPDATE sinhvien 
-        SET hoTenSV = ?, emailSV = ?, truongHoc = ?, avatarURL = ?
+        SET hoTenSV = ?, emailSV = ?, truongHoc = ?, avatarPath = ?, maNganh = ?
         WHERE maSinhVien = ?
       `;
-      params = [hoTenSV, emailSV, truongHoc, avatarURL, id];
+      params = [hoTenSV, emailSV, truongHoc, avatarPath || null, maNganh || null, id];
     } else {
       query = `
         UPDATE sinhvien 
@@ -76,7 +77,7 @@ class SinhVienModel {
   // Lấy danh sách tất cả sinh viên (cho admin)
   static async getAll(limit = 50, offset = 0) {
     const query = `
-      SELECT maSinhVien, hoTenSV, emailSV, truongHoc, avatarURL, ngayTao, trangThaiTK
+      SELECT maSinhVien, maNganh, hoTenSV, emailSV, truongHoc, avatarPath, ngayTao, trangThaiTK
       FROM sinhvien
       ORDER BY ngayTao DESC
       LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}

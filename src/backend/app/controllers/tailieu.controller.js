@@ -15,16 +15,24 @@ class TaiLieuController {
         });
       }
 
-      const { Mon, Nganh, LoaiTaiLieu, tieuDe, moTa } = req.body;
+      const { maMon, Mon, maNganh, Nganh, maLoai, LoaiTaiLieu, tieuDeTL, tieuDe, maDinhDang } = req.body;
       const maSinhVien = req.user.id;
 
-      const document = await TaiLieuService.upload(maSinhVien, req.file, {
-        Mon,
-        Nganh,
-        LoaiTaiLieu,
-        tieuDe,
-        moTa
-      });
+      // Normalize incoming fields (support both old and new names)
+      const payload = {
+        maMon: maMon ?? Mon ?? null,
+        maNganh: maNganh ?? Nganh ?? null,
+        maLoai: maLoai ?? LoaiTaiLieu ?? null,
+        tieuDeTL: tieuDeTL ?? tieuDe ?? null,
+        maDinhDang: maDinhDang ?? null
+      };
+
+      // Basic server-side validation to avoid sending undefined to DB
+      if (!payload.maNganh || !payload.maMon || !payload.maLoai || !payload.tieuDeTL) {
+        return res.status(400).json({ success: false, message: 'Vui lòng cung cấp đầy đủ thông tin: ngành, môn, loại và tiêu đề' });
+      }
+
+      const document = await TaiLieuService.upload(maSinhVien, req.file, payload);
 
       res.status(201).json({
         success: true,
@@ -41,8 +49,16 @@ class TaiLieuController {
     try {
       const { Mon, Nganh, LoaiTaiLieu, search, page = 1, limit = 20 } = req.query;
 
+      // Map query parameters to service/model expected keys
+      const filters = {
+        maMon: Mon || null,
+        maNganh: Nganh || null,
+        maLoai: LoaiTaiLieu || null,
+        search: search || null
+      };
+
       const result = await TaiLieuService.getAll(
-        { Mon, Nganh, LoaiTaiLieu, search },
+        filters,
         parseInt(page),
         parseInt(limit)
       );
@@ -80,7 +96,12 @@ class TaiLieuController {
 
       const document = await TaiLieuService.download(id);
 
-      res.download(document.duongDanFile, document.tenFile);
+      // Use downloadPath if provided (copied file in downloads), otherwise fallback to filePath
+      const path = (await import('path')).default;
+      const filePath = document.downloadPath || document.filePath;
+      const fileName = filePath ? path.basename(filePath) : undefined;
+      if (!filePath) throw new Error('File path not found');
+      res.download(filePath, fileName);
     } catch (error) {
       next(error);
     }

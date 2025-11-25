@@ -23,7 +23,7 @@ class CauHoiService {
   static async getAll(filters, page = 1, limit = 20) {
     const offset = (page - 1) * limit;
     const questions = await CauHoiModel.getAll(filters, limit, offset);
-    const total = await CauHoiModel.count();
+    const total = await CauHoiModel.count(filters);
 
     return {
       questions,
@@ -37,10 +37,17 @@ class CauHoiService {
   }
 
   // Lấy chi tiết câu hỏi
-  static async getById(id, maSinhVien = null) {
+  static async getById(id, maSinhVien = null, role = null) {
     const question = await CauHoiModel.getById(id);
     if (!question) {
       throw new Error('Câu hỏi không tồn tại');
+    }
+
+    // Nếu câu hỏi ở trạng thái 'hidden' thì không cho người khác xem (chỉ author hoặc admin)
+    if (question.trangThaiCH === 'hidden') {
+      if (!maSinhVien || (role !== 'admin' && question.maSinhVien !== maSinhVien)) {
+        throw new Error('Câu hỏi không tồn tại');
+      }
     }
 
     // Lấy câu trả lời

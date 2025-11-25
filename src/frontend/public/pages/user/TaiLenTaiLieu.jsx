@@ -21,9 +21,9 @@ export default function TaiLenTaiLieu() {
   const [selectedFile, setSelectedFile] = useState(null)
   const [formData, setFormData] = useState({
     tieuDeTL: '',
-    moTa: '',
     maLoai: '',
-    maMon: ''
+    maMon: '',
+    maNganh: ''
   })
   const [isUploading, setIsUploading] = useState(false)
   const [filterOptions, setFilterOptions] = useState({
@@ -56,6 +56,10 @@ export default function TaiLenTaiLieu() {
     }
   }
 
+  useEffect(() => {
+    setFormData(prev => ({ ...prev, maMon: '' }))
+  }, [formData.maNganh])
+
   const handleFileSelect = (e) => {
     const file = e.target.files[0]
     if (file) {
@@ -83,7 +87,7 @@ export default function TaiLenTaiLieu() {
       return
     }
 
-    if (!formData.tieuDeTL.trim() || !formData.maLoai || !formData.maMon) {
+    if (!formData.tieuDeTL.trim() || !formData.maLoai || !formData.maMon || !formData.maNganh) {
       showNotification('Vui lòng điền đầy đủ thông tin', 'warning')
       return
     }
@@ -95,9 +99,9 @@ export default function TaiLenTaiLieu() {
       const uploadData = new FormData()
       uploadData.append('file', selectedFile)
       uploadData.append('tieuDeTL', formData.tieuDeTL.trim())
-      uploadData.append('moTa', formData.moTa.trim())
       uploadData.append('maLoai', parseInt(formData.maLoai))
       uploadData.append('maMon', parseInt(formData.maMon))
+      uploadData.append('maNganh', parseInt(formData.maNganh))
 
       await taiLieuService.upload(uploadData)
       
@@ -167,7 +171,7 @@ export default function TaiLenTaiLieu() {
 
               <div className="form-section">
                 <h3>Thông tin tài liệu</h3>
-                
+
                 <div className="form-group">
                   <label>Tiêu đề *</label>
                   <input
@@ -179,17 +183,7 @@ export default function TaiLenTaiLieu() {
                   />
                 </div>
 
-                <div className="form-group">
-                  <label>Mô tả</label>
-                  <textarea
-                    rows="4"
-                    value={formData.moTa}
-                    onChange={(e) => setFormData({ ...formData, moTa: e.target.value })}
-                    placeholder="Mô tả chi tiết về tài liệu"
-                  ></textarea>
-                </div>
-
-                <div className="form-row" style={{ gridTemplateColumns: '1fr 1fr' }}>
+                <div className="form-row" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
                   <div className="form-group">
                     <label>Loại tài liệu *</label>
                     <select
@@ -208,14 +202,31 @@ export default function TaiLenTaiLieu() {
                     <label>Môn học *</label>
                     <select
                       required
+                      disabled={!formData.maNganh}
                       value={formData.maMon}
                       onChange={(e) => setFormData({ ...formData, maMon: e.target.value })}
                     >
-                      <option value="">Chọn môn học</option>
-                      {filterOptions.subjects.map(mon => (
-                        <option key={mon.maMon} value={mon.maMon}>{mon.tenMon}</option>
-                      ))}
+                      <option value="">{formData.maNganh ? 'Chọn môn học' : 'Chọn ngành trước'}</option>
+                      {filterOptions.subjects
+                        .filter(mon => !formData.maNganh || String(mon.maNganh) === String(formData.maNganh))
+                        .map(mon => (
+                          <option key={mon.maMon} value={mon.maMon}>{mon.tenMon}</option>
+                        ))}
                     </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Ngành *</label>
+                      <select
+                        required
+                        value={formData.maNganh}
+                        onChange={(e) => setFormData({ ...formData, maNganh: e.target.value })}
+                      >
+                        <option value="">Chọn ngành</option>
+                        {filterOptions.majors.map(nganh => (
+                          <option key={nganh.maNganh} value={nganh.maNganh}>{nganh.tenNganh}</option>
+                        ))}
+                      </select>
                   </div>
                 </div>
               </div>

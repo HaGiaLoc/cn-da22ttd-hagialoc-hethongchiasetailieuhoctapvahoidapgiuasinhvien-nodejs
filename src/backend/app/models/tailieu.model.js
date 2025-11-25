@@ -6,15 +6,16 @@ class TaiLieuModel {
     const connection = await db.getConnection();
     try {
       await connection.beginTransaction();
+      const { maSinhVien, maMon, maLoai, tieuDeTL, filePath, fileSizes, maDinhDang, trangThaiTL = 'show' } = taiLieuData;
 
-      const { maSinhVien, maMon, maLoai, tieuDeTL, URL, fileSizes, maDinhDang } = taiLieuData;
-      
       // Insert vào bảng tailieu
       const query = `
-        INSERT INTO tailieu (maLoai, maSinhVien, maDinhDang, tieuDeTL, URL, fileSizes, trangThaiTL, soLanLuu, luotTaiXuong)
-        VALUES (?, ?, ?, ?, ?, ?, 'pending', 0, 0)
+        INSERT INTO tailieu (maLoai, maSinhVien, maDinhDang, tieuDeTL, filePath, fileSizes, trangThaiTL, soLanLuu, luotTaiXuong)
+        VALUES (?, ?, ?, ?, ?, ?, ?, 0, 0)
       `;
-      const [result] = await connection.execute(query, [maLoai, maSinhVien, maDinhDang, tieuDeTL, URL, fileSizes]);
+      // Normalize bind parameters: mysql2 throws if any are undefined. Use null to represent SQL NULL.
+      const params = [maLoai, maSinhVien, maDinhDang, tieuDeTL, filePath, fileSizes, trangThaiTL].map(v => (v === undefined ? null : v));
+      const [result] = await connection.execute(query, params);
       const maTaiLieu = result.insertId;
 
       // Insert vào bảng danhsachtailieu
@@ -34,25 +35,25 @@ class TaiLieuModel {
   }
 
   // Lấy tất cả tài liệu đã được duyệt
-  static async getAll(filters = {}, limit = 20, offset = 0) {
-    let query = `
-      SELECT t.maTaiLieu, t.maLoai, t.maSinhVien, t.maDinhDang, t.tieuDeTL, t.URL, 
-             t.fileSizes, t.trangThaiTL, t.soLanLuu, 
-             t.luotTaiXuong, t.ngayChiaSe,
-             MAX(s.hoTenSV) as hoTenSV, 
-             MAX(s.avatarURL) as avatarURL, 
-             MAX(l.loaiTaiLieu) as loaiTaiLieu,
-             MAX(d.tenDinhDang) as tenDinhDang,
-             MAX(m.tenMon) as tenMon, 
-             MAX(n.tenNganh) as tenNganh
-      FROM tailieu t
+    static async getAll(filters = {}, limit = 20, offset = 0) {
+      let query = `
+          SELECT t.maTaiLieu, t.maLoai, t.maSinhVien, t.maDinhDang, t.tieuDeTL, t.filePath, 
+            t.fileSizes, t.trangThaiTL, t.soLanLuu, 
+            t.luotTaiXuong, t.ngayChiaSe,
+            MAX(s.hoTenSV) as hoTenSV, 
+            MAX(s.avatarPath) as avatarPath, 
+            MAX(l.loaiTaiLieu) as loaiTaiLieu,
+            MAX(d.tenDinhDang) as tenDinhDang,
+            MAX(m.tenMon) as tenMon, 
+            MAX(n.tenNganh) as tenNganh
+          FROM tailieu t
       LEFT JOIN sinhvien s ON t.maSinhVien = s.maSinhVien
       LEFT JOIN loaitailieu l ON t.maLoai = l.maLoai
       LEFT JOIN dinhdang d ON t.maDinhDang = d.maDinhDang
       LEFT JOIN danhsachtailieu dst ON t.maTaiLieu = dst.maTaiLieu
       LEFT JOIN mon m ON dst.maMon = m.maMon
       LEFT JOIN nganh n ON m.maNganh = n.maNganh
-      WHERE t.trangThaiTL = 'approved'
+      WHERE t.trangThaiTL = 'show'
     `;
     const params = [];
 
@@ -80,18 +81,18 @@ class TaiLieuModel {
   }
 
   // Lấy tài liệu cho admin (tất cả trạng thái)
-  static async getAllForAdmin(status = null, limit = 20, offset = 0) {
-    let query = `
-      SELECT t.maTaiLieu, t.maLoai, t.maSinhVien, t.maDinhDang, t.tieuDeTL, t.URL, 
-             t.fileSizes, t.trangThaiTL, t.soLanLuu, 
-             t.luotTaiXuong as luotTai, t.ngayChiaSe as ngayTai,
-             MAX(s.hoTenSV) as hoTenSV, 
-             MAX(s.avatarURL) as avatarURL, 
-             MAX(l.loaiTaiLieu) as tenLoai,
-             MAX(d.tenDinhDang) as tenDinhDang,
-             MAX(m.tenMon) as tenMon, 
-             MAX(n.tenNganh) as tenNganh
-      FROM tailieu t
+    static async getAllForAdmin(status = null, limit = 20, offset = 0) {
+      let query = `
+          SELECT t.maTaiLieu, t.maLoai, t.maSinhVien, t.maDinhDang, t.tieuDeTL, t.filePath, 
+            t.fileSizes, t.trangThaiTL, t.soLanLuu, 
+            t.luotTaiXuong as luotTai, t.ngayChiaSe as ngayTai,
+            MAX(s.hoTenSV) as hoTenSV, 
+            MAX(s.avatarPath) as avatarPath, 
+            MAX(l.loaiTaiLieu) as tenLoai,
+            MAX(d.tenDinhDang) as tenDinhDang,
+            MAX(m.tenMon) as tenMon, 
+            MAX(n.tenNganh) as tenNganh
+          FROM tailieu t
       LEFT JOIN sinhvien s ON t.maSinhVien = s.maSinhVien
       LEFT JOIN loaitailieu l ON t.maLoai = l.maLoai
       LEFT JOIN dinhdang d ON t.maDinhDang = d.maDinhDang
@@ -117,8 +118,8 @@ class TaiLieuModel {
   // Lấy chi tiết tài liệu
   static async getById(id) {
     const query = `
-      SELECT t.*, s.hoTenSV, s.avatarURL, l.loaiTaiLieu,
-             d.tenDinhDang, m.tenMon, n.tenNganh
+            SELECT t.*, s.hoTenSV, s.avatarPath, l.loaiTaiLieu,
+              d.tenDinhDang, m.tenMon, n.tenNganh
       FROM tailieu t
       LEFT JOIN sinhvien s ON t.maSinhVien = s.maSinhVien
       LEFT JOIN loaitailieu l ON t.maLoai = l.maLoai

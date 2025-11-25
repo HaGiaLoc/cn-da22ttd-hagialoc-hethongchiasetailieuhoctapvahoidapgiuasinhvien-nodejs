@@ -23,7 +23,7 @@ class AuthService {
       matKhauSV: hashedPassword,
       hoTenSV,
       truongHoc: null,
-      avatarURL: ''
+      avatarPath: ''
     });
 
     // Lấy thông tin sinh viên

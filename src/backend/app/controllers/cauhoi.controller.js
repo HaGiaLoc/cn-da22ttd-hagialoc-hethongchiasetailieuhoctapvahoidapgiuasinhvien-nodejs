@@ -52,8 +52,9 @@ class CauHoiController {
     try {
       const { id } = req.params;
       const maSinhVien = req.user?.id;
+      const role = req.user?.role;
 
-      const question = await CauHoiService.getById(id, maSinhVien);
+      const question = await CauHoiService.getById(id, maSinhVien, role);
 
       res.json({
         success: true,

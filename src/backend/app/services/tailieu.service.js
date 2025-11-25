@@ -1,20 +1,51 @@
 import TaiLieuModel from '../models/tailieu.model.js';
 import LuuTaiLieuModel from '../models/luutailieu.model.js';
+import DinhDangModel from '../models/dinhdang.model.js';
 import fs from 'fs/promises';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 class TaiLieuService {
   // Tải lên tài liệu
   static async upload(maSinhVien, fileData, documentData) {
-    const { maMon, maLoai, tieuDeTL, URL, fileSizes, DinhDang } = documentData;
+    const { maMon, maLoai, tieuDeTL, filePath, fileSizes, maDinhDang } = documentData;
+
+    // Determine maDinhDang automatically from file extension if not provided
+    let resolvedMaDinhDang = maDinhDang ?? null;
+    if (!resolvedMaDinhDang) {
+      try {
+        const origName = fileData.originalname || '';
+        const ext = origName.includes('.') ? origName.split('.').pop().toLowerCase() : '';
+        // Map extension to a display name (tenDinhDang) — default to uppercased extension
+        const ten = ext ? ext.toUpperCase() : 'UNKNOWN';
+
+        // Try to find existing dinhdang by name
+        const existing = await DinhDangModel.getByName(ten);
+        if (existing) {
+          resolvedMaDinhDang = existing.maDinhDang;
+        } else if (ext) {
+          // Create new dinhdang entry for this extension
+          const newId = await DinhDangModel.create(ten);
+          resolvedMaDinhDang = newId;
+        }
+      } catch (err) {
+        // If anything fails, leave maDinhDang null and proceed
+        console.error('Error resolving maDinhDang from extension:', err);
+        resolvedMaDinhDang = null;
+      }
+    }
 
     const taiLieuId = await TaiLieuModel.create({
       maSinhVien,
       maMon,
       maLoai,
       tieuDeTL,
-      URL: URL || fileData.path,
+      filePath: filePath || fileData.path,
       fileSizes: fileSizes || fileData.size,
-      DinhDang: DinhDang || fileData.mimetype
+      maDinhDang: resolvedMaDinhDang
     });
 
     return await TaiLieuModel.getById(taiLieuId);
@@ -24,7 +55,7 @@ class TaiLieuService {
   static async getAll(filters, page = 1, limit = 20) {
     const offset = (page - 1) * limit;
     const documents = await TaiLieuModel.getAll(filters, limit, offset);
-    const total = await TaiLieuModel.count('approved');
+    const total = await TaiLieuModel.count('show');
 
     return {
       documents,
@@ -60,8 +91,27 @@ class TaiLieuService {
       throw new Error('Tài liệu không tồn tại');
     }
 
+    // Ensure source file exists then copy to downloads folder before returning path
+    const srcPath = document.filePath;
+    if (!srcPath) throw new Error('File path not found');
+
+    const downloadsDir = path.join(__dirname, '../db/documents/downloads');
+    try {
+      await fs.mkdir(downloadsDir, { recursive: true });
+    } catch (err) {
+      // ignore
+    }
+
+    const destPath = path.join(downloadsDir, path.basename(srcPath));
+    try {
+      await fs.copyFile(srcPath, destPath);
+    } catch (err) {
+      // If copy fails, still proceed to increment and return original path
+      console.error('Error copying file for download:', err);
+    }
+
     await TaiLieuModel.incrementDownload(id);
-    return document;
+    return { ...document, downloadPath: destPath };
   }
 
   // Lưu tài liệu
@@ -116,7 +166,7 @@ class TaiLieuService {
 
     // Xóa file
     try {
-      await fs.unlink(document.duongDanFile);
+      await fs.unlink(document.filePath);
     } catch (error) {
       console.error('Error deleting file:', error);
     }
@@ -127,7 +177,7 @@ class TaiLieuService {
 
   // Admin duyệt tài liệu
   static async approve(id) {
-    const result = await TaiLieuModel.updateStatus(id, 'approved');
+    const result = await TaiLieuModel.updateStatus(id, 'show');
     if (!result) {
       throw new Error('Tài liệu không tồn tại');
     }
@@ -136,7 +186,7 @@ class TaiLieuService {
 
   // Admin từ chối tài liệu
   static async reject(id) {
-    const result = await TaiLieuModel.updateStatus(id, 'rejected');
+    const result = await TaiLieuModel.updateStatus(id, 'hidden');
     if (!result) {
       throw new Error('Tài liệu không tồn tại');
     }

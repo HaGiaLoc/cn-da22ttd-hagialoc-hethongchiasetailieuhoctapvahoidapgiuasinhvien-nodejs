@@ -45,9 +45,10 @@ app.get('/api/stats', async (req, res) => {
   try {
     const db = (await import('./app/config/database.js')).default;
     
-    const [docCount] = await db.execute('SELECT COUNT(*) as total FROM tailieu WHERE trangThaiTL = "approved"');
-    const [questionCount] = await db.execute('SELECT COUNT(*) as total FROM cauhoi');
-    const [studentCount] = await db.execute('SELECT COUNT(*) as total FROM sinhvien');
+    const [docCount] = await db.execute('SELECT COUNT(*) as total FROM tailieu WHERE trangThaiTL = "show"');
+    // Count only visible questions for public stats
+    const [questionCount] = await db.execute('SELECT COUNT(*) as total FROM cauhoi WHERE trangThaiCH = "show"');
+    const [studentCount] = await db.execute('SELECT COUNT(*) as total FROM sinhvien WHERE trangThaiTK = "active"');
     
     res.json({
       success: true,
