@@ -13,6 +13,7 @@ export default function CauHoiCuaToi() {
   const [myQuestions, setMyQuestions] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
+  // filterStatus values: 'all' | 'show' | 'answered'
   const [filterStatus, setFilterStatus] = useState('all')
   const itemsPerPage = 10
 
@@ -28,9 +29,10 @@ export default function CauHoiCuaToi() {
   const loadQuestions = async () => {
     try {
       setIsLoading(true)
-      const res = await cauHoiService.getAll()
-      const questions = res.questions || res.data || []
-      setMyQuestions(questions.filter(q => q.author === user?.name))
+      // Fetch user's questions from backend. Request a large limit to retrieve all and paginate client-side.
+      const res = await cauHoiService.getMyQuestions(1, 1000)
+      const questions = res?.questions || res?.data?.questions || []
+      setMyQuestions(questions)
     } catch (error) {
       console.error('Error loading questions:', error)
     } finally {
@@ -39,10 +41,12 @@ export default function CauHoiCuaToi() {
   }
 
   let filteredQuestions = [...myQuestions]
-  if (filterStatus === 'solved') {
-    filteredQuestions = filteredQuestions.filter(q => q.status === 'solved')
-  } else if (filterStatus === 'open') {
-    filteredQuestions = filteredQuestions.filter(q => q.status === 'open')
+  if (filterStatus === 'answered') {
+    // show only questions marked as answered
+    filteredQuestions = filteredQuestions.filter(q => (q.trangThaiCauHoi || q.trangThaiCH || q.status) === 'answered')
+  } else if (filterStatus === 'show') {
+    // show only visible / unresolved questions (DB uses 'show')
+    filteredQuestions = filteredQuestions.filter(q => (q.trangThaiCauHoi || q.trangThaiCH || q.status) === 'show')
   }
 
   const totalPages = Math.ceil(filteredQuestions.length / itemsPerPage)
@@ -75,14 +79,14 @@ export default function CauHoiCuaToi() {
                   Tất cả
                 </button>
                 <button
-                  className={`filter-btn ${filterStatus === 'open' ? 'active' : ''}`}
-                  onClick={() => setFilterStatus('open')}
+                  className={`filter-btn ${filterStatus === 'show' ? 'active' : ''}`}
+                  onClick={() => setFilterStatus('show')}
                 >
                   Chưa giải quyết
                 </button>
                 <button
-                  className={`filter-btn ${filterStatus === 'solved' ? 'active' : ''}`}
-                  onClick={() => setFilterStatus('solved')}
+                  className={`filter-btn ${filterStatus === 'answered' ? 'active' : ''}`}
+                  onClick={() => setFilterStatus('answered')}
                 >
                   Đã giải quyết
                 </button>
