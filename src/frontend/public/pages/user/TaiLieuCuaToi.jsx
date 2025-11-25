@@ -28,9 +28,11 @@ export default function TaiLieuCuaToi() {
   const loadDocuments = async () => {
     try {
       setIsLoading(true)
-      const res = await taiLieuService.getAll()
-      const docs = res.documents || res.data || []
-      setMyDocuments(docs.filter(d => d.author === user?.name))
+      // Fetch user's documents from backend (authenticated). Request a large limit and paginate client-side.
+      const res = await taiLieuService.getMyDocuments(1, 1000)
+      // Response shape may vary; support multiple possibilities
+      const docs = res?.data?.documents || res?.documents || res?.data || []
+      setMyDocuments(docs)
     } catch (error) {
       console.error('Error loading documents:', error)
     } finally {

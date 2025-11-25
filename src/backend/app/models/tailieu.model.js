@@ -148,9 +148,23 @@ class TaiLieuModel {
   // Lấy tài liệu của sinh viên
   static async getByStudent(maSinhVien, limit = 20, offset = 0) {
     const query = `
-      SELECT t.*
+      SELECT t.maTaiLieu, t.maLoai, t.maSinhVien, t.maDinhDang, t.tieuDeTL, t.filePath,
+        t.fileSizes, t.trangThaiTL, t.soLanLuu, t.luotTaiXuong, t.ngayChiaSe,
+        MAX(s.hoTenSV) as hoTenSV,
+        MAX(s.avatarPath) as avatarPath,
+        MAX(l.loaiTaiLieu) as loaiTaiLieu,
+        MAX(d.tenDinhDang) as tenDinhDang,
+        MAX(m.tenMon) as tenMon,
+        MAX(n.tenNganh) as tenNganh
       FROM tailieu t
+      LEFT JOIN sinhvien s ON t.maSinhVien = s.maSinhVien
+      LEFT JOIN loaitailieu l ON t.maLoai = l.maLoai
+      LEFT JOIN dinhdang d ON t.maDinhDang = d.maDinhDang
+      LEFT JOIN danhsachtailieu dst ON t.maTaiLieu = dst.maTaiLieu
+      LEFT JOIN mon m ON dst.maMon = m.maMon
+      LEFT JOIN nganh n ON m.maNganh = n.maNganh
       WHERE t.maSinhVien = ?
+      GROUP BY t.maTaiLieu
       ORDER BY t.ngayChiaSe DESC
       LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}
     `;

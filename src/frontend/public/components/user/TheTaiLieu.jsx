@@ -10,7 +10,9 @@ export default function TheTaiLieu({ document }) {
   const [isSaved, setIsSaved] = useState(false)
   const [showReportModal, setShowReportModal] = useState(false)
 
-  const authorAvatar = generateAvatar(document.hoTenSV)
+  // Prefer backend avatarPath when it's a usable URL/path; otherwise generate an avatar
+  const hasAvatarPath = document.avatarPath && (String(document.avatarPath).startsWith('http') || String(document.avatarPath).startsWith('/'))
+  const authorAvatar = hasAvatarPath ? document.avatarPath : generateAvatar(document.hoTenSV)
 
   useEffect(() => {
     // Kiểm tra xem tài liệu đã được lưu chưa
@@ -60,9 +62,10 @@ export default function TheTaiLieu({ document }) {
       showNotification('Vui lòng đăng nhập để tải xuống', 'error', 2000)
       return
     }
-    // Tải xuống trực tiếp tài liệu
-    if (document.URL) {
-      window.open(document.URL, '_blank')
+    // Tải xuống qua endpoint backend (yêu cầu xác thực)
+    if (document.maTaiLieu) {
+      const downloadUrl = `/api/tailieu/${document.maTaiLieu}/download`;
+      window.open(downloadUrl, '_blank')
       showNotification('Đang tải xuống...', 'success', 1000)
     }
   }
@@ -81,7 +84,7 @@ export default function TheTaiLieu({ document }) {
       </div>
       <div className="document-info">
         <div className="document-header-actions">
-          <span className="document-type">{document.loaiTaiLieu}</span>
+          <span className="document-type">{document.loaiTaiLieu || document.tenLoai || document.tenDinhDang || 'Tài liệu'}</span>
           <button 
             className={`save-btn ${isSaved ? 'saved' : ''}`}
             onClick={handleSave}
@@ -93,12 +96,12 @@ export default function TheTaiLieu({ document }) {
         <h3 className="document-title">{document.tieuDeTL}</h3>
         <div className="document-author">
           <div className="author-info">
-            <img 
-              src={authorAvatar} 
-              alt={document.hoTenSV}
+            <img
+              src={authorAvatar}
+              alt={document.hoTenSV || 'Tác giả'}
               className="author-avatar-small"
             />
-            <span>{document.hoTenSV}</span>
+            <span>{document.hoTenSV || document.tenSV || document.author || 'Tác giả'}</span>
           </div>
           <span className="document-date">{formatDate(document.ngayChiaSe)}</span>
         </div>
