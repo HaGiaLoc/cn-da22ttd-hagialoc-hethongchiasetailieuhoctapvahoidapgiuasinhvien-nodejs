@@ -4,6 +4,7 @@ import BoTri from '../../components/BoTri'
 import { useAuth } from '../../contexts/AuthContext'
 import { useNotification } from '../../contexts/NotificationContext'
 import { generateAvatar } from '../../utils/helpers'
+import { cauHoiService, authService } from '../../services'
 
 export default function ChinhSuaHoSo() {
   const navigate = useNavigate()
@@ -18,6 +19,7 @@ export default function ChinhSuaHoSo() {
   })
   const [avatarPreview, setAvatarPreview] = useState('')
   const [errors, setErrors] = useState({})
+  const [majors, setMajors] = useState([])
 
   useEffect(() => {
     if (loading) return
@@ -30,11 +32,26 @@ export default function ChinhSuaHoSo() {
     setFormData({
       hoTenSinhVien: user.name || '',
       email: user.email || '',
-      truongHoc: 'Chưa cập nhật',
-      nganh: 'Chưa cập nhật'
+      truongHoc: user.truongHoc || 'Chưa cập nhật',
+      nganh: user.maNganh || user.nganh || ''
     })
     setAvatarPreview(user.avatar || generateAvatar(user.name))
   }, [user, navigate, loading])
+
+  useEffect(() => {
+    // load majors from backend so user can select
+    const loadMajors = async () => {
+      try {
+        const res = await cauHoiService.getNganh()
+        const items = res?.data || res || []
+        setMajors(items)
+      } catch (err) {
+        console.error('Error loading majors:', err)
+      }
+    }
+
+    loadMajors()
+  }, [])
 
   const handleAvatarChange = (e) => {
     const file = e.target.files[0]
@@ -76,28 +93,43 @@ export default function ChinhSuaHoSo() {
     if (!validateForm()) {
       return
     }
+    const doUpdate = async () => {
+      try {
+        showNotification('Đang cập nhật hồ sơ...', 'loading', 0)
 
-    showNotification('Đang cập nhật hồ sơ...', 'loading', 0)
+        const payload = {
+          hoTenSinhVien: formData.hoTenSinhVien,
+          email: formData.email,
+          truongHoc: formData.truongHoc,
+          maNganh: formData.nganh,
+          avatar: avatarPreview
+        }
 
-    setTimeout(() => {
-      const updatedUser = {
-        ...user,
-        name: formData.hoTenSinhVien,
-        email: formData.email,
-        truongHoc: formData.truongHoc,
-        nganh: formData.nganh,
-        avatar: avatarPreview
+        const res = await authService.updateProfile(payload)
+        const updatedStudent = res?.data || res || {}
+
+        // Normalize response to match client user shape
+        const newUser = {
+          ...user,
+          name: updatedStudent.hoTenSV || formData.hoTenSinhVien,
+          email: updatedStudent.emailSV || formData.email,
+          truongHoc: updatedStudent.truongHoc || formData.truongHoc,
+          nganh: updatedStudent.maNganh || updatedStudent.tenNganh || formData.nganh,
+          avatar: updatedStudent.avatarPath || avatarPreview
+        }
+
+        setUser(newUser)
+        localStorage.setItem('user', JSON.stringify(newUser))
+
+        showNotification('Cập nhật hồ sơ thành công!', 'success', 1000)
+        setTimeout(() => navigate('/profile'), 800)
+      } catch (err) {
+        console.error('Update profile error:', err)
+        showNotification(err.message || 'Không thể cập nhật hồ sơ', 'error')
       }
-      
-      setUser(updatedUser)
-      localStorage.setItem('user', JSON.stringify(updatedUser))
-      
-      showNotification('Cập nhật hồ sơ thành công!', 'success', 1000)
-      
-      setTimeout(() => {
-        navigate('/profile')
-      }, 2000)
-    }, 1500)
+    }
+
+    doUpdate()
   }
 
   return (
@@ -177,12 +209,15 @@ export default function ChinhSuaHoSo() {
                   </div>
                   <div className="form-group">
                     <label>Ngành</label>
-                    <input
-                      type="text"
+                    <select
                       value={formData.nganh}
                       onChange={(e) => setFormData({ ...formData, nganh: e.target.value })}
-                      placeholder="Nhập tên ngành"
-                    />
+                    >
+                      <option value="">Chưa chọn</option>
+                      {majors.map(m => (
+                        <option key={m.maNganh} value={m.maNganh}>{m.tenNganh}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
               </div>

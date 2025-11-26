@@ -49,14 +49,17 @@ export default function HoiDap() {
     }
   }
 
-  const loadQuestions = async () => {
+  const loadQuestions = async (opts = {}) => {
     try {
       setIsLoading(true)
-      const res = await cauHoiService.getAll()
-      console.log('Questions loaded:', res)
-      const qs = res.data?.questions || res.questions || res.data || []
+      // opts can contain page/limit or overrides
+      const svcFilters = { ...opts }
+      const res = await cauHoiService.getAll(svcFilters)
+      console.log('Questions loaded (server):', res)
+      const qs = res.data?.questions || res.questions || res.data || res || []
       setAllQuestions(qs)
       setQuestions(qs)
+      return qs
     } catch (error) {
       console.error('Error loading questions:', error)
     } finally {
@@ -64,42 +67,26 @@ export default function HoiDap() {
     }
   }
 
-  const applyFilters = () => {
-    let filtered = [...allQuestions]
+  const applyFilters = async (page = 1) => {
+    // Build server filters using IDs for Mon (maMon) and Nganh (maNganh)
+    const svcFilters = {}
+    if (filters.search) svcFilters.search = filters.search
+    if (filters.status && filters.status !== 'all') svcFilters.trangThaiCH = filters.status
+    if (filters.major) svcFilters.Nganh = filters.major
+    if (filters.subject) svcFilters.Mon = filters.subject
+    if (selectedTag) svcFilters.tag = selectedTag
+    svcFilters.page = page
+    svcFilters.limit = itemsPerPage * 10 // fetch more to allow client-side paging, adjust as needed
 
-    if (filters.search) {
-      filtered = filtered.filter(q =>
-        searchMatch(q.tieuDeCH, filters.search) || searchMatch(q.noiDungCH, filters.search)
-      )
-    }
+    const fetched = await loadQuestions(svcFilters)
 
-    if (filters.status === 'solved') {
-      filtered = filtered.filter(q => q.trangThaiCH === 'solved')
-    } else if (filters.status === 'open') {
-      filtered = filtered.filter(q => q.trangThaiCH === 'open')
-    }
+    // Apply client-side sorting after server fetch
+    let sorted = [...(fetched || [])]
+    if (filters.sort === 'newest') sorted.sort((a, b) => new Date(b.ngayDatCH) - new Date(a.ngayDatCH))
+    else if (filters.sort === 'votes') sorted.sort((a, b) => (b.votes || 0) - (a.votes || 0))
+    else if (filters.sort === 'answers') sorted.sort((a, b) => (b.soLuongTraLoi || 0) - (a.soLuongTraLoi || 0))
 
-    if (filters.subject) {
-      filtered = filtered.filter(q => q.tenMon === filters.subject)
-    }
-
-    if (filters.major) {
-      filtered = filtered.filter(q => q.tenNganh === filters.major)
-    }
-
-    if (selectedTag) {
-      filtered = filtered.filter(q => q.tags.includes(selectedTag))
-    }
-
-    if (filters.sort === 'newest') {
-      filtered.sort((a, b) => new Date(b.ngayDatCH) - new Date(a.ngayDatCH))
-    } else if (filters.sort === 'votes') {
-      filtered.sort((a, b) => (b.votes || 0) - (a.votes || 0))
-    } else if (filters.sort === 'answers') {
-      filtered.sort((a, b) => (b.soLuongTraLoi || 0) - (a.soLuongTraLoi || 0))
-    }
-
-    setQuestions(filtered)
+    setQuestions(sorted)
     setCurrentPage(1)
   }
 
@@ -133,10 +120,7 @@ export default function HoiDap() {
 
   // Lọc môn học theo ngành được chọn
   const filteredSubjects = filters.major
-    ? filterOptions.subjects.filter(mon => {
-        const nganh = filterOptions.majors.find(n => n.tenNganh === filters.major)
-        return nganh ? mon.maNganh === nganh.maNganh : true
-      })
+    ? filterOptions.subjects.filter(mon => mon.maNganh === filters.major)
     : filterOptions.subjects
 
   const totalPages = Math.ceil(questions.length / itemsPerPage)
@@ -178,8 +162,8 @@ export default function HoiDap() {
                       <input
                         type="radio"
                         name="status"
-                        value="open"
-                        checked={filters.status === 'open'}
+                        value="show"
+                        checked={filters.status === 'show'}
                         onChange={(e) => setFilters({ ...filters, status: e.target.value })}
                       />
                       Chưa giải quyết
@@ -188,8 +172,8 @@ export default function HoiDap() {
                       <input
                         type="radio"
                         name="status"
-                        value="solved"
-                        checked={filters.status === 'solved'}
+                        value="answered"
+                        checked={filters.status === 'answered'}
                         onChange={(e) => setFilters({ ...filters, status: e.target.value })}
                       />
                       Đã giải quyết
@@ -205,7 +189,7 @@ export default function HoiDap() {
                   >
                     <option value="" key="all-majors">Tất cả ngành</option>
                     {filterOptions.majors.map(nganh => (
-                      <option key={nganh.maNganh} value={nganh.tenNganh}>{nganh.tenNganh}</option>
+                      <option key={nganh.maNganh} value={nganh.maNganh}>{nganh.tenNganh}</option>
                     ))}
                   </select>
                 </div>
@@ -221,7 +205,7 @@ export default function HoiDap() {
                       {filters.major ? 'Tất cả môn học' : 'Chọn ngành trước'}
                     </option>
                     {filteredSubjects.map(mon => (
-                      <option key={mon.maMon} value={mon.tenMon}>{mon.tenMon}</option>
+                      <option key={mon.maMon} value={mon.maMon}>{mon.tenMon}</option>
                     ))}
                   </select>
                 </div>
