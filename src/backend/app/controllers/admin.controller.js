@@ -57,11 +57,12 @@ class AdminController {
       const { id } = req.params;
       const data = req.body;
 
-      await AdminService.updateStudent(id, data);
+      const updated = await AdminService.updateStudent(id, data);
 
       res.json({
         success: true,
-        message: 'Cập nhật thông tin sinh viên thành công'
+        message: 'Cập nhật thông tin sinh viên thành công',
+        data: updated
       });
     } catch (error) {
       next(error);
@@ -423,6 +424,26 @@ class AdminController {
     try {
       await AdminService.deleteAnswer(req.params.id);
       res.json({ success: true, message: 'Xóa câu trả lời thành công' });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async approveAnswer(req, res, next) {
+    try {
+      const { id } = req.params;
+      await AdminService.approveAnswer(id);
+      res.json({ success: true, message: 'Đã chấp nhận câu trả lời' });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async rejectAnswer(req, res, next) {
+    try {
+      const { id } = req.params;
+      await AdminService.rejectAnswer(id);
+      res.json({ success: true, message: 'Đã ẩn câu trả lời' });
     } catch (error) {
       next(error);
     }

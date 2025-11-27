@@ -104,13 +104,13 @@ export default function QuanTriCauHoi() {
                         <td>{q.hoTenSV}</td>
                         <td>
                           <span className={`badge ${
-                            q.trangThaiCauHoi === 'open' ? 'badge-warning' : 
+                            q.trangThaiCauHoi === 'show' ? 'badge-warning' : 
                             q.trangThaiCauHoi === 'answered' ? 'badge-success' : 
                             'badge-secondary'
                           }`}>
-                            {q.trangThaiCauHoi === 'open' ? 'Đang mở' : 
+                            {q.trangThaiCauHoi === 'show' ? 'Đang mở' : 
                              q.trangThaiCauHoi === 'answered' ? 'Đã trả lời' : 
-                             'Đã đóng'}
+                             'Đã ẩn'}
                           </span>
                         </td>
                         <td>{formatNumber(q.soLuongTraLoi || 0)}</td>

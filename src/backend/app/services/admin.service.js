@@ -1,4 +1,5 @@
 import SinhVienModel from '../models/sinhvien.model.js';
+import bcrypt from 'bcryptjs';
 import TaiLieuModel from '../models/tailieu.model.js';
 import CauHoiModel from '../models/cauhoi.model.js';
 import BaoCaoModel from '../models/baocao.model.js';
@@ -57,12 +58,34 @@ class AdminService {
 
   // Cập nhật thông tin sinh viên
   static async updateStudent(id, data) {
-    const { hoTenSV, emailSV, truongHoc } = data;
-    const result = await SinhVienModel.update(id, { hoTenSV, emailSV, truongHoc });
+    // Accept more fields: hoTenSV, emailSV, truongHoc, avatarPath, maNganh
+    const updatePayload = {
+      hoTenSV: data.hoTenSV,
+      emailSV: data.emailSV,
+      truongHoc: data.truongHoc,
+      avatarPath: data.avatarPath,
+      maNganh: data.maNganh
+    };
+
+    const result = await SinhVienModel.update(id, updatePayload);
     if (!result) {
       throw new Error('Sinh viên không tồn tại');
     }
-    return true;
+
+    // If status is provided, update it as well
+    if (data.trangThaiTK !== undefined) {
+      await SinhVienModel.updateStatus(id, data.trangThaiTK);
+    }
+
+    // If password provided, hash and update
+    if (data.password) {
+      const hashed = await bcrypt.hash(data.password, 10);
+      await SinhVienModel.updatePassword(id, hashed);
+    }
+
+    // Return the updated student
+    const updated = await SinhVienModel.findById(id);
+    return updated;
   }
 
   // Cập nhật trạng thái tài khoản sinh viên
@@ -277,8 +300,10 @@ class AdminService {
              ctl.ngayTraLoi, 
              ctl.trangThaiCTL,
              ch.tieuDeCH as tieuDeCauHoi, 
+             ch.trangThaiCH as trangThaiCauHoi,
              sv.hoTenSV,
-            CASE WHEN ctl.trangThaiCTL = 'show' THEN 'accepted' ELSE 'normal' END as trangThaiDuyet,
+            -- trangThaiCTL: 'show' = visible, 'hidden' = hidden. Use cauhoi.trangThaiCH to detect accepted answer.
+            NULL as trangThaiDuyet,
              (SELECT COALESCE(SUM(CASE WHEN Upvote = '1' THEN 1 WHEN Downvote = '1' THEN -1 ELSE 0 END), 0)
               FROM danhgiacautraloi 
               WHERE maCauTraLoi = ctl.maCauTraLoi) as danhGia
@@ -306,6 +331,18 @@ class AdminService {
 
   static async deleteAnswer(id) {
     const result = await CauTraLoiModel.delete(id);
+    if (!result) throw new Error('Câu trả lời không tồn tại');
+    return true;
+  }
+
+  static async approveAnswer(id) {
+    const result = await CauTraLoiModel.acceptById(id);
+    if (!result) throw new Error('Câu trả lời không tồn tại');
+    return true;
+  }
+
+  static async rejectAnswer(id) {
+    const result = await CauTraLoiModel.updateStatus(id, 'hidden');
     if (!result) throw new Error('Câu trả lời không tồn tại');
     return true;
   }

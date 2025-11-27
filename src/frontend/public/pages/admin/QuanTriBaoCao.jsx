@@ -165,7 +165,27 @@ export default function QuanTriBaoCao() {
                              report.loaiBaoCao === 'question' ? 'Câu hỏi' :
                              report.loaiBaoCao === 'answer' ? 'Câu trả lời' : 'Khác'}
                           </strong>
-                          <div className="report-target-id">#{report.maBaoCao}</div>
+                          <div className="report-target-id">
+                            {report.loaiBaoCao === 'document' && (
+                              <>
+                                #{report.maTaiLieu || 'N/A'}
+                                {report.tieuDeTL ? ` - ${report.tieuDeTL}` : ''}
+                              </>
+                            )}
+                            {report.loaiBaoCao === 'question' && (
+                              <>
+                                #{report.maCauHoi || 'N/A'}
+                                {report.tieuDeCH ? ` - ${report.tieuDeCH}` : ''}
+                              </>
+                            )}
+                            {report.loaiBaoCao === 'answer' && (
+                              <>
+                                #{report.maCauTraLoi || 'N/A'}
+                                {report.noiDungTraLoi ? ` - ${String(report.noiDungTraLoi).slice(0, 120)}${String(report.noiDungTraLoi).length > 120 ? '...' : ''}` : ''}
+                              </>
+                            )}
+                            {(!report.loaiBaoCao) && `#${report.maBaoCao}`}
+                          </div>
                         </div>
                       </td>
                       <td>

@@ -15,9 +15,15 @@ class BaoCaoModel {
   // Lấy tất cả báo cáo
   static async getAll(status = null, type = null, limit = 20, offset = 0) {
     let query = `
-      SELECT b.*, s.hoTenSV, s.emailSV
+      SELECT b.*, s.hoTenSV, s.emailSV,
+             t.maTaiLieu, t.tieuDeTL,
+             ch.maCauHoi, ch.tieuDeCH,
+             ctl.maCauTraLoi, ctl.noiDungCTL as noiDungTraLoi
       FROM baocaovipham b
       LEFT JOIN sinhvien s ON b.maSinhVien = s.maSinhVien
+      LEFT JOIN tailieu t ON b.maTaiLieu = t.maTaiLieu
+      LEFT JOIN cauhoi ch ON b.maCauHoi = ch.maCauHoi
+      LEFT JOIN cautraloi ctl ON b.maCauTraLoi = ctl.maCauTraLoi
       WHERE 1=1
     `;
     const params = [];

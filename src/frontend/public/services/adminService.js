@@ -177,6 +177,14 @@ const adminService = {
   async deleteAnswer(id) {
     return await api.delete(`/admin/answers/${id}`);
   },
+  
+  async approveAnswer(id) {
+    return await api.put(`/admin/answers/${id}/approve`);
+  },
+
+  async rejectAnswer(id) {
+    return await api.put(`/admin/answers/${id}/reject`);
+  },
 
   // Thống kê
   async getStatistics() {

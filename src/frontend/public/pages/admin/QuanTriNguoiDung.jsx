@@ -13,10 +13,21 @@ export default function QuanTriNguoiDung() {
   const [searchTerm, setSearchTerm] = useState('')
   const [editingStudent, setEditingStudent] = useState(null)
   const [showEditModal, setShowEditModal] = useState(false)
+  const [majors, setMajors] = useState([])
 
   useEffect(() => {
     loadStudents()
+    loadMajors()
   }, [])
+
+  const loadMajors = async () => {
+    try {
+      const res = await adminService.getAllMajors()
+      setMajors(res.data || [])
+    } catch (error) {
+      console.error('Error loading majors', error)
+    }
+  }
 
   const loadStudents = async () => {
     try {
@@ -49,10 +60,10 @@ export default function QuanTriNguoiDung() {
   }
 
   const handleToggleLock = async (student) => {
-    const action = student.trangThaiTK === 'not_banned' ? 'khóa' : 'mở khóa'
+    const action = student.trangThaiTK === 'active' ? 'khóa' : 'mở khóa'
     if (window.confirm(`Bạn có chắc muốn ${action} tài khoản này?`)) {
       try {
-        const newStatus = student.trangThaiTK === 'not_banned' ? 'banned' : 'not_banned'
+        const newStatus = student.trangThaiTK === 'active' ? 'locked' : 'active'
         await adminService.updateStudentStatus(student.maSinhVien, newStatus)
         await loadStudents()
         showNotification(`Đã ${action} tài khoản`, 'success', 2000)
@@ -157,8 +168,8 @@ export default function QuanTriNguoiDung() {
                       <td>{student.truongHoc || 'Chưa cập nhật'}</td>
                       <td>{formatDate(student.ngayTao)}</td>
                       <td>
-                        <span className={`badge badge-${student.trangThaiTK === 'not_banned' ? 'success' : 'danger'}`}>
-                          {student.trangThaiTK === 'not_banned' ? 'Hoạt động' : 'Đã khóa'}
+                        <span className={`badge badge-${student.trangThaiTK === 'active' ? 'success' : 'danger'}`}>
+                          {student.trangThaiTK === 'active' ? 'Hoạt động' : 'Đã khóa'}
                         </span>
                       </td>
                       <td>
@@ -171,11 +182,11 @@ export default function QuanTriNguoiDung() {
                             <i className="fas fa-edit"></i>
                           </button>
                           <button
-                            className={`btn btn-sm ${student.trangThaiTK === 'not_banned' ? 'btn-warning' : 'btn-success'}`}
+                            className={`btn btn-sm ${student.trangThaiTK === 'active' ? 'btn-warning' : 'btn-success'}`}
                             onClick={() => handleToggleLock(student)}
-                            title={student.trangThaiTK === 'not_banned' ? 'Khóa tài khoản' : 'Mở khóa tài khoản'}
+                            title={student.trangThaiTK === 'active' ? 'Khóa tài khoản' : 'Mở khóa tài khoản'}
                           >
-                            <i className={`fas fa-${student.trangThaiTK === 'not_banned' ? 'lock' : 'unlock'}`}></i>
+                            <i className={`fas fa-${student.trangThaiTK === 'active' ? 'lock' : 'unlock'}`}></i>
                           </button>
                         </div>
                       </td>
@@ -226,6 +237,16 @@ export default function QuanTriNguoiDung() {
                     />
                   </div>
                   <div className="form-group">
+                    <label>Mật khẩu (để trống nếu không đổi)</label>
+                    <input
+                      type="password"
+                      value={editingStudent.password || ''}
+                      onChange={(e) => setEditingStudent({ ...editingStudent, password: e.target.value })}
+                      className="form-control"
+                      placeholder="Nhập mật khẩu mới"
+                    />
+                  </div>
+                  <div className="form-group">
                     <label>Trường học</label>
                     <input
                       type="text"
@@ -233,6 +254,31 @@ export default function QuanTriNguoiDung() {
                       onChange={(e) => setEditingStudent({ ...editingStudent, truongHoc: e.target.value })}
                       className="form-control"
                     />
+                  </div>
+                  <div className="form-group">
+                    <label>Ngành</label>
+                    <select
+                      className="form-control"
+                      value={editingStudent.maNganh || ''}
+                      onChange={(e) => setEditingStudent({ ...editingStudent, maNganh: e.target.value || null })}
+                    >
+                      <option value="">-- Chọn ngành --</option>
+                      {majors.map(m => (
+                        <option key={m.maNganh} value={m.maNganh}>{m.tenNganh}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Trạng thái tài khoản</label>
+                    <select
+                      className="form-control"
+                      value={editingStudent.trangThaiTK || 'active'}
+                      onChange={(e) => setEditingStudent({ ...editingStudent, trangThaiTK: e.target.value })}
+                    >
+                      <option value="active">Hoạt động</option>
+                      <option value="locked">Đã khóa</option>
+                    </select>
                   </div>
                 </div>
                 <div className="modal-footer">

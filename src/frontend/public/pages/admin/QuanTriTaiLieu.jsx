@@ -36,9 +36,9 @@ export default function QuanTriTaiLieu() {
     try {
       await adminService.approveDocument(docId)
       await loadDocuments()
-      showNotification('Đã duyệt tài liệu', 'success', 2000)
+      showNotification('Đã hiển thị tài liệu', 'success', 2000)
     } catch (error) {
-      showNotification('Duyệt tài liệu thất bại', 'error', 3000)
+      showNotification('Hiển thị tài liệu thất bại', 'error', 3000)
     }
   }
 
@@ -46,9 +46,9 @@ export default function QuanTriTaiLieu() {
     try {
       await adminService.rejectDocument(docId)
       await loadDocuments()
-      showNotification('Đã từ chối tài liệu', 'success', 2000)
+      showNotification('Đã ẩn tài liệu', 'success', 2000)
     } catch (error) {
-      showNotification('Từ chối tài liệu thất bại', 'error', 3000)
+      showNotification('Ẩn tài liệu thất bại', 'error', 3000)
     }
   }
 
@@ -79,7 +79,7 @@ export default function QuanTriTaiLieu() {
           <div className="admin-header">
             <div>
               <h1><i className="fas fa-file-alt"></i> Quản lý tài liệu</h1>
-              <p>Duyệt và quản lý tài liệu từ người dùng</p>
+              <p>Hiện/Ẩn và quản lý tài liệu từ người dùng</p>
             </div>
           </div>
 
@@ -89,9 +89,8 @@ export default function QuanTriTaiLieu() {
               <label>Trạng thái:</label>
               <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
                 <option value="all">Tất cả</option>
-                <option value="pending">Chờ duyệt</option>
-                <option value="approved">Đã duyệt</option>
-                <option value="rejected">Từ chối</option>
+                <option value="show">Hiện</option>
+                <option value="hidden">Ẩn</option>
               </select>
             </div>
 
@@ -163,42 +162,38 @@ export default function QuanTriTaiLieu() {
                       <td>{formatDate(doc.ngayTai)}</td>
                       <td>
                         <span className={`badge badge-${
-                          doc.trangThaiTL === 'approved' ? 'success' :
-                          doc.trangThaiTL === 'pending' ? 'warning' : 'danger'
+                          doc.trangThaiTL === 'show' ? 'success' : 'danger'
                         }`}>
-                          {doc.trangThaiTL === 'approved' ? 'Đã duyệt' :
-                           doc.trangThaiTL === 'pending' ? 'Chờ duyệt' : 'Từ chối'}
+                          {doc.trangThaiTL === 'show' ? 'Hiện' : 'Ẩn'}
                         </span>
                       </td>
                       <td>
                         <div className="action-buttons">
-                          {doc.trangThaiTL === 'pending' && (
-                            <>
-                              <button
-                                className="btn btn-sm btn-success"
-                                onClick={() => handleApprove(doc.maTaiLieu)}
-                                title="Duyệt"
-                              >
-                                <i className="fas fa-check"></i>
-                              </button>
-                              <button
-                                className="btn btn-sm btn-danger"
-                                onClick={() => handleReject(doc.maTaiLieu)}
-                                title="Từ chối"
-                              >
-                                <i className="fas fa-times"></i>
-                              </button>
-                            </>
-                          )}
-                          {doc.trangThaiTL !== 'pending' && (
+                          {doc.trangThaiTL === 'hidden' && (
                             <button
-                              className="btn btn-sm btn-outline"
-                              onClick={() => handleDelete(doc.maTaiLieu)}
-                              title="Xóa"
+                              className="btn btn-sm btn-success"
+                              onClick={() => handleApprove(doc.maTaiLieu)}
+                              title="Hiện"
                             >
-                              <i className="fas fa-trash"></i>
+                              <i className="fas fa-eye"></i>
                             </button>
                           )}
+                          {doc.trangThaiTL === 'show' && (
+                            <button
+                              className="btn btn-sm btn-warning"
+                              onClick={() => handleReject(doc.maTaiLieu)}
+                              title="Ẩn"
+                            >
+                              <i className="fas fa-eye-slash"></i>
+                            </button>
+                          )}
+                          <button
+                            className="btn btn-sm btn-outline"
+                            onClick={() => handleDelete(doc.maTaiLieu)}
+                            title="Xóa"
+                          >
+                            <i className="fas fa-trash"></i>
+                          </button>
                         </div>
                       </td>
                     </tr>

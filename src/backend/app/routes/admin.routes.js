@@ -67,6 +67,8 @@ router.delete('/questions/:id', AdminController.deleteQuestion);
 // Quản lý câu trả lời
 router.get('/answers', AdminController.getAllAnswers);
 router.delete('/answers/:id', AdminController.deleteAnswer);
+router.put('/answers/:id/approve', AdminController.approveAnswer);
+router.put('/answers/:id/reject', AdminController.rejectAnswer);
 
 // Thống kê
 router.get('/statistics', AdminController.getStatistics);

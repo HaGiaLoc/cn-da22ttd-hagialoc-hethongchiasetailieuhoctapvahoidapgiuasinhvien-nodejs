@@ -107,8 +107,13 @@ export default function QuanTriCauTraLoi() {
                         </td>
                         <td>{a.hoTenSV}</td>
                         <td>
-                          <span className={`badge ${a.trangThaiDuyet === 'accepted' ? 'badge-success' : 'badge-secondary'}`}>
-                            {a.trangThaiDuyet === 'accepted' ? 'Được chấp nhận' : 'Bình thường'}
+                          {/* Determine status using DB fields: trangThaiCTL and question status trangThaiCauHoi */}
+                          <span className={`badge ${
+                            (a.trangThaiCauHoi === 'answered' && a.trangThaiCTL === 'show') ? 'badge-success' :
+                            a.trangThaiCTL === 'show' ? 'badge-info' : 'badge-secondary'
+                          }`}>
+                            {(a.trangThaiCauHoi === 'answered' && a.trangThaiCTL === 'show') ? 'Được chấp nhận' :
+                             a.trangThaiCTL === 'show' ? 'Hiển thị' : 'Đã ẩn'}
                           </span>
                         </td>
                         <td>
@@ -119,6 +124,46 @@ export default function QuanTriCauTraLoi() {
                         <td>{formatDate(a.ngayTraLoi)}</td>
                         <td>
                           <div className="action-buttons">
+                            {/* Approve (accept) if not currently accepted */}
+                            {!(a.trangThaiCauHoi === 'answered' && a.trangThaiCTL === 'show') && (
+                              <button
+                                className="btn btn-sm btn-success"
+                                onClick={async () => {
+                                  if (!confirm('Chấp nhận câu trả lời này?')) return;
+                                  try {
+                                    await adminService.approveAnswer(a.maTraLoi)
+                                    await loadAnswers()
+                                    showNotification('Đã chấp nhận câu trả lời', 'success', 2000)
+                                  } catch (err) {
+                                    showNotification('Chấp nhận thất bại', 'error', 3000)
+                                  }
+                                }}
+                                title="Chấp nhận"
+                              >
+                                <i className="fas fa-check"></i>
+                              </button>
+                            )}
+
+                            {/* Hide / reject */}
+                            {a.trangThaiCTL === 'show' && (
+                              <button
+                                className="btn btn-sm btn-warning"
+                                onClick={async () => {
+                                  if (!confirm('Ẩn câu trả lời này?')) return;
+                                  try {
+                                    await adminService.rejectAnswer(a.maTraLoi)
+                                    await loadAnswers()
+                                    showNotification('Đã ẩn câu trả lời', 'success', 2000)
+                                  } catch (err) {
+                                    showNotification('Ẩn thất bại', 'error', 3000)
+                                  }
+                                }}
+                                title="Ẩn"
+                              >
+                                <i className="fas fa-eye-slash"></i>
+                              </button>
+                            )}
+
                             <button
                               className="btn btn-sm btn-danger"
                               onClick={() => handleDelete(a.maTraLoi)}
