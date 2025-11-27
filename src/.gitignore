@@ -1,6 +1,8 @@
 # Ignore database files
-db/documents/
-db/pictures/
+db/documents/test/
+db/pictures/avatars/test/
+db/pictures/images/test/
+
 
 # Dependencies
 node_modules/
