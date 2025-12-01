@@ -11,6 +11,22 @@ import DinhDangModel from '../models/dinhdang.model.js';
 import CauTraLoiModel from '../models/cautraloi.model.js';
 import QuanTriVienModel from '../models/quantrivien.model.js';
 import db from '../config/database.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Helper function to convert absolute path to relative path from backend root
+const getRelativePath = (absolutePath) => {
+  if (!absolutePath) return absolutePath;
+  // If already relative or URL, return as is
+  if (!path.isAbsolute(absolutePath) || absolutePath.startsWith('http')) return absolutePath;
+  const backendRoot = path.join(__dirname, '../..');
+  const relativePath = path.relative(backendRoot, absolutePath);
+  // Convert Windows backslashes to forward slashes for consistency
+  return relativePath.replace(/\\/g, '/');
+};
 
 class AdminService {
   // Lấy thống kê dashboard
@@ -63,7 +79,7 @@ class AdminService {
       hoTenSV: data.hoTenSV,
       emailSV: data.emailSV,
       truongHoc: data.truongHoc,
-      avatarPath: data.avatarPath,
+      avatarPath: data.avatarPath ? getRelativePath(data.avatarPath) : data.avatarPath,
       maNganh: data.maNganh
     };
 
@@ -228,6 +244,12 @@ class AdminService {
     return await TagModel.create(tenTag);
   }
 
+  static async updateTag(id, tenTag) {
+    const result = await TagModel.update(id, tenTag);
+    if (!result) throw new Error('Tag không tồn tại');
+    return true;
+  }
+
   static async deleteTag(id) {
     const result = await TagModel.delete(id);
     if (!result) throw new Error('Tag không tồn tại');
@@ -241,6 +263,12 @@ class AdminService {
 
   static async createDocumentType(loaiTaiLieu) {
     return await LoaiTaiLieuModel.create(loaiTaiLieu);
+  }
+
+  static async updateDocumentType(id, loaiTaiLieu) {
+    const result = await LoaiTaiLieuModel.update(id, loaiTaiLieu);
+    if (!result) throw new Error('Loại tài liệu không tồn tại');
+    return true;
   }
 
   static async deleteDocumentType(id) {
@@ -258,6 +286,12 @@ class AdminService {
     return await DinhDangModel.create(tenDinhDang);
   }
 
+  static async updateFormat(id, tenDinhDang) {
+    const result = await DinhDangModel.update(id, tenDinhDang);
+    if (!result) throw new Error('Định dạng không tồn tại');
+    return true;
+  }
+
   static async deleteFormat(id) {
     const result = await DinhDangModel.delete(id);
     if (!result) throw new Error('Định dạng không tồn tại');
@@ -266,11 +300,21 @@ class AdminService {
 
   // ===== CONTENT MANAGEMENT =====
   
+  static async updateDocument(id, updateData) {
+    const result = await TaiLieuModel.update(id, updateData);
+    if (!result) throw new Error('Tài liệu không tồn tại');
+    return true;
+  }
+
   // Câu hỏi
   static async getAllQuestions(page = 1, limit = 20) {
     const offset = (page - 1) * limit;
-    const questions = await CauHoiModel.getAll({}, limit, offset);
-    const total = await CauHoiModel.count();
+    const questions = await CauHoiModel.getAllForAdmin({}, limit, offset);
+    
+    // Count all questions for admin (including hidden)
+    const query = `SELECT COUNT(*) as total FROM cauhoi`;
+    const [rows] = await (await import('../config/database.js')).default.execute(query);
+    const total = rows[0].total;
 
     return {
       questions,
@@ -281,6 +325,24 @@ class AdminService {
         totalPages: Math.ceil(total / limit)
       }
     };
+  }
+
+  static async hideQuestion(id) {
+    const result = await CauHoiModel.updateStatus(id, 'hidden');
+    if (!result) throw new Error('Câu hỏi không tồn tại');
+    return true;
+  }
+
+  static async showQuestion(id) {
+    const result = await CauHoiModel.updateStatus(id, 'show');
+    if (!result) throw new Error('Câu hỏi không tồn tại');
+    return true;
+  }
+
+  static async updateQuestion(id, updateData) {
+    const result = await CauHoiModel.update(id, updateData);
+    if (!result) throw new Error('Câu hỏi không tồn tại');
+    return true;
   }
 
   static async deleteQuestion(id) {
@@ -327,6 +389,12 @@ class AdminService {
         totalPages: Math.ceil(total / limit)
       }
     };
+  }
+
+  static async updateAnswer(id, updateData) {
+    const result = await CauTraLoiModel.update(id, updateData);
+    if (!result) throw new Error('Câu trả lời không tồn tại');
+    return true;
   }
 
   static async deleteAnswer(id) {

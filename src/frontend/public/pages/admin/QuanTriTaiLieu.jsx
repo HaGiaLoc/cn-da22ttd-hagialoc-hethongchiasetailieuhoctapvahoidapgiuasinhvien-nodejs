@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import BoTriQuanTri from '../../components/admin/BoTriQuanTri'
+import EditDocumentModal from '../../components/admin/EditDocumentModal'
 import { adminService } from '../../services'
 import { useNotification } from '../../contexts/NotificationContext'
 import { formatDate, formatNumber } from '../../utils/helpers'
@@ -11,6 +12,7 @@ export default function QuanTriTaiLieu() {
   const [isLoading, setIsLoading] = useState(true)
   const [filterStatus, setFilterStatus] = useState('all')
   const [searchTerm, setSearchTerm] = useState('')
+  const [editingDocument, setEditingDocument] = useState(null)
 
   useEffect(() => {
     loadDocuments()
@@ -32,23 +34,18 @@ export default function QuanTriTaiLieu() {
     loadDocuments()
   }, [filterStatus])
 
-  const handleApprove = async (docId) => {
-    try {
-      await adminService.approveDocument(docId)
-      await loadDocuments()
-      showNotification('Đã hiển thị tài liệu', 'success', 2000)
-    } catch (error) {
-      showNotification('Hiển thị tài liệu thất bại', 'error', 3000)
-    }
+  const handleEdit = (doc) => {
+    setEditingDocument(doc)
   }
 
-  const handleReject = async (docId) => {
+  const handleSaveEdit = async (formData) => {
     try {
-      await adminService.rejectDocument(docId)
+      await adminService.updateDocument(editingDocument.maTaiLieu, formData)
       await loadDocuments()
-      showNotification('Đã ẩn tài liệu', 'success', 2000)
+      setEditingDocument(null)
+      showNotification('Cập nhật tài liệu thành công', 'success', 2000)
     } catch (error) {
-      showNotification('Ẩn tài liệu thất bại', 'error', 3000)
+      showNotification('Cập nhật tài liệu thất bại', 'error', 3000)
     }
   }
 
@@ -78,8 +75,8 @@ export default function QuanTriTaiLieu() {
       <section className="admin-section">
           <div className="admin-header">
             <div>
-              <h1><i className="fas fa-file-alt"></i> Quản lý tài liệu</h1>
-              <p>Hiện/Ẩn và quản lý tài liệu từ người dùng</p>
+            <h1><i className="fas fa-file-alt"></i> Quản lý tài liệu</h1>
+            <p>Sửa và xóa tài liệu từ người dùng</p>
             </div>
           </div>
 
@@ -169,26 +166,15 @@ export default function QuanTriTaiLieu() {
                       </td>
                       <td>
                         <div className="action-buttons">
-                          {doc.trangThaiTL === 'hidden' && (
-                            <button
-                              className="btn btn-sm btn-success"
-                              onClick={() => handleApprove(doc.maTaiLieu)}
-                              title="Hiện"
-                            >
-                              <i className="fas fa-eye"></i>
-                            </button>
-                          )}
-                          {doc.trangThaiTL === 'show' && (
-                            <button
-                              className="btn btn-sm btn-warning"
-                              onClick={() => handleReject(doc.maTaiLieu)}
-                              title="Ẩn"
-                            >
-                              <i className="fas fa-eye-slash"></i>
-                            </button>
-                          )}
                           <button
-                            className="btn btn-sm btn-outline"
+                            className="btn btn-sm btn-primary"
+                            onClick={() => handleEdit(doc)}
+                            title="Sửa"
+                          >
+                            <i className="fas fa-edit"></i>
+                          </button>
+                          <button
+                            className="btn btn-sm btn-danger"
                             onClick={() => handleDelete(doc.maTaiLieu)}
                             title="Xóa"
                           >
@@ -204,6 +190,14 @@ export default function QuanTriTaiLieu() {
             )}
           </div>
       </section>
+
+      {editingDocument && (
+        <EditDocumentModal
+          document={editingDocument}
+          onClose={() => setEditingDocument(null)}
+          onSave={handleSaveEdit}
+        />
+      )}
     </BoTriQuanTri>
   )
 }

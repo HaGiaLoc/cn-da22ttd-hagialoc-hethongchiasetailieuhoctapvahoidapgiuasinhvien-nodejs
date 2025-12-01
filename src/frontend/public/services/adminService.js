@@ -51,6 +51,11 @@ const adminService = {
     return await api.put(`/admin/documents/${id}/reject`);
   },
 
+  // Cập nhật tài liệu
+  async updateDocument(id, data) {
+    return await api.put(`/admin/documents/${id}`, data);
+  },
+
   // Xóa tài liệu
   async deleteDocument(id) {
     return await api.delete(`/tailieu/${id}`);
@@ -128,6 +133,10 @@ const adminService = {
     return await api.post('/admin/tags', { tenTag });
   },
 
+  async updateTag(id, tenTag) {
+    return await api.put(`/admin/tags/${id}`, { tenTag });
+  },
+
   async deleteTag(id) {
     return await api.delete(`/admin/tags/${id}`);
   },
@@ -139,6 +148,10 @@ const adminService = {
 
   async createDocumentType(loaiTaiLieu) {
     return await api.post('/admin/document-types', { loaiTaiLieu });
+  },
+
+  async updateDocumentType(id, loaiTaiLieu) {
+    return await api.put(`/admin/document-types/${id}`, { loaiTaiLieu });
   },
 
   async deleteDocumentType(id) {
@@ -154,6 +167,10 @@ const adminService = {
     return await api.post('/admin/formats', { tenDinhDang });
   },
 
+  async updateFormat(id, tenDinhDang) {
+    return await api.put(`/admin/formats/${id}`, { tenDinhDang });
+  },
+
   async deleteFormat(id) {
     return await api.delete(`/admin/formats/${id}`);
   },
@@ -165,6 +182,18 @@ const adminService = {
     return await api.get(`/admin/questions?page=${page}&limit=${limit}`);
   },
 
+  async hideQuestion(id) {
+    return await api.put(`/admin/questions/${id}/hide`);
+  },
+
+  async showQuestion(id) {
+    return await api.put(`/admin/questions/${id}/show`);
+  },
+
+  async updateQuestion(id, data) {
+    return await api.put(`/admin/questions/${id}`, data);
+  },
+
   async deleteQuestion(id) {
     return await api.delete(`/admin/questions/${id}`);
   },
@@ -172,6 +201,10 @@ const adminService = {
   // Câu trả lời
   async getAllAnswers(page = 1, limit = 50) {
     return await api.get(`/admin/answers?page=${page}&limit=${limit}`);
+  },
+
+  async updateAnswer(id, data) {
+    return await api.put(`/admin/answers/${id}`, data);
   },
 
   async deleteAnswer(id) {

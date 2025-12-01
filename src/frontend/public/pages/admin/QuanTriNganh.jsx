@@ -71,7 +71,11 @@ export default function QuanTriNganh() {
             <h1><i className="fas fa-graduation-cap"></i> Quản lý ngành</h1>
             <p>Quản lý danh sách ngành học trong hệ thống</p>
           </div>
-          <button className="btn btn-primary" onClick={() => setShowModal(true)}>
+          <button className="btn btn-primary" onClick={() => {
+            setEditingMajor(null)
+            setFormData({ tenNganh: '' })
+            setShowModal(true)
+          }}>
             <i className="fas fa-plus"></i> Thêm ngành
           </button>
         </div>

@@ -8,6 +8,7 @@ export default function QuanTriLoaiTaiLieu() {
   const [types, setTypes] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
+  const [editingType, setEditingType] = useState(null)
   const [formData, setFormData] = useState({ loaiTaiLieu: '' })
 
   useEffect(() => {
@@ -26,12 +27,23 @@ export default function QuanTriLoaiTaiLieu() {
     }
   }
 
+  const handleEdit = (type) => {
+    setEditingType(type)
+    setFormData({ loaiTaiLieu: type.loaiTaiLieu })
+    setShowModal(true)
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
-      await adminService.createDocumentType(formData.loaiTaiLieu)
-      showNotification('Đã thêm loại tài liệu mới', 'success', 2000)
+      if (editingType) {
+        await adminService.updateDocumentType(editingType.maLoai, formData.loaiTaiLieu)
+      } else {
+        await adminService.createDocumentType(formData.loaiTaiLieu)
+      }
+      showNotification(editingType ? 'Đã cập nhật loại tài liệu' : 'Đã thêm loại tài liệu mới', 'success', 2000)
       setShowModal(false)
+      setEditingType(null)
       setFormData({ loaiTaiLieu: '' })
       loadTypes()
     } catch (error) {
@@ -88,6 +100,7 @@ export default function QuanTriLoaiTaiLieu() {
                         <td>{type.loaiTaiLieu}</td>
                         <td>
                           <div className="action-buttons">
+                            <button className="btn btn-sm btn-primary" onClick={() => handleEdit(type)}><i className="fas fa-edit"></i></button>
                             <button className="btn btn-sm btn-danger" onClick={() => handleDelete(type.maLoai)}><i className="fas fa-trash"></i></button>
                           </div>
                         </td>
@@ -104,7 +117,7 @@ export default function QuanTriLoaiTaiLieu() {
           <div className="modal-overlay" onClick={() => setShowModal(false)}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
               <div className="modal-header">
-                <h2>Thêm loại tài liệu mới</h2>
+                <h2>{editingType ? 'Chỉnh sửa loại tài liệu' : 'Thêm loại tài liệu mới'}</h2>
                 <button className="modal-close" onClick={() => setShowModal(false)}>
                   <i className="fas fa-times"></i>
                 </button>
@@ -125,7 +138,7 @@ export default function QuanTriLoaiTaiLieu() {
                 </div>
                 <div className="modal-footer">
                   <button type="button" className="btn btn-outline" onClick={() => setShowModal(false)}>Hủy</button>
-                  <button type="submit" className="btn btn-primary">Thêm mới</button>
+                  <button type="submit" className="btn btn-primary">{editingType ? 'Cập nhật' : 'Thêm mới'}</button>
                 </div>
               </form>
             </div>

@@ -27,10 +27,20 @@ export default function QuanTriTags() {
     }
   }
 
+  const handleEdit = (tag) => {
+    setEditingTag(tag)
+    setFormData({ tenTag: tag.tenTag })
+    setShowModal(true)
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
-      await adminService.createTag(formData.tenTag)
+      if (editingTag) {
+        await adminService.updateTag(editingTag.maTag, formData.tenTag)
+      } else {
+        await adminService.createTag(formData.tenTag)
+      }
       showNotification(editingTag ? 'Đã cập nhật tag' : 'Đã thêm tag mới', 'success', 2000)
       setShowModal(false)
       setEditingTag(null)
@@ -90,6 +100,9 @@ export default function QuanTriTags() {
                         <td><span className="badge badge-info">{tag.tenTag}</span></td>
                         <td>
                           <div className="action-buttons">
+                            <button className="btn btn-sm btn-primary" onClick={() => handleEdit(tag)}>
+                              <i className="fas fa-edit"></i>
+                            </button>
                             <button className="btn btn-sm btn-danger" onClick={() => handleDelete(tag.maTag)}>
                               <i className="fas fa-trash"></i>
                             </button>

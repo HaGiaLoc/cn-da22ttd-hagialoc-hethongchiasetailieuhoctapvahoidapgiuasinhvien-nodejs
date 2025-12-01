@@ -8,6 +8,7 @@ export default function QuanTriDinhDang() {
   const [formats, setFormats] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
+  const [editingFormat, setEditingFormat] = useState(null)
   const [formData, setFormData] = useState({ tenDinhDang: '' })
 
   useEffect(() => {
@@ -26,12 +27,23 @@ export default function QuanTriDinhDang() {
     }
   }
 
+  const handleEdit = (format) => {
+    setEditingFormat(format)
+    setFormData({ tenDinhDang: format.tenDinhDang })
+    setShowModal(true)
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
-      await adminService.createFormat(formData.tenDinhDang)
-      showNotification('Đã thêm định dạng mới', 'success', 2000)
+      if (editingFormat) {
+        await adminService.updateFormat(editingFormat.maDinhDang, formData.tenDinhDang)
+      } else {
+        await adminService.createFormat(formData.tenDinhDang)
+      }
+      showNotification(editingFormat ? 'Đã cập nhật định dạng' : 'Đã thêm định dạng mới', 'success', 2000)
       setShowModal(false)
+      setEditingFormat(null)
       setFormData({ tenDinhDang: '' })
       loadFormats()
     } catch (error) {
@@ -88,6 +100,9 @@ export default function QuanTriDinhDang() {
                         <td><span className="badge badge-secondary">{format.tenDinhDang}</span></td>
                         <td>
                           <div className="action-buttons">
+                            <button className="btn btn-sm btn-primary" onClick={() => handleEdit(format)}>
+                              <i className="fas fa-edit"></i>
+                            </button>
                             <button className="btn btn-sm btn-danger" onClick={() => handleDelete(format.maDinhDang)}>
                               <i className="fas fa-trash"></i>
                             </button>
@@ -106,7 +121,7 @@ export default function QuanTriDinhDang() {
           <div className="modal-overlay" onClick={() => setShowModal(false)}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
               <div className="modal-header">
-                <h2>Thêm định dạng mới</h2>
+                <h2>{editingFormat ? 'Chỉnh sửa định dạng' : 'Thêm định dạng mới'}</h2>
                 <button className="modal-close" onClick={() => setShowModal(false)}>
                   <i className="fas fa-times"></i>
                 </button>
@@ -127,7 +142,7 @@ export default function QuanTriDinhDang() {
                 </div>
                 <div className="modal-footer">
                   <button type="button" className="btn btn-outline" onClick={() => setShowModal(false)}>Hủy</button>
-                  <button type="submit" className="btn btn-primary">Thêm mới</button>
+                  <button type="submit" className="btn btn-primary">{editingFormat ? 'Cập nhật' : 'Thêm mới'}</button>
                 </div>
               </form>
             </div>

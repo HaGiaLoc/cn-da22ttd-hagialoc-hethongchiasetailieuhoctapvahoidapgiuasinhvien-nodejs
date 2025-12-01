@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import BoTriQuanTri from '../../components/admin/BoTriQuanTri'
+import EditQuestionModal from '../../components/admin/EditQuestionModal'
 import { useNotification } from '../../contexts/NotificationContext'
 import { formatDate, formatNumber } from '../../utils/helpers'
 import { adminService } from '../../services'
@@ -10,6 +11,8 @@ export default function QuanTriCauHoi() {
   const [questions, setQuestions] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
+  const [sortBy, setSortBy] = useState('newest')
+  const [editingQuestion, setEditingQuestion] = useState(null)
 
   useEffect(() => {
     loadQuestions()
@@ -19,7 +22,7 @@ export default function QuanTriCauHoi() {
     setIsLoading(true)
     try {
       const res = await adminService.getAllQuestions()
-      setQuestions((res.data?.questions || []).sort((a, b) => a.maCauHoi - b.maCauHoi))
+      setQuestions(res.data?.questions || [])
     } catch (error) {
       showNotification('Không thể tải danh sách câu hỏi', 'error', 3000)
     } finally {
@@ -27,8 +30,23 @@ export default function QuanTriCauHoi() {
     }
   }
 
+  const handleEdit = (question) => {
+    setEditingQuestion(question)
+  }
+
+  const handleSaveEdit = async (formData) => {
+    try {
+      await adminService.updateQuestion(editingQuestion.maCauHoi, formData)
+      await loadQuestions()
+      setEditingQuestion(null)
+      showNotification('Cập nhật câu hỏi thành công', 'success', 2000)
+    } catch (error) {
+      showNotification('Cập nhật câu hỏi thất bại', 'error', 3000)
+    }
+  }
+
   const handleDelete = async (maCauHoi) => {
-    if (!confirm('Bạn có chắc chắn muốn xóa câu hỏi này?')) return
+    if (!confirm('Bạn có chắc chắn muốn xóa vĩnh viễn câu hỏi này?')) return
     try {
       await adminService.deleteQuestion(maCauHoi)
       showNotification('Đã xóa câu hỏi', 'success', 2000)
@@ -41,7 +59,20 @@ export default function QuanTriCauHoi() {
   const filteredQuestions = questions.filter(q => 
     q.tieuDeCauHoi?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     q.hoTenSV?.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  ).sort((a, b) => {
+    switch (sortBy) {
+      case 'newest':
+        return new Date(b.ngayDang) - new Date(a.ngayDang)
+      case 'oldest':
+        return new Date(a.ngayDang) - new Date(b.ngayDang)
+      case 'highest-rating':
+        return (b.votes || 0) - (a.votes || 0)
+      case 'lowest-rating':
+        return (a.votes || 0) - (b.votes || 0)
+      default:
+        return 0
+    }
+  })
 
   return (
     <BoTriQuanTri>
@@ -63,6 +94,18 @@ export default function QuanTriCauHoi() {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
+          <div className="filter-group">
+            <label>Sắp xếp:</label>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+            >
+              <option value="newest">Mới nhất</option>
+              <option value="oldest">Cũ nhất</option>
+              <option value="highest-rating">Đánh giá cao nhất</option>
+              <option value="lowest-rating">Đánh giá thấp nhất</option>
+            </select>
+          </div>
           <div className="filter-stats">
             <span>Tổng: <strong>{filteredQuestions.length}</strong> câu hỏi</span>
           </div>
@@ -81,11 +124,11 @@ export default function QuanTriCauHoi() {
                     <th>ID</th>
                     <th>Tiêu đề</th>
                     <th>Tác giả</th>
-                    <th>Trạng thái</th>
                     <th>Trả lời</th>
                     <th>Đánh giá</th>
                     <th>Lượt xem</th>
                     <th>Ngày đăng</th>
+                    <th>Trạng thái</th>
                     <th>Thao tác</th>
                   </tr>
                 </thead>
@@ -102,17 +145,6 @@ export default function QuanTriCauHoi() {
                           </Link>
                         </td>
                         <td>{q.hoTenSV}</td>
-                        <td>
-                          <span className={`badge ${
-                            q.trangThaiCauHoi === 'show' ? 'badge-warning' : 
-                            q.trangThaiCauHoi === 'answered' ? 'badge-success' : 
-                            'badge-secondary'
-                          }`}>
-                            {q.trangThaiCauHoi === 'show' ? 'Đang mở' : 
-                             q.trangThaiCauHoi === 'answered' ? 'Đã trả lời' : 
-                             'Đã ẩn'}
-                          </span>
-                        </td>
                         <td>{formatNumber(q.soLuongTraLoi || 0)}</td>
                         <td>
                           <strong style={{ color: q.votes > 0 ? '#4caf50' : q.votes < 0 ? '#f44336' : '#666' }}>
@@ -122,7 +154,21 @@ export default function QuanTriCauHoi() {
                         <td>{formatNumber(q.luotXem || 0)}</td>
                         <td>{formatDate(q.ngayDang)}</td>
                         <td>
+                          <span className={`badge badge-${
+                            q.trangThaiCauHoi === 'show' ? 'success' : 'danger'
+                          }`}>
+                            {q.trangThaiCauHoi === 'show' ? 'Hiện' : 'Ẩn'}
+                          </span>
+                        </td>
+                        <td>
                           <div className="action-buttons">
+                            <button
+                              className="btn btn-sm btn-primary"
+                              onClick={() => handleEdit(q)}
+                              title="Sửa"
+                            >
+                              <i className="fas fa-edit"></i>
+                            </button>
                             <button
                               className="btn btn-sm btn-danger"
                               onClick={() => handleDelete(q.maCauHoi)}
@@ -141,6 +187,14 @@ export default function QuanTriCauHoi() {
           )}
         </div>
       </section>
+
+      {editingQuestion && (
+        <EditQuestionModal
+          question={editingQuestion}
+          onClose={() => setEditingQuestion(null)}
+          onSave={handleSaveEdit}
+        />
+      )}
     </BoTriQuanTri>
   )
 }

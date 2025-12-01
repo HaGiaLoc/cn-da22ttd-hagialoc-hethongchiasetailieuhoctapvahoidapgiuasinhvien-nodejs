@@ -125,6 +125,23 @@ class AdminController {
     }
   }
 
+  // Cập nhật tài liệu
+  static async updateDocument(req, res, next) {
+    try {
+      const { id } = req.params;
+      const updateData = req.body;
+
+      await AdminService.updateDocument(id, updateData);
+
+      res.json({
+        success: true,
+        message: 'Cập nhật tài liệu thành công'
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   // Duyệt tài liệu
   static async approveDocument(req, res, next) {
     try {
@@ -322,6 +339,15 @@ class AdminController {
     }
   }
 
+  static async updateTag(req, res, next) {
+    try {
+      await AdminService.updateTag(req.params.id, req.body.tenTag);
+      res.json({ success: true, message: 'Cập nhật tag thành công' });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   static async deleteTag(req, res, next) {
     try {
       await AdminService.deleteTag(req.params.id);
@@ -345,6 +371,15 @@ class AdminController {
     try {
       const id = await AdminService.createDocumentType(req.body.loaiTaiLieu);
       res.json({ success: true, message: 'Thêm loại tài liệu thành công', data: { id } });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async updateDocumentType(req, res, next) {
+    try {
+      await AdminService.updateDocumentType(req.params.id, req.body.loaiTaiLieu);
+      res.json({ success: true, message: 'Cập nhật loại tài liệu thành công' });
     } catch (error) {
       next(error);
     }
@@ -378,6 +413,15 @@ class AdminController {
     }
   }
 
+  static async updateFormat(req, res, next) {
+    try {
+      await AdminService.updateFormat(req.params.id, req.body.tenDinhDang);
+      res.json({ success: true, message: 'Cập nhật định dạng thành công' });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   static async deleteFormat(req, res, next) {
     try {
       await AdminService.deleteFormat(req.params.id);
@@ -400,6 +444,40 @@ class AdminController {
     }
   }
 
+  static async updateQuestion(req, res, next) {
+    try {
+      const { id } = req.params;
+      const updateData = req.body;
+
+      await AdminService.updateQuestion(id, updateData);
+
+      res.json({
+        success: true,
+        message: 'Cập nhật câu hỏi thành công'
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async hideQuestion(req, res, next) {
+    try {
+      await AdminService.hideQuestion(req.params.id);
+      res.json({ success: true, message: 'Đã ẩn câu hỏi' });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async showQuestion(req, res, next) {
+    try {
+      await AdminService.showQuestion(req.params.id);
+      res.json({ success: true, message: 'Đã hiển thị câu hỏi' });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   static async deleteQuestion(req, res, next) {
     try {
       await AdminService.deleteQuestion(req.params.id);
@@ -415,6 +493,22 @@ class AdminController {
       const { page = 1, limit = 20 } = req.query;
       const result = await AdminService.getAllAnswers(parseInt(page), parseInt(limit));
       res.json({ success: true, data: result });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async updateAnswer(req, res, next) {
+    try {
+      const { id } = req.params;
+      const updateData = req.body;
+
+      await AdminService.updateAnswer(id, updateData);
+
+      res.json({
+        success: true,
+        message: 'Cập nhật câu trả lời thành công'
+      });
     } catch (error) {
       next(error);
     }
