@@ -1,8 +1,10 @@
 # Ignore database files
-db/documents/test/
-db/pictures/avatars/test/
-db/pictures/images/test/
-
+data/documents/**/*
+!data/documents/
+data/pictures/avatars/**/*
+!data/pictures/avatars/
+data/pictures/images/**/*
+!data/pictures/images/
 
 # Dependencies
 node_modules/
