@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 02, 2025 at 12:24 PM
+-- Generation Time: Dec 02, 2025 at 01:33 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -20,8 +20,6 @@ SET time_zone = "+00:00";
 --
 -- Database: `kef_db`
 --
-CREATE DATABASE IF NOT EXISTS `kef_db` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE `kef_db`;
 
 --
 -- Dumping data for table `baocaovipham`
@@ -201,14 +199,6 @@ INSERT INTO `nganh` (`maNganh`, `tenNganh`) VALUES
 (3, 'Ngôn ngữ Anh'),
 (4, 'Quản trị kinh doanh'),
 (5, 'Nông nghiệp');
-
---
--- Dumping data for table `quantrivien`
---
-
-INSERT INTO `quantrivien` (`maQuanTriVien`, `hoTenQTV`, `emailQTV`, `matKhauQTV`) VALUES
-(1, 'Admin 1', 'admin1@gmail.com', '$2a$10$G.4fWcGZjNkJJ2TbvU7tPOtORW5owAnZ9COexVEgZM9ExTUNqkBWK'),
-(2, 'Admin 2', 'admin2@gmail.com', '$2a$10$MrZcWJor99G8.5mwPXBoBu9baQmKZ4AV8dp2..OAgafpnUx6wfhJi');
 
 --
 -- Dumping data for table `sinhvien`

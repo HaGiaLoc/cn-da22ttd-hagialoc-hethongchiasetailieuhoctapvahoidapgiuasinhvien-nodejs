@@ -1,0 +1,118 @@
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: kef_db
+      MYSQL_USER: kef_user
+      MYSQL_PASSWORD: kef_password
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./backend/data/kef_db.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - kef-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend Node.js API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      NODE_ENV: development
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: kef_user
+      DB_PASSWORD: kef_password
+      DB_NAME: kef_db
+      JWT_SECRET: your-secret-key-change-this-in-production
+      PORT: 5000
+    command: >
+      sh -c "
+        echo 'Đang đợi MySQL khởi động...';
+        while ! nc -z mysql 3306; do
+          echo 'Đang đợi MySQL...';
+          sleep 5;
+        done;
+        echo 'MySQL đã sẵn sàng! Khởi động backend...';
+        npm run dev
+      "
+    volumes:
+      # Mount source code để hot-reload hoạt động
+      - ./backend:/app
+      # Exclude node_modules để tránh conflict
+      - /app/node_modules
+      # Mount uploads directory
+      - backend_documents:/app/data/documents
+      - backend_avatars:/app/data/pictures/avatars
+      - backend_images:/app/data/pictures/images
+    depends_on:
+      - mysql
+    networks:
+      - kef-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5000/api/health", "||", "exit", "1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # Frontend React + Vite
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      VITE_API_URL: http://localhost:5000
+    command: >
+      sh -c "
+        echo 'Đang đợi Backend khởi động...';
+        while ! nc -z backend 5000; do
+          echo 'Đang đợi Backend...';
+          sleep 5;
+        done;
+        echo 'Backend đã sẵn sàng! Khởi động frontend...';
+        npm run dev -- --host 0.0.0.0
+      "
+    volumes:
+      # Mount source code để HMR hoạt động
+      - ./frontend:/app
+      # Exclude node_modules
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - kef-network
+    stdin_open: true
+    tty: true
+
+volumes:
+  mysql_data:
+    driver: local
+  backend_documents:
+    driver: local
+  backend_avatars:
+    driver: local
+  backend_images:
+    driver: local
+
+networks:
+  kef-network:
+    driver: bridge
