@@ -113,27 +113,12 @@ class TaiLieuService {
       throw new Error('Tài liệu không tồn tại');
     }
 
-    // Ensure source file exists then copy to downloads folder before returning path
-    const srcPath = getAbsolutePath(document.filePath);
-    if (!srcPath) throw new Error('File path not found');
-
-    const downloadsDir = path.join(__dirname, '../../db/documents/downloads');
-    try {
-      await fs.mkdir(downloadsDir, { recursive: true });
-    } catch (err) {
-      // ignore
-    }
-
-    const destPath = path.join(downloadsDir, path.basename(srcPath));
-    try {
-      await fs.copyFile(srcPath, destPath);
-    } catch (err) {
-      // If copy fails, still proceed to increment and return original path
-      console.error('Error copying file for download:', err);
-    }
+    // Verify file exists
+    const filePath = getAbsolutePath(document.filePath);
+    if (!filePath) throw new Error('File path not found');
 
     await TaiLieuModel.incrementDownload(id);
-    return { ...document, downloadPath: destPath };
+    return { ...document, downloadPath: filePath };
   }
 
   // Lưu tài liệu

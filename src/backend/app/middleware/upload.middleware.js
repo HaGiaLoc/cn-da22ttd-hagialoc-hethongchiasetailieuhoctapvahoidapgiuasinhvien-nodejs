@@ -6,6 +6,15 @@ import fs from 'fs';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Helper to convert Vietnamese to non-accented
+const removeVietnameseTones = (str) => {
+  return str
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/Đ/g, 'D');
+};
+
 // Ensure base storage directories exist
 const ensureDir = (dirPath) => {
   try {
@@ -15,16 +24,15 @@ const ensureDir = (dirPath) => {
   }
 };
 
-const baseDbDir = path.join(__dirname, '../../db');
-const documentsDir = path.join(baseDbDir, 'documents');
-const picturesDir = path.join(baseDbDir, 'pictures');
+const baseDataDir = path.join(__dirname, '../../data');
+const documentsDir = path.join(baseDataDir, 'documents');
+const picturesDir = path.join(baseDataDir, 'pictures');
 const avatarsDir = path.join(picturesDir, 'avatars');
 const imagesDir = path.join(picturesDir, 'images');
 
 ensureDir(documentsDir);
 ensureDir(avatarsDir);
 ensureDir(imagesDir);
-ensureDir(path.join(documentsDir, 'downloads'));
 
 // Configure storage
 const storage = multer.diskStorage({
@@ -49,8 +57,13 @@ const storage = multer.diskStorage({
     cb(null, documentsDir);
   },
   filename: (req, file, cb) => {
+    // Keep original filename with timestamp suffix to avoid conflicts
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
+    const ext = path.extname(file.originalname);
+    const nameWithoutExt = path.basename(file.originalname, ext);
+    const nameNoTones = removeVietnameseTones(nameWithoutExt);
+    const sanitizedName = nameNoTones.replace(/[^a-zA-Z0-9._-]/g, '_');
+    cb(null, sanitizedName + '-' + uniqueSuffix + ext);
   }
 });
 
