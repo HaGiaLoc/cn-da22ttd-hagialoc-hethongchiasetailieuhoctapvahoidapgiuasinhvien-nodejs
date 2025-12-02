@@ -122,6 +122,39 @@ class CauHoiService {
     return true;
   }
 
+  // Cập nhật câu hỏi
+  static async update(id, maSinhVien, updateData) {
+    const question = await CauHoiModel.getById(id);
+    if (!question) {
+      throw new Error('Câu hỏi không tồn tại');
+    }
+
+    // Chỉ cho phép chủ sở hữu cập nhật
+    if (question.maSinhVien !== maSinhVien) {
+      throw new Error('Bạn không có quyền chỉnh sửa câu hỏi này');
+    }
+
+    const { tieuDeCH, noiDungCH } = updateData;
+    await CauHoiModel.update(id, { tieuDeCH, noiDungCH });
+    return true;
+  }
+
+  // Chuyển trạng thái câu hỏi
+  static async updateStatus(id, maSinhVien, trangThaiCH) {
+    const question = await CauHoiModel.getById(id);
+    if (!question) {
+      throw new Error('Câu hỏi không tồn tại');
+    }
+
+    // Chỉ cho phép chủ sở hữu thay đổi trạng thái
+    if (question.maSinhVien !== maSinhVien) {
+      throw new Error('Bạn không có quyền thay đổi trạng thái câu hỏi này');
+    }
+
+    await CauHoiModel.updateStatus(id, trangThaiCH);
+    return true;
+  }
+
   // Xóa câu hỏi
   static async delete(id, maSinhVien, role) {
     const question = await CauHoiModel.getById(id);

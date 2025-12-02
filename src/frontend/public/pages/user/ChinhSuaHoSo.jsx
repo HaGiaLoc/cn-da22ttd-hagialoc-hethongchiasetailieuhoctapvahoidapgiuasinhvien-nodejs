@@ -3,8 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import BoTri from '../../components/BoTri'
 import { useAuth } from '../../contexts/AuthContext'
 import { useNotification } from '../../contexts/NotificationContext'
-import { generateAvatar } from '../../utils/helpers'
-import { cauHoiService, authService } from '../../services'
+import { generateAvatar, getAvatarUrl } from '../../utils/helpers'
+import { cauHoiService, authService } from '../../api'
 
 export default function ChinhSuaHoSo() {
   const navigate = useNavigate()
@@ -17,6 +17,7 @@ export default function ChinhSuaHoSo() {
     truongHoc: '',
     nganh: ''
   })
+  const [avatarFile, setAvatarFile] = useState(null)
   const [avatarPreview, setAvatarPreview] = useState('')
   const [errors, setErrors] = useState({})
   const [majors, setMajors] = useState([])
@@ -35,7 +36,7 @@ export default function ChinhSuaHoSo() {
       truongHoc: user.truongHoc || 'Chưa cập nhật',
       nganh: user.maNganh || user.nganh || ''
     })
-    setAvatarPreview(user.avatar || generateAvatar(user.name))
+    setAvatarPreview(getAvatarUrl(user.avatar, user.name))
   }, [user, navigate, loading])
 
   useEffect(() => {
@@ -56,6 +57,7 @@ export default function ChinhSuaHoSo() {
   const handleAvatarChange = (e) => {
     const file = e.target.files[0]
     if (file) {
+      setAvatarFile(file)
       const reader = new FileReader()
       reader.onloadend = () => {
         setAvatarPreview(reader.result)
@@ -65,6 +67,7 @@ export default function ChinhSuaHoSo() {
   }
 
   const resetAvatar = () => {
+    setAvatarFile(null)
     if (user) {
       setAvatarPreview(generateAvatar(formData.hoTenSinhVien || user.name))
     }
@@ -97,15 +100,19 @@ export default function ChinhSuaHoSo() {
       try {
         showNotification('Đang cập nhật hồ sơ...', 'loading', 0)
 
-        const payload = {
-          hoTenSinhVien: formData.hoTenSinhVien,
-          email: formData.email,
-          truongHoc: formData.truongHoc,
-          maNganh: formData.nganh,
-          avatar: avatarPreview
+        // Tạo FormData để gửi file
+        const formDataToSend = new FormData()
+        formDataToSend.append('hoTenSinhVien', formData.hoTenSinhVien)
+        formDataToSend.append('email', formData.email)
+        formDataToSend.append('truongHoc', formData.truongHoc)
+        formDataToSend.append('maNganh', formData.nganh)
+        
+        // Nếu có file avatar mới, thêm vào FormData
+        if (avatarFile) {
+          formDataToSend.append('avatar', avatarFile)
         }
 
-        const res = await authService.updateProfile(payload)
+        const res = await authService.updateProfile(formDataToSend)
         const updatedStudent = res?.data || res || {}
 
         // Normalize response to match client user shape
@@ -115,7 +122,7 @@ export default function ChinhSuaHoSo() {
           email: updatedStudent.emailSV || formData.email,
           truongHoc: updatedStudent.truongHoc || formData.truongHoc,
           nganh: updatedStudent.maNganh || updatedStudent.tenNganh || formData.nganh,
-          avatar: updatedStudent.avatarPath || avatarPreview
+          avatar: updatedStudent.avatarPath ? `/db/pictures/avatars/${updatedStudent.avatarPath.split('/').pop()}` : avatarPreview
         }
 
         setUser(newUser)

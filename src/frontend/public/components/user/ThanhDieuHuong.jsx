@@ -55,9 +55,11 @@ export default function ThanhDieuHuong() {
         <div className="nav-actions">
           {isAuthenticated ? (
             <>
-              <Link to="/upload" className="btn btn-primary">
-                <i className="fas fa-upload"></i> Upload
-              </Link>
+              {user?.role === 'student' && (
+                <Link to="/upload" className="btn btn-primary">
+                  <i className="fas fa-upload"></i> Chia sẻ
+                </Link>
+              )}
               <div 
                 ref={profileRef}
                 className={`nav-profile ${profileDropdownOpen ? 'active' : ''}`} 
@@ -65,23 +67,25 @@ export default function ThanhDieuHuong() {
               >
                 <img src={user?.avatar || generateAvatar(user?.name)} alt={user?.name} />
                 <div className="profile-dropdown">
-                  <Link to="/profile">
-                    <i className="fas fa-user"></i> Hồ sơ
-                  </Link>
-                  <Link to="/my-documents">
-                    <i className="fas fa-file-alt"></i> Tài liệu của tôi
-                  </Link>
-                  <Link to="/my-questions">
-                    <i className="fas fa-question-circle"></i> Câu hỏi của tôi
-                  </Link>
-                  <Link to="/change-password">
-                    <i className="fas fa-key"></i> Đổi mật khẩu
-                  </Link>
-                  {user?.role === 'admin' && (
+                  {user?.role === 'student' ? (
                     <>
-                      <hr />
+                      <Link to="/profile">
+                        <i className="fas fa-user"></i> Hồ sơ
+                      </Link>
+                      <Link to="/my-documents">
+                        <i className="fas fa-file-alt"></i> Tài liệu của tôi
+                      </Link>
+                      <Link to="/my-questions">
+                        <i className="fas fa-question-circle"></i> Câu hỏi của tôi
+                      </Link>
+                      <Link to="/change-password">
+                        <i className="fas fa-key"></i> Đổi mật khẩu
+                      </Link>
+                    </>
+                  ) : (
+                    <>
                       <Link to="/admin" className="admin-link">
-                        <i className="fas fa-tachometer-alt"></i> Quản trị
+                        <i className="fas fa-tachometer-alt"></i> Bảng điều khiển
                       </Link>
                     </>
                   )}

@@ -90,7 +90,9 @@ class TaiLieuModel {
             MAX(s.avatarPath) as avatarPath, 
             MAX(l.loaiTaiLieu) as tenLoai,
             MAX(d.tenDinhDang) as tenDinhDang,
-            MAX(m.tenMon) as tenMon, 
+            MAX(m.maMon) as maMon,
+            MAX(m.tenMon) as tenMon,
+            MAX(n.maNganh) as maNganh,
             MAX(n.tenNganh) as tenNganh
           FROM tailieu t
       LEFT JOIN sinhvien s ON t.maSinhVien = s.maSinhVien
@@ -177,6 +179,61 @@ class TaiLieuModel {
     const query = 'UPDATE tailieu SET trangThaiTL = ? WHERE maTaiLieu = ?';
     const [result] = await db.execute(query, [status, id]);
     return result.affectedRows > 0;
+  }
+
+  // Cập nhật tài liệu
+  static async update(id, updateData) {
+    const connection = await db.getConnection();
+    try {
+      await connection.beginTransaction();
+
+      const { tieuDeTL, trangThaiTL, maLoai, maDinhDang, maMon } = updateData;
+      const updates = [];
+      const params = [];
+
+      if (tieuDeTL !== undefined) {
+        updates.push('tieuDeTL = ?');
+        params.push(tieuDeTL);
+      }
+      if (trangThaiTL !== undefined) {
+        updates.push('trangThaiTL = ?');
+        params.push(trangThaiTL);
+      }
+      if (maLoai !== undefined) {
+        updates.push('maLoai = ?');
+        params.push(maLoai);
+      }
+      if (maDinhDang !== undefined) {
+        updates.push('maDinhDang = ?');
+        params.push(maDinhDang);
+      }
+
+      // Update tailieu table
+      if (updates.length > 0) {
+        params.push(id);
+        const query = `UPDATE tailieu SET ${updates.join(', ')} WHERE maTaiLieu = ?`;
+        await connection.execute(query, params);
+      }
+
+      // Update danhsachtailieu if maMon is provided
+      if (maMon !== undefined) {
+        // Delete existing entries
+        await connection.execute('DELETE FROM danhsachtailieu WHERE maTaiLieu = ?', [id]);
+        
+        // Insert new entry if maMon is not null
+        if (maMon) {
+          await connection.execute('INSERT INTO danhsachtailieu (maMon, maTaiLieu) VALUES (?, ?)', [maMon, id]);
+        }
+      }
+
+      await connection.commit();
+      return true;
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
   }
 
   // Xóa tài liệu

@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import BoTri from '../../components/BoTri'
 import { useAuth } from '../../contexts/AuthContext'
 import { useNotification } from '../../contexts/NotificationContext'
-import { cauHoiService } from '../../services'
+import { cauHoiService } from '../../api'
 
 
 export default function DatCauHoi() {

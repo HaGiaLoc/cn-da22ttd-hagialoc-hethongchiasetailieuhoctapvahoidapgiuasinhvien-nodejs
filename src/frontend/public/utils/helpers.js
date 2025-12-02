@@ -117,3 +117,26 @@ export function generateAvatar(fullName) {
   
   return `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=4F46E5&color=fff&size=150`
 }
+
+/**
+ * Lấy URL đầy đủ của avatar từ đường dẫn tương đối hoặc tạo avatar mặc định
+ * @param {string} avatarPath - Đường dẫn avatar từ backend (có thể là tương đối hoặc URL)
+ * @param {string} fullName - Tên đầy đủ để tạo avatar mặc định nếu không có avatarPath
+ * @returns {string} URL avatar đầy đủ
+ */
+export function getAvatarUrl(avatarPath, fullName) {
+  // Nếu không có avatarPath, tạo avatar từ tên
+  if (!avatarPath) {
+    return generateAvatar(fullName)
+  }
+  
+  // Nếu đã là URL đầy đủ (http/https), trả về luôn
+  if (avatarPath.startsWith('http://') || avatarPath.startsWith('https://')) {
+    return avatarPath
+  }
+  
+  // Nếu là đường dẫn tương đối, tạo URL đầy đủ
+  const baseUrl = import.meta.env.VITE_API_BASE_URL || ''
+  const cleanPath = avatarPath.startsWith('/') ? avatarPath : `/${avatarPath}`
+  return `${baseUrl}${cleanPath}`
+}

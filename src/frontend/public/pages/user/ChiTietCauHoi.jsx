@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import BoTri from '../../components/BoTri'
 import BaoCaoModal from '../../components/user/BaoCaoModal'
-import { cauHoiService } from '../../services'
+import EditQuestionModal from '../../components/user/EditQuestionModal'
+import { cauHoiService } from '../../api'
 import { useNotification } from '../../contexts/NotificationContext'
 import { useAuth } from '../../contexts/AuthContext'
 import { formatDate, generateAvatar } from '../../utils/helpers'
@@ -17,6 +18,7 @@ export default function ChiTietCauHoi() {
   const [answers, setAnswers] = useState([])
   const [answer, setAnswer] = useState('')
   const [showReportModal, setShowReportModal] = useState(false)
+  const [showEditModal, setShowEditModal] = useState(false)
   const [showDropdown, setShowDropdown] = useState(false)
   const dropdownRef = useRef(null)
 
@@ -101,6 +103,38 @@ export default function ChiTietCauHoi() {
     }
   }
 
+  const handleEditQuestion = () => {
+    setShowEditModal(true)
+    setShowDropdown(false)
+  }
+
+  const handleSaveEdit = async (formData) => {
+    try {
+      await cauHoiService.update(id, formData)
+      showNotification('Cập nhật câu hỏi thành công', 'success', 2000)
+      setShowEditModal(false)
+      await loadQuestion()
+    } catch (error) {
+      showNotification(error.message || 'Không thể cập nhật câu hỏi', 'error')
+    }
+  }
+
+  const handleToggleStatus = async () => {
+    try {
+      const newStatus = question.trangThaiCH === 'show' ? 'hidden' : 'show'
+      await cauHoiService.updateStatus(id, newStatus)
+      showNotification(
+        `Đã ${newStatus === 'show' ? 'hiển thị' : 'ẩn'} câu hỏi`,
+        'success',
+        2000
+      )
+      setShowDropdown(false)
+      await loadQuestion()
+    } catch (error) {
+      showNotification(error.message || 'Không thể thay đổi trạng thái', 'error')
+    }
+  }
+
   return (
     <BoTri>
       <section className="question-detail-section">
@@ -139,6 +173,18 @@ export default function ChiTietCauHoi() {
                     </button>
                     {showDropdown && (
                       <div className="dropdown-menu">
+                        {user && user.id === question.maSinhVien && (
+                          <>
+                            <button onClick={handleEditQuestion}>
+                              <i className="fas fa-edit"></i>
+                              Chỉnh sửa câu hỏi
+                            </button>
+                            <button onClick={handleToggleStatus}>
+                              <i className={`fas fa-${question.trangThaiCH === 'show' ? 'eye-slash' : 'eye'}`}></i>
+                              {question.trangThaiCH === 'show' ? 'Ẩn câu hỏi' : 'Hiển thị câu hỏi'}
+                            </button>
+                          </>
+                        )}
                         <button onClick={() => {
                           setShowReportModal(true)
                           setShowDropdown(false)
@@ -160,17 +206,21 @@ export default function ChiTietCauHoi() {
               <div className="question-body">
                 <div className="question-voting">
                   <button 
-                    onClick={() => handleVote('up', 'question')}
+                    onClick={() => user?.role === 'student' && handleVote('up', 'question')}
                     className={user && question.userVote?.Upvote ? 'active' : ''}
-                    title={!user ? 'Đăng nhập để vote' : 'Upvote'}
+                    title={!user ? 'Đăng nhập để vote' : user?.role === 'admin' ? 'Quản trị viên không thể đánh giá' : 'Upvote'}
+                    disabled={!user || user?.role === 'admin'}
+                    style={user?.role === 'admin' ? { cursor: 'not-allowed', opacity: 0.5 } : {}}
                   >
                     <i className="fas fa-arrow-up"></i>
                   </button>
                   <span className="vote-count">{question.votes || 0}</span>
                   <button 
-                    onClick={() => handleVote('down', 'question')}
+                    onClick={() => user?.role === 'student' && handleVote('down', 'question')}
                     className={user && question.userVote?.Downvote ? 'active' : ''}
-                    title={!user ? 'Đăng nhập để vote' : 'Downvote'}
+                    title={!user ? 'Đăng nhập để vote' : user?.role === 'admin' ? 'Quản trị viên không thể đánh giá' : 'Downvote'}
+                    disabled={!user || user?.role === 'admin'}
+                    style={user?.role === 'admin' ? { cursor: 'not-allowed', opacity: 0.5 } : {}}
                   >
                     <i className="fas fa-arrow-down"></i>
                   </button>
@@ -196,15 +246,19 @@ export default function ChiTietCauHoi() {
                     <div key={ans.maCauTraLoi} className="answer-item">
                       <div className="answer-voting">
                         <button 
-                          onClick={() => handleVote('up', 'answer', ans.maCauTraLoi)}
-                          title={!user ? 'Đăng nhập để vote' : 'Upvote'}
+                          onClick={() => user?.role === 'student' && handleVote('up', 'answer', ans.maCauTraLoi)}
+                          title={!user ? 'Đăng nhập để vote' : user?.role === 'admin' ? 'Quản trị viên không thể đánh giá' : 'Upvote'}
+                          disabled={!user || user?.role === 'admin'}
+                          style={user?.role === 'admin' ? { cursor: 'not-allowed', opacity: 0.5 } : {}}
                         >
                           <i className="fas fa-arrow-up"></i>
                         </button>
                         <span className="vote-count">{ans.votes || 0}</span>
                         <button 
-                          onClick={() => handleVote('down', 'answer', ans.maCauTraLoi)}
-                          title={!user ? 'Đăng nhập để vote' : 'Downvote'}
+                          onClick={() => user?.role === 'student' && handleVote('down', 'answer', ans.maCauTraLoi)}
+                          title={!user ? 'Đăng nhập để vote' : user?.role === 'admin' ? 'Quản trị viên không thể đánh giá' : 'Downvote'}
+                          disabled={!user || user?.role === 'admin'}
+                          style={user?.role === 'admin' ? { cursor: 'not-allowed', opacity: 0.5 } : {}}
                         >
                           <i className="fas fa-arrow-down"></i>
                         </button>
@@ -221,31 +275,33 @@ export default function ChiTietCauHoi() {
                 </div>
               </div>
 
-              <div className="answer-form-section">
-                <h3>Câu trả lời của bạn</h3>
-                {user ? (
-                  <form onSubmit={handleSubmitAnswer} className="answer-form">
-                    <textarea
-                      rows="6"
-                      placeholder="Viết câu trả lời của bạn..."
-                      value={answer}
-                      onChange={(e) => setAnswer(e.target.value)}
-                      required
-                    ></textarea>
-                    <button 
-                      type="submit" 
-                      className="btn btn-primary"
-                      disabled={!answer.trim()}
-                    >
-                      Gửi câu trả lời
-                    </button>
-                  </form>
-                ) : (
-                  <div className="login-prompt">
-                    <p>Vui lòng <Link to="/dang-nhap">đăng nhập</Link> để trả lời câu hỏi</p>
-                  </div>
-                )}
-              </div>
+              {user?.role !== 'admin' && (
+                <div className="answer-form-section">
+                  <h3>Câu trả lời của bạn</h3>
+                  {user ? (
+                    <form onSubmit={handleSubmitAnswer} className="answer-form">
+                      <textarea
+                        rows="6"
+                        placeholder="Viết câu trả lời của bạn..."
+                        value={answer}
+                        onChange={(e) => setAnswer(e.target.value)}
+                        required
+                      ></textarea>
+                      <button 
+                        type="submit" 
+                        className="btn btn-primary"
+                        disabled={!answer.trim()}
+                      >
+                        Gửi câu trả lời
+                      </button>
+                    </form>
+                  ) : (
+                    <div className="login-prompt">
+                      <p>Vui lòng <Link to="/dang-nhap">đăng nhập</Link> để trả lời câu hỏi</p>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -258,6 +314,14 @@ export default function ChiTietCauHoi() {
         reportedId={question?.maCauHoi}
         reportedTitle={question?.tieuDeCH}
       />
+
+      {showEditModal && (
+        <EditQuestionModal
+          question={question}
+          onClose={() => setShowEditModal(false)}
+          onSave={handleSaveEdit}
+        />
+      )}
     </BoTri>
   )
 }

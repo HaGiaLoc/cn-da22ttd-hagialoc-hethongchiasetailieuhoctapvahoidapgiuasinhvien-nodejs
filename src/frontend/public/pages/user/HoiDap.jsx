@@ -3,10 +3,12 @@ import { Link } from 'react-router-dom'
 import BoTri from '../../components/BoTri'
 import TheCauHoi from '../../components/user/TheCauHoi'
 import PhanTrang from '../../components/user/PhanTrang'
-import { cauHoiService } from '../../services'
+import { cauHoiService } from '../../api'
 import { searchMatch } from '../../utils/helpers'
+import { useAuth } from '../../contexts/AuthContext'
 
 export default function HoiDap() {
+  const { user } = useAuth()
   const [allQuestions, setAllQuestions] = useState([])
   const [questions, setQuestions] = useState([])
   const [isLoading, setIsLoading] = useState(true)
@@ -74,19 +76,29 @@ export default function HoiDap() {
     if (filters.status && filters.status !== 'all') svcFilters.trangThaiCH = filters.status
     if (filters.major) svcFilters.Nganh = filters.major
     if (filters.subject) svcFilters.Mon = filters.subject
-    if (selectedTag) svcFilters.tag = selectedTag
     svcFilters.page = page
     svcFilters.limit = itemsPerPage * 10 // fetch more to allow client-side paging, adjust as needed
 
     const fetched = await loadQuestions(svcFilters)
 
-    // Apply client-side sorting after server fetch
-    let sorted = [...(fetched || [])]
-    if (filters.sort === 'newest') sorted.sort((a, b) => new Date(b.ngayDatCH) - new Date(a.ngayDatCH))
-    else if (filters.sort === 'votes') sorted.sort((a, b) => (b.votes || 0) - (a.votes || 0))
-    else if (filters.sort === 'answers') sorted.sort((a, b) => (b.soLuongTraLoi || 0) - (a.soLuongTraLoi || 0))
+    // Apply client-side tag filter
+    let filtered = [...(fetched || [])]
+    if (selectedTag) {
+      filtered = filtered.filter(q => {
+        if (!q.tags) return false
+        const tagArray = typeof q.tags === 'string' 
+          ? q.tags.split(',').map(t => t.trim())
+          : (Array.isArray(q.tags) ? q.tags : [])
+        return tagArray.includes(selectedTag)
+      })
+    }
 
-    setQuestions(sorted)
+    // Apply client-side sorting after filtering
+    if (filters.sort === 'newest') filtered.sort((a, b) => new Date(b.ngayDatCH) - new Date(a.ngayDatCH))
+    else if (filters.sort === 'votes') filtered.sort((a, b) => (b.votes || 0) - (a.votes || 0))
+    else if (filters.sort === 'answers') filtered.sort((a, b) => (b.soLuongTraLoi || 0) - (a.soLuongTraLoi || 0))
+
+    setQuestions(filtered)
     setCurrentPage(1)
   }
 
@@ -120,8 +132,14 @@ export default function HoiDap() {
 
   // Lọc môn học theo ngành được chọn
   const filteredSubjects = filters.major
-    ? filterOptions.subjects.filter(mon => mon.maNganh === filters.major)
+    ? filterOptions.subjects.filter(mon => mon.maNganh == filters.major)
     : filterOptions.subjects
+
+  console.log('Filtered subjects:', { 
+    major: filters.major, 
+    allSubjects: filterOptions.subjects, 
+    filtered: filteredSubjects 
+  })
 
   const totalPages = Math.ceil(questions.length / itemsPerPage)
   const currentQuestions = questions.slice(
@@ -199,10 +217,9 @@ export default function HoiDap() {
                   <select
                     value={filters.subject}
                     onChange={(e) => setFilters({ ...filters, subject: e.target.value })}
-                    disabled={!filters.major && filterOptions.subjects.length > 0}
                   >
                     <option value="" key="all-subjects">
-                      {filters.major ? 'Tất cả môn học' : 'Chọn ngành trước'}
+                      Tất cả môn học
                     </option>
                     {filteredSubjects.map(mon => (
                       <option key={mon.maMon} value={mon.maMon}>{mon.tenMon}</option>
@@ -222,8 +239,20 @@ export default function HoiDap() {
                   </select>
                 </div>
 
-                <button className="btn btn-primary btn-full" onClick={applyFilters}>
-                  Áp dụng
+                <button 
+                  className="btn btn-primary btn-full" 
+                  onClick={() => {
+                    setFilters({
+                      search: '',
+                      status: 'all',
+                      subject: '',
+                      major: '',
+                      sort: 'newest'
+                    })
+                    setSelectedTag('')
+                  }}
+                >
+                  <i className="fas fa-times"></i> Xóa bộ lọc
                 </button>
               </div>
 
@@ -258,9 +287,11 @@ export default function HoiDap() {
 
               <div className="qa-header">
                 <h2>{questions.length} câu hỏi</h2>
-                <Link to="/ask" className="btn btn-primary">
-                  Đặt câu hỏi
-                </Link>
+                {user?.role === 'student' && (
+                  <Link to="/ask" className="btn btn-primary">
+                    Đặt câu hỏi
+                  </Link>
+                )}
               </div>
 
               <div className="questions-list">

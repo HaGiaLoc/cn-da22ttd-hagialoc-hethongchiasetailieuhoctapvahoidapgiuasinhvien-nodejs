@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import BoTriQuanTri from '../../components/admin/BoTriQuanTri'
-import { adminService } from '../../services'
+import { adminService } from '../../api'
 import { useNotification } from '../../contexts/NotificationContext'
 import { formatDate } from '../../utils/helpers'
 

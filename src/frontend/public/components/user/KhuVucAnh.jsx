@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import api from '../../utils/api'
+import api from '../../utils/axiosConfig'
 
 export default function KhuVucAnh() {
   const [searchQuery, setSearchQuery] = useState('')

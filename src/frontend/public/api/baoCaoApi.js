@@ -1,4 +1,4 @@
-import api from '../utils/api';
+import api from '../utils/axiosConfig';
 
 const baoCaoService = {
   // Tạo báo cáo

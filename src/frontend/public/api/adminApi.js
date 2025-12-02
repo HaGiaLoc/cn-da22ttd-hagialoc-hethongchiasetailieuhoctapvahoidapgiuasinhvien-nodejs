@@ -1,4 +1,4 @@
-import api from '../utils/api';
+import api from '../utils/axiosConfig';
 
 const adminService = {
   // Lấy thống kê dashboard

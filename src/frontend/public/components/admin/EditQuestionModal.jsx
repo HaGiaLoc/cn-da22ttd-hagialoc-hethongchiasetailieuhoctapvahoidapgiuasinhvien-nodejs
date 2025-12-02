@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { adminService } from '../../services'
+import { adminService } from '../../api'
 
 export default function EditQuestionModal({ question, onClose, onSave }) {
   const [formData, setFormData] = useState({

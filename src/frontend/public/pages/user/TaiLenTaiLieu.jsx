@@ -4,7 +4,7 @@ import BoTri from '../../components/BoTri'
 import { useAuth } from '../../contexts/AuthContext'
 import { useNotification } from '../../contexts/NotificationContext'
 import { getFileIcon, formatFileSize } from '../../utils/helpers'
-import { taiLieuService } from '../../services'
+import { taiLieuService } from '../../api'
 
 export default function TaiLenTaiLieu() {
   const navigate = useNavigate()

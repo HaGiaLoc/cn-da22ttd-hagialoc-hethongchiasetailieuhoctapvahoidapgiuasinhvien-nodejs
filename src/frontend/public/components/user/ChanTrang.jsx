@@ -43,7 +43,7 @@ export default function ChanTrang() {
         </div>
         
         <div className="footer-bottom">
-          <p>&copy; 2024-2025 KEF - Knowledge Exchange Forum. All rights reserved.</p>
+          <p>&copy; KEF - Knowledge Exchange Forum. All rights reserved.</p>
         </div>
       </div>
     </footer>

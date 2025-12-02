@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom'
 import BoTri from '../../components/BoTri'
 import TheTaiLieu from '../../components/user/TheTaiLieu'
 import PhanTrang from '../../components/user/PhanTrang'
-import { taiLieuService } from '../../services'
+import { taiLieuService } from '../../api'
 import { useAuth } from '../../contexts/AuthContext'
 
 export default function TaiLieuCuaToi() {

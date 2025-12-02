@@ -1,4 +1,4 @@
-import api from '../utils/api';
+import api from '../utils/axiosConfig';
 
 const authService = {
   // Đăng nhập
@@ -37,7 +37,10 @@ const authService = {
   // Logout (client-side)
   logout() {
     localStorage.removeItem('user');
+    localStorage.removeItem('rememberMe');
+    localStorage.removeItem('tabCount');
     sessionStorage.removeItem('user');
+    sessionStorage.removeItem('isTemporarySession');
   }
 };
 

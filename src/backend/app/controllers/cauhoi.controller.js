@@ -180,6 +180,42 @@ class CauHoiController {
     }
   }
 
+  // Cập nhật câu hỏi
+  static async update(req, res, next) {
+    try {
+      const { id } = req.params;
+      const { tieuDeCH, noiDungCH } = req.body;
+      const maSinhVien = req.user.id;
+
+      await CauHoiService.update(id, maSinhVien, { tieuDeCH, noiDungCH });
+
+      res.json({
+        success: true,
+        message: 'Cập nhật câu hỏi thành công'
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // Chuyển trạng thái câu hỏi
+  static async updateStatus(req, res, next) {
+    try {
+      const { id } = req.params;
+      const { trangThaiCH } = req.body;
+      const maSinhVien = req.user.id;
+
+      await CauHoiService.updateStatus(id, maSinhVien, trangThaiCH);
+
+      res.json({
+        success: true,
+        message: 'Chuyển trạng thái câu hỏi thành công'
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   // Xóa câu hỏi
   static async delete(req, res, next) {
     try {

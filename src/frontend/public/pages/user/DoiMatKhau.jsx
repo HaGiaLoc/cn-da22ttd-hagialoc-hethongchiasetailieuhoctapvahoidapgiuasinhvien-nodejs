@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import BoTri from '../../components/BoTri'
 import { useAuth } from '../../contexts/AuthContext'
 import { useNotification } from '../../contexts/NotificationContext'
-import authService from '../../services/authService'
+import authService from '../../api/authApi'
 
 
 export default function DoiMatKhau() {

@@ -4,7 +4,7 @@ import BoTriQuanTri from '../../components/admin/BoTriQuanTri'
 import EditQuestionModal from '../../components/admin/EditQuestionModal'
 import { useNotification } from '../../contexts/NotificationContext'
 import { formatDate, formatNumber } from '../../utils/helpers'
-import { adminService } from '../../services'
+import { adminService } from '../../api'
 
 export default function QuanTriCauHoi() {
   const { showNotification } = useNotification()

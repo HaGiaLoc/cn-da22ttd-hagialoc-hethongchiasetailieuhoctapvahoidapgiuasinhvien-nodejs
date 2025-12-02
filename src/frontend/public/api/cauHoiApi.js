@@ -1,4 +1,4 @@
-import api from '../utils/api';
+import api from '../utils/axiosConfig';
 
 const cauHoiService = {
   // Lấy danh sách câu hỏi
@@ -60,6 +60,18 @@ const cauHoiService = {
   // Vote câu trả lời
   async voteAnswer(answerId, isUpvote) {
     const response = await api.post(`/cauhoi/answer/${answerId}/vote`, { isUpvote });
+    return response.data;
+  },
+
+  // Cập nhật câu hỏi
+  async update(id, updateData) {
+    const response = await api.put(`/cauhoi/${id}`, updateData);
+    return response.data;
+  },
+
+  // Chuyển trạng thái câu hỏi
+  async updateStatus(id, trangThaiCH) {
+    const response = await api.put(`/cauhoi/${id}/status`, { trangThaiCH });
     return response.data;
   },
 

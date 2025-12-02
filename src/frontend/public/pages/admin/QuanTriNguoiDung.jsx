@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import BoTriQuanTri from '../../components/admin/BoTriQuanTri'
-import { adminService } from '../../services'
+import { adminService } from '../../api'
 import { generateAvatar } from '../../utils/helpers'
 import { useNotification } from '../../contexts/NotificationContext'
 import { formatDate } from '../../utils/helpers'

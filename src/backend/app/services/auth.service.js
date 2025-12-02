@@ -2,6 +2,22 @@ import bcrypt from 'bcryptjs';
 import SinhVienModel from '../models/sinhvien.model.js';
 import QuanTriVienModel from '../models/quantrivien.model.js';
 import { generateToken } from '../config/jwt.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Helper function to convert absolute path to relative path from backend root
+const getRelativePath = (absolutePath) => {
+  if (!absolutePath) return absolutePath;
+  // If already relative or URL, return as is
+  if (!path.isAbsolute(absolutePath) || absolutePath.startsWith('http')) return absolutePath;
+  const backendRoot = path.join(__dirname, '../..');
+  const relativePath = path.relative(backendRoot, absolutePath);
+  // Convert Windows backslashes to forward slashes for consistency
+  return relativePath.replace(/\\/g, '/');
+};
 
 class AuthService {
   // Đăng ký sinh viên
@@ -116,12 +132,22 @@ class AuthService {
       throw new Error('Not implemented for admin');
     }
 
+    // Handle avatar file upload
+    let avatarPath = undefined;
+    if (updateData.avatarFile) {
+      // Convert absolute path from multer to relative path
+      avatarPath = getRelativePath(updateData.avatarFile.path);
+    } else if (updateData.avatar && !updateData.avatar.startsWith('data:')) {
+      // If avatar is provided but not base64, use it (for backward compatibility)
+      avatarPath = getRelativePath(updateData.avatar);
+    }
+
     // Map frontend fields to model fields
     const payload = {
       hoTenSV: updateData.hoTenSinhVien || updateData.name || undefined,
       emailSV: updateData.email || undefined,
       truongHoc: updateData.truongHoc || undefined,
-      avatarPath: updateData.avatar || undefined,
+      avatarPath: avatarPath,
       maNganh: updateData.maNganh || updateData.nganh || undefined
     };
 

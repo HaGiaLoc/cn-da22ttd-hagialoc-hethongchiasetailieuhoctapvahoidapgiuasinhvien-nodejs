@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import BoTriQuanTri from '../../components/admin/BoTriQuanTri'
 import { useNotification } from '../../contexts/NotificationContext'
 import { formatNumber } from '../../utils/helpers'
-import { adminService } from '../../services'
+import { adminService } from '../../api'
 
 export default function QuanTriThongKe() {
   const { showNotification } = useNotification()

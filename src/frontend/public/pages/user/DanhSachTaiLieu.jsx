@@ -3,7 +3,7 @@ import { useSearchParams, Link } from 'react-router-dom'
 import BoTri from '../../components/BoTri'
 import TheTaiLieu from '../../components/user/TheTaiLieu'
 import PhanTrang from '../../components/user/PhanTrang'
-import { taiLieuService } from '../../services'
+import { taiLieuService } from '../../api'
 import { searchMatch } from '../../utils/helpers'
 
 export default function DanhSachTaiLieu() {
@@ -60,7 +60,7 @@ export default function DanhSachTaiLieu() {
     try {
       setIsLoading(true)
       const res = await taiLieuService.getAll()
-      const docs = res.documents || res.data || []
+      const docs = res.documents || []
       setAllDocuments(docs)
       setDocuments(docs)
     } catch (error) {

@@ -4,7 +4,7 @@ import BoTri from '../../components/BoTri'
 import KhuVucAnh from '../../components/user/KhuVucAnh'
 import TheTaiLieu from '../../components/user/TheTaiLieu'
 import TheCauHoi from '../../components/user/TheCauHoi'
-import { taiLieuService, cauHoiService } from '../../services'
+import { taiLieuService, cauHoiService } from '../../api'
 
 export default function TrangChu() {
   const [recentDocuments, setRecentDocuments] = useState([])
@@ -23,8 +23,8 @@ export default function TrangChu() {
         cauHoiService.getAll({ limit: 3 })
       ])
       
-      setRecentDocuments(docsRes.documents || docsRes.data || [])
-      setRecentQuestions(questionsRes.questions || questionsRes.data || [])
+      setRecentDocuments(docsRes.documents || [])
+      setRecentQuestions(questionsRes.questions || [])
     } catch (error) {
       console.error('Error loading homepage data:', error)
       setRecentDocuments([])

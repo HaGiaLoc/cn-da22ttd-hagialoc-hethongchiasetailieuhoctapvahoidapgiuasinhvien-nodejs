@@ -45,6 +45,13 @@ class TagModel {
     return rows;
   }
 
+  // Cập nhật tag
+  static async update(maTag, tenTag) {
+    const query = 'UPDATE tag SET tenTag = ? WHERE maTag = ?';
+    const [result] = await db.execute(query, [tenTag, maTag]);
+    return result.affectedRows > 0;
+  }
+
   // Xóa tag
   static async delete(maTag) {
     const query = 'DELETE FROM tag WHERE maTag = ?';

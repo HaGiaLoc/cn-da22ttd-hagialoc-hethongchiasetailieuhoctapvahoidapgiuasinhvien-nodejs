@@ -63,6 +63,11 @@ class AuthController {
       const { id, role } = req.user;
       const updateData = req.body;
 
+      // Nếu có file avatar được upload, thêm vào updateData
+      if (req.file) {
+        updateData.avatarFile = req.file;
+      }
+
       const updated = await AuthService.updateProfile(id, role, updateData);
 
       res.json({

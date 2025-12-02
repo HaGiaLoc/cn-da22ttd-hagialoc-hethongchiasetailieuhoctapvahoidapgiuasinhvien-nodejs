@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { useNotification } from '../../contexts/NotificationContext'
-import { baoCaoService } from '../../services'
+import { baoCaoService } from '../../api'
 
 export default function BaoCaoModal({ isOpen, onClose, reportType, reportedId, reportedTitle }) {
   const { user } = useAuth()

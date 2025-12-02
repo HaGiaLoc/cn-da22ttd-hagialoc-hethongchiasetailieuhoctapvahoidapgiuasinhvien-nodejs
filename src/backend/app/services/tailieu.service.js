@@ -8,6 +8,24 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Helper function to convert absolute path to relative path from backend root
+const getRelativePath = (absolutePath) => {
+  if (!absolutePath) return absolutePath;
+  const backendRoot = path.join(__dirname, '../..');
+  const relativePath = path.relative(backendRoot, absolutePath);
+  // Convert Windows backslashes to forward slashes for consistency
+  return relativePath.replace(/\\/g, '/');
+};
+
+// Helper function to convert relative path to absolute path
+const getAbsolutePath = (relativePath) => {
+  if (!relativePath) return relativePath;
+  // If already absolute, return as is
+  if (path.isAbsolute(relativePath)) return relativePath;
+  const backendRoot = path.join(__dirname, '../..');
+  return path.join(backendRoot, relativePath);
+};
+
 class TaiLieuService {
   // Tải lên tài liệu
   static async upload(maSinhVien, fileData, documentData) {
@@ -38,12 +56,16 @@ class TaiLieuService {
       }
     }
 
+    // Convert absolute path to relative path before saving
+    const absolutePath = filePath || fileData.path;
+    const relativeFilePath = getRelativePath(absolutePath);
+
     const taiLieuId = await TaiLieuModel.create({
       maSinhVien,
       maMon,
       maLoai,
       tieuDeTL,
-      filePath: filePath || fileData.path,
+      filePath: relativeFilePath,
       fileSizes: fileSizes || fileData.size,
       maDinhDang: resolvedMaDinhDang
     });
@@ -92,10 +114,10 @@ class TaiLieuService {
     }
 
     // Ensure source file exists then copy to downloads folder before returning path
-    const srcPath = document.filePath;
+    const srcPath = getAbsolutePath(document.filePath);
     if (!srcPath) throw new Error('File path not found');
 
-    const downloadsDir = path.join(__dirname, '../db/documents/downloads');
+    const downloadsDir = path.join(__dirname, '../../db/documents/downloads');
     try {
       await fs.mkdir(downloadsDir, { recursive: true });
     } catch (err) {
@@ -166,7 +188,8 @@ class TaiLieuService {
 
     // Xóa file
     try {
-      await fs.unlink(document.filePath);
+      const absolutePath = getAbsolutePath(document.filePath);
+      await fs.unlink(absolutePath);
     } catch (error) {
       console.error('Error deleting file:', error);
     }

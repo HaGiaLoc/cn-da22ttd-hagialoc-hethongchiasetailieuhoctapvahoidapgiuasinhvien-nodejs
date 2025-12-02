@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import BoTriQuanTri from '../../components/admin/BoTriQuanTri'
 import EditDocumentModal from '../../components/admin/EditDocumentModal'
-import { adminService } from '../../services'
+import { adminService } from '../../api'
 import { useNotification } from '../../contexts/NotificationContext'
 import { formatDate, formatNumber } from '../../utils/helpers'
 

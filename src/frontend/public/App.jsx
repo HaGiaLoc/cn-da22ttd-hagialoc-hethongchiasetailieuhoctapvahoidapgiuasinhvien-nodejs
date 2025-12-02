@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import { NotificationProvider } from './contexts/NotificationContext'
 import AdminRoute from './components/admin/AdminRoute'
+import StudentRoute from './components/user/StudentRoute'
 
 // Pages
 import TrangChu from './pages/user/TrangChu'
@@ -40,17 +41,17 @@ function App() {
         <Routes>
           <Route path="/" element={<TrangChu />} />
           <Route path="/documents" element={<DanhSachTaiLieu />} />
-          <Route path="/upload" element={<TaiLenTaiLieu />} />
-          <Route path="/my-documents" element={<TaiLieuCuaToi />} />
+          <Route path="/upload" element={<StudentRoute><TaiLenTaiLieu /></StudentRoute>} />
+          <Route path="/my-documents" element={<StudentRoute><TaiLieuCuaToi /></StudentRoute>} />
           <Route path="/qa" element={<HoiDap />} />
           <Route path="/qa/:id" element={<ChiTietCauHoi />} />
-          <Route path="/ask" element={<DatCauHoi />} />
-          <Route path="/my-questions" element={<CauHoiCuaToi />} />
+          <Route path="/ask" element={<StudentRoute><DatCauHoi /></StudentRoute>} />
+          <Route path="/my-questions" element={<StudentRoute><CauHoiCuaToi /></StudentRoute>} />
           <Route path="/login" element={<DangNhap />} />
           <Route path="/register" element={<DangKy />} />
-          <Route path="/profile" element={<HoSo />} />
-          <Route path="/profile/edit" element={<ChinhSuaHoSo />} />
-          <Route path="/change-password" element={<DoiMatKhau />} />
+          <Route path="/profile" element={<StudentRoute><HoSo /></StudentRoute>} />
+          <Route path="/profile/edit" element={<StudentRoute><ChinhSuaHoSo /></StudentRoute>} />
+          <Route path="/change-password" element={<StudentRoute><DoiMatKhau /></StudentRoute>} />
           
           {/* Admin Routes - Protected */}
           <Route path="/admin" element={<AdminRoute><QuanTriDashboard /></AdminRoute>} />

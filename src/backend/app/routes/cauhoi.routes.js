@@ -42,6 +42,12 @@ router.post('/:id/vote', CauHoiController.vote);
 // Vote câu trả lời
 router.post('/answer/:answerId/vote', CauHoiController.voteAnswer);
 
+// Cập nhật câu hỏi
+router.put('/:id', CauHoiController.update);
+
+// Chuyển trạng thái câu hỏi
+router.put('/:id/status', CauHoiController.updateStatus);
+
 // Xóa câu hỏi
 router.delete('/:id', CauHoiController.delete);
 

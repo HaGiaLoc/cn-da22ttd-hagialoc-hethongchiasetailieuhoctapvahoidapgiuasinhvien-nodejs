@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import BoTriQuanTri from '../../components/admin/BoTriQuanTri'
 import { formatNumber } from '../../utils/helpers'
-import { adminService } from '../../services'
+import { adminService } from '../../api'
 
 export default function QuanTriDashboard() {
   const [stats, setStats] = useState({

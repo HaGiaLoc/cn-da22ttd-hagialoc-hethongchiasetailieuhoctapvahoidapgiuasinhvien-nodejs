@@ -84,6 +84,56 @@ class CauTraLoiModel {
     return result.affectedRows > 0;
   }
 
+  // Cập nhật câu trả lời
+  static async update(id, updateData) {
+    const { noiDungCTL, trangThaiCTL } = updateData;
+    const updates = [];
+    const params = [];
+
+    if (noiDungCTL !== undefined) {
+      updates.push('noiDungCTL = ?');
+      params.push(noiDungCTL);
+    }
+    if (trangThaiCTL !== undefined) {
+      updates.push('trangThaiCTL = ?');
+      params.push(trangThaiCTL);
+    }
+
+    if (updates.length === 0) {
+      return true; // No updates needed
+    }
+
+    params.push(id);
+    const query = `UPDATE cautraloi SET ${updates.join(', ')} WHERE maCauTraLoi = ?`;
+    const [result] = await db.execute(query, params);
+    return result.affectedRows > 0;
+  }
+
+  // Cập nhật câu trả lời
+  static async update(id, updateData) {
+    const { noiDungCTL, trangThaiCTL } = updateData;
+    const updates = [];
+    const params = [];
+
+    if (noiDungCTL !== undefined) {
+      updates.push('noiDungCTL = ?');
+      params.push(noiDungCTL);
+    }
+    if (trangThaiCTL !== undefined) {
+      updates.push('trangThaiCTL = ?');
+      params.push(trangThaiCTL);
+    }
+
+    if (updates.length === 0) {
+      return true; // No updates needed
+    }
+
+    params.push(id);
+    const query = `UPDATE cautraloi SET ${updates.join(', ')} WHERE maCauTraLoi = ?`;
+    const [result] = await db.execute(query, params);
+    return result.affectedRows > 0;
+  }
+
   // Cập nhật trạng thái câu trả lời (show/hidden)
   static async updateStatus(id, status) {
     const query = 'UPDATE cautraloi SET trangThaiCTL = ? WHERE maCauTraLoi = ?';

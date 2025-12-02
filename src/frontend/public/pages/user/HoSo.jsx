@@ -5,7 +5,7 @@ import TheTaiLieu from '../../components/user/TheTaiLieu'
 import TheCauHoi from '../../components/user/TheCauHoi'
 import { useAuth } from '../../contexts/AuthContext'
 import { generateAvatar } from '../../utils/helpers'
-import { taiLieuService, cauHoiService } from '../../services'
+import { taiLieuService, cauHoiService } from '../../api'
 
 export default function HoSo() {
   const navigate = useNavigate()
