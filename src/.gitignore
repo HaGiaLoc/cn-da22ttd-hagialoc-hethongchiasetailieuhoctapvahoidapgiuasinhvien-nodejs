@@ -9,6 +9,7 @@ data/pictures/images/**/*
 # Dependencies
 node_modules/
 package-lock.json
+scripts/
 
 # Environment variables
 .env
