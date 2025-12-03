@@ -34,11 +34,17 @@ export default function DangNhap() {
     }
 
     try {
-      await login(formData.email, formData.password, formData.rememberMe)
+      const user = await login(formData.email, formData.password, formData.rememberMe)
       showNotification('Đăng nhập thành công!', 'success', 1000)
       
       setTimeout(() => {
-        navigate(from, { replace: true })
+        // Nếu là quản trị viên, chuyển đến trang Dashboard quản trị
+        if (user.role === 'admin') {
+          navigate('/admin', { replace: true })
+        } else {
+          // Nếu là sinh viên, chuyển đến trang từ state hoặc trang chủ
+          navigate(from, { replace: true })
+        }
       }, 2000)
     } catch (error) {
       showNotification(error.message || 'Đăng nhập thất bại', 'error', 3000)
@@ -97,9 +103,9 @@ export default function DangNhap() {
                         checked={formData.rememberMe}
                         onChange={(e) => setFormData({ ...formData, rememberMe: e.target.checked })}
                       />
-                      <span>Ghi nhớ đăng nhập</span>
+                      <span> Ghi nhớ đăng nhập</span>
                     </label>
-                    <a href="#" className="forgot-password">Quên mật khẩu?</a>
+                    <Link to="/forgot-password" className="forgot-password">Quên mật khẩu?</Link>
                   </div>
 
                   <button type="submit" className="btn btn-primary btn-full">

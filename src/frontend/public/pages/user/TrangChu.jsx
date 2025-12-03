@@ -5,8 +5,10 @@ import KhuVucAnh from '../../components/user/KhuVucAnh'
 import TheTaiLieu from '../../components/user/TheTaiLieu'
 import TheCauHoi from '../../components/user/TheCauHoi'
 import { taiLieuService, cauHoiService } from '../../api'
+import { useAuth } from '../../contexts/AuthContext'
 
 export default function TrangChu() {
+  const { user } = useAuth()
   const [recentDocuments, setRecentDocuments] = useState([])
   const [recentQuestions, setRecentQuestions] = useState([])
   const [loading, setLoading] = useState(true)
@@ -119,17 +121,19 @@ export default function TrangChu() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="cta">
-        <div className="container">
-          <h2>Sẵn sàng bắt đầu?</h2>
-          <p>Tham gia cộng đồng sinh viên và khám phá hàng ngàn tài liệu học tập</p>
-          <div className="cta-buttons">
-            <Link to="/register" className="btn btn-white btn-lg">Đăng ký ngay</Link>
-            <Link to="/documents" className="btn btn-white btn-lg">Khám phá tài liệu</Link>
+      {/* CTA Section - Only show when not logged in */}
+      {!user && (
+        <section className="cta">
+          <div className="container">
+            <h2>Sẵn sàng bắt đầu?</h2>
+            <p>Tham gia cộng đồng sinh viên và khám phá hàng ngàn tài liệu học tập</p>
+            <div className="cta-buttons">
+              <Link to="/register" className="btn btn-white btn-lg">Đăng ký ngay</Link>
+              <Link to="/documents" className="btn btn-white btn-lg">Khám phá tài liệu</Link>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
     </BoTri>
   )
 }

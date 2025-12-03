@@ -1,9 +1,9 @@
 # Ignore database files
-data/documents/**/*
+data/documents/*
 !data/documents/
-data/pictures/avatars/**/*
+data/pictures/avatars/*
 !data/pictures/avatars/
-data/pictures/images/**/*
+data/pictures/images/*
 !data/pictures/images/
 
 # Dependencies

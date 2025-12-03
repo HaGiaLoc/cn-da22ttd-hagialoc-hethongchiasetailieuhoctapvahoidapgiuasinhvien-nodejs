@@ -18,6 +18,8 @@ import DangKy from './pages/user/DangKy'
 import HoSo from './pages/user/HoSo'
 import ChinhSuaHoSo from './pages/user/ChinhSuaHoSo'
 import DoiMatKhau from './pages/user/DoiMatKhau'
+import QuenMatKhau from './pages/user/QuenMatKhau'
+import DatLaiMatKhau from './pages/user/DatLaiMatKhau'
 
 // Admin Pages
 import QuanTriDashboard from './pages/admin/QuanTriDashboard'
@@ -49,6 +51,8 @@ function App() {
           <Route path="/my-questions" element={<StudentRoute><CauHoiCuaToi /></StudentRoute>} />
           <Route path="/login" element={<DangNhap />} />
           <Route path="/register" element={<DangKy />} />
+          <Route path="/forgot-password" element={<QuenMatKhau />} />
+          <Route path="/reset-password" element={<DatLaiMatKhau />} />
           <Route path="/profile" element={<StudentRoute><HoSo /></StudentRoute>} />
           <Route path="/profile/edit" element={<StudentRoute><ChinhSuaHoSo /></StudentRoute>} />
           <Route path="/change-password" element={<StudentRoute><DoiMatKhau /></StudentRoute>} />

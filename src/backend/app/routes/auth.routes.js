@@ -19,4 +19,10 @@ router.put('/change-password', authenticate, AuthController.changePassword);
 // Cập nhật hồ sơ (cho phép upload avatar)
 router.put('/me', authenticate, upload.single('avatar'), AuthController.updateProfile);
 
+// Xác thực email (quên mật khẩu)
+router.post('/verify-email', AuthController.verifyEmail);
+
+// Đặt lại mật khẩu (quên mật khẩu)
+router.post('/reset-password', AuthController.resetPassword);
+
 export default router;

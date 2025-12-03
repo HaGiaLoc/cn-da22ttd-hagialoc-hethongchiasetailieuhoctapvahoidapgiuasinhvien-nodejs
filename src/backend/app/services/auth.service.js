@@ -157,6 +157,44 @@ class AuthService {
     const student = await SinhVienModel.findById(userId);
     return student;
   }
+
+  // Xác thực email tồn tại
+  static async verifyEmail(email) {
+    // Kiểm tra trong bảng admin
+    const admin = await QuanTriVienModel.findByEmail(email);
+    if (admin) {
+      return { exists: true, role: 'admin', user: admin };
+    }
+
+    // Kiểm tra trong bảng sinh viên
+    const student = await SinhVienModel.findByEmail(email);
+    if (student) {
+      return { exists: true, role: 'student', user: student };
+    }
+
+    return { exists: false };
+  }
+
+  // Đặt lại mật khẩu (không cần mật khẩu cũ)
+  static async resetPassword(email, newPassword) {
+    // Kiểm tra admin
+    const admin = await QuanTriVienModel.findByEmail(email);
+    if (admin) {
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      await QuanTriVienModel.updatePassword(admin.maQuanTriVien, hashedPassword);
+      return { success: true, role: 'admin' };
+    }
+
+    // Kiểm tra sinh viên
+    const student = await SinhVienModel.findByEmail(email);
+    if (student) {
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      await SinhVienModel.updatePassword(student.maSinhVien, hashedPassword);
+      return { success: true, role: 'student' };
+    }
+
+    throw new Error('Email không tồn tại trong hệ thống');
+  }
 }
 
 export default AuthService;

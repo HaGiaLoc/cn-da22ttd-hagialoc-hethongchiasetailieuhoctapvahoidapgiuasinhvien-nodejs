@@ -109,6 +109,60 @@ class AuthController {
       next(error);
     }
   }
+
+  // Xác thực email
+  static async verifyEmail(req, res, next) {
+    try {
+      const { email } = req.body;
+
+      if (!email) {
+        return res.status(400).json({
+          success: false,
+          message: 'Vui lòng nhập email'
+        });
+      }
+
+      const result = await AuthService.verifyEmail(email);
+
+      if (!result.exists) {
+        return res.status(404).json({
+          success: false,
+          message: 'Email không tồn tại trong hệ thống'
+        });
+      }
+
+      res.json({
+        success: true,
+        message: 'Email hợp lệ',
+        data: { email, role: result.role }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // Đặt lại mật khẩu
+  static async resetPassword(req, res, next) {
+    try {
+      const { email, newPassword } = req.body;
+
+      if (!email || !newPassword) {
+        return res.status(400).json({
+          success: false,
+          message: 'Vui lòng nhập đầy đủ thông tin'
+        });
+      }
+
+      await AuthService.resetPassword(email, newPassword);
+
+      res.json({
+        success: true,
+        message: 'Đặt lại mật khẩu thành công'
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export default AuthController;
