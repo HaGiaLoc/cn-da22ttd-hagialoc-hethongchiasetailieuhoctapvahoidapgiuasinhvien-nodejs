@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import BoTriQuanTri from '../../components/admin/BoTriQuanTri'
 import { useNotification } from '../../contexts/NotificationContext'
 import { adminService } from '../../api'
+import { searchMatch } from '../../utils/helpers'
 
 export default function QuanTriLoaiTaiLieu() {
   const { showNotification } = useNotification()
@@ -9,6 +10,7 @@ export default function QuanTriLoaiTaiLieu() {
   const [isLoading, setIsLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [editingType, setEditingType] = useState(null)
+  const [searchTerm, setSearchTerm] = useState('')
   const [formData, setFormData] = useState({ loaiTaiLieu: '' })
 
   useEffect(() => {
@@ -75,6 +77,25 @@ export default function QuanTriLoaiTaiLieu() {
           </button>
         </div>
 
+        {/* Search Bar */}
+        <div className="admin-filters">
+          <div className="filter-group search-group">
+            <label>Tìm kiếm thông minh:</label>
+            <input
+              type="text"
+              placeholder="Tìm kiếm loại tài liệu..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <div className="filter-stats">
+            <span>Tổng: <strong>{types.filter(t => 
+              searchMatch(t.loaiTaiLieu, searchTerm) ||
+              String(t.maLoai).includes(searchTerm.trim())
+            ).length}</strong> loại</span>
+          </div>
+        </div>
+
         <div className="admin-card">
           {isLoading ? (
             <div className="empty-state" style={{ padding: '40px', textAlign: 'center' }}>
@@ -91,10 +112,18 @@ export default function QuanTriLoaiTaiLieu() {
                   </tr>
                 </thead>
                 <tbody>
-                  {types.length === 0 ? (
-                    <tr><td colSpan="3" className="empty-state">Chưa có loại tài liệu nào</td></tr>
+                  {types.filter(t => 
+                    searchMatch(t.loaiTaiLieu, searchTerm) ||
+                    String(t.maLoai).includes(searchTerm.trim())
+                  ).length === 0 ? (
+                    <tr><td colSpan="3" className="empty-state">
+                      {searchTerm ? 'Không tìm thấy loại tài liệu phù hợp' : 'Chưa có loại tài liệu nào'}
+                    </td></tr>
                   ) : (
-                    types.map(type => (
+                    types.filter(t => 
+                      searchMatch(t.loaiTaiLieu, searchTerm) ||
+                      String(t.maLoai).includes(searchTerm.trim())
+                    ).map(type => (
                       <tr key={type.maLoai}>
                         <td><strong>#{type.maLoai}</strong></td>
                         <td>{type.loaiTaiLieu}</td>

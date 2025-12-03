@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import BoTriQuanTri from '../../components/admin/BoTriQuanTri'
 import { useNotification } from '../../contexts/NotificationContext'
 import { adminService } from '../../api'
+import { searchMatch } from '../../utils/helpers'
 
 export default function QuanTriTags() {
   const { showNotification } = useNotification()
@@ -9,6 +10,7 @@ export default function QuanTriTags() {
   const [isLoading, setIsLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [editingTag, setEditingTag] = useState(null)
+  const [searchTerm, setSearchTerm] = useState('')
   const [formData, setFormData] = useState({ tenTag: '' })
 
   useEffect(() => {
@@ -75,6 +77,25 @@ export default function QuanTriTags() {
           </button>
         </div>
 
+        {/* Search Bar */}
+        <div className="admin-filters">
+          <div className="filter-group search-group">
+            <label>Tìm kiếm thông minh:</label>
+            <input
+              type="text"
+              placeholder="Tìm kiếm tag..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <div className="filter-stats">
+            <span>Tổng: <strong>{tags.filter(t => 
+              searchMatch(t.tenTag, searchTerm) ||
+              String(t.maTag).includes(searchTerm.trim())
+            ).length}</strong> tags</span>
+          </div>
+        </div>
+
         <div className="admin-card">
           {isLoading ? (
             <div className="empty-state" style={{ padding: '40px', textAlign: 'center' }}>
@@ -91,10 +112,18 @@ export default function QuanTriTags() {
                   </tr>
                 </thead>
                 <tbody>
-                  {tags.length === 0 ? (
-                    <tr><td colSpan="3" className="empty-state">Chưa có tag nào</td></tr>
+                  {tags.filter(t => 
+                    searchMatch(t.tenTag, searchTerm) ||
+                    String(t.maTag).includes(searchTerm.trim())
+                  ).length === 0 ? (
+                    <tr><td colSpan="3" className="empty-state">
+                      {searchTerm ? 'Không tìm thấy tag phù hợp' : 'Chưa có tag nào'}
+                    </td></tr>
                   ) : (
-                    tags.map(tag => (
+                    tags.filter(t => 
+                      searchMatch(t.tenTag, searchTerm) ||
+                      String(t.maTag).includes(searchTerm.trim())
+                    ).map(tag => (
                       <tr key={tag.maTag}>
                         <td><strong>#{tag.maTag}</strong></td>
                         <td><span className="badge badge-info">{tag.tenTag}</span></td>

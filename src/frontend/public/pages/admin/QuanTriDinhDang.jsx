@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import BoTriQuanTri from '../../components/admin/BoTriQuanTri'
 import { useNotification } from '../../contexts/NotificationContext'
 import { adminService } from '../../api'
+import { searchMatch } from '../../utils/helpers'
 
 export default function QuanTriDinhDang() {
   const { showNotification } = useNotification()
@@ -9,6 +10,7 @@ export default function QuanTriDinhDang() {
   const [isLoading, setIsLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [editingFormat, setEditingFormat] = useState(null)
+  const [searchTerm, setSearchTerm] = useState('')
   const [formData, setFormData] = useState({ tenDinhDang: '' })
 
   useEffect(() => {
@@ -75,6 +77,25 @@ export default function QuanTriDinhDang() {
           </button>
         </div>
 
+        {/* Search Bar */}
+        <div className="admin-filters">
+          <div className="filter-group search-group">
+            <label>Tìm kiếm thông minh:</label>
+            <input
+              type="text"
+              placeholder="Tìm kiếm định dạng..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <div className="filter-stats">
+            <span>Tổng: <strong>{formats.filter(f => 
+              searchMatch(f.tenDinhDang, searchTerm) ||
+              String(f.maDinhDang).includes(searchTerm.trim())
+            ).length}</strong> định dạng</span>
+          </div>
+        </div>
+
         <div className="admin-card">
           {isLoading ? (
             <div className="empty-state" style={{ padding: '40px', textAlign: 'center' }}>
@@ -91,10 +112,18 @@ export default function QuanTriDinhDang() {
                   </tr>
                 </thead>
                 <tbody>
-                  {formats.length === 0 ? (
-                    <tr><td colSpan="3" className="empty-state">Chưa có định dạng nào</td></tr>
+                  {formats.filter(f => 
+                    searchMatch(f.tenDinhDang, searchTerm) ||
+                    String(f.maDinhDang).includes(searchTerm.trim())
+                  ).length === 0 ? (
+                    <tr><td colSpan="3" className="empty-state">
+                      {searchTerm ? 'Không tìm thấy định dạng phù hợp' : 'Chưa có định dạng nào'}
+                    </td></tr>
                   ) : (
-                    formats.map(format => (
+                    formats.filter(f => 
+                      searchMatch(f.tenDinhDang, searchTerm) ||
+                      String(f.maDinhDang).includes(searchTerm.trim())
+                    ).map(format => (
                       <tr key={format.maDinhDang}>
                         <td><strong>#{format.maDinhDang}</strong></td>
                         <td><span className="badge badge-secondary">{format.tenDinhDang}</span></td>

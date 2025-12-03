@@ -4,7 +4,7 @@ import BoTriQuanTri from '../../components/admin/BoTriQuanTri'
 import EditDocumentModal from '../../components/admin/EditDocumentModal'
 import { adminService } from '../../api'
 import { useNotification } from '../../contexts/NotificationContext'
-import { formatDate, formatNumber } from '../../utils/helpers'
+import { formatDate, formatNumber, searchMatch } from '../../utils/helpers'
 
 export default function QuanTriTaiLieu() {
   const { showNotification } = useNotification()
@@ -63,9 +63,21 @@ export default function QuanTriTaiLieu() {
 
   const filteredDocs = documents.filter(d => {
     const statusMatch = filterStatus === 'all' || d.trangThaiTL === filterStatus
-    const searchMatch = d.tieuDeTL.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                       d.author.toLowerCase().includes(searchTerm.toLowerCase())
-    return statusMatch && searchMatch
+    
+    if (!searchTerm.trim()) return statusMatch
+    
+    // Tìm kiếm thông minh - sử dụng searchMatch từ helpers (bỏ dấu)
+    const searchMatch_title = searchMatch(d.tieuDeTL, searchTerm)
+    const searchMatch_author = searchMatch(d.hoTenSV, searchTerm)
+    const searchMatch_type = searchMatch(d.tenLoai, searchTerm)
+    const searchMatch_subject = searchMatch(d.tenMon, searchTerm)
+    const searchMatch_desc = searchMatch(d.moTa, searchTerm)
+    const searchMatch_id = String(d.maTaiLieu || '').includes(searchTerm.trim())
+    
+    const isMatch = searchMatch_title || searchMatch_author || searchMatch_type || 
+                    searchMatch_subject || searchMatch_desc || searchMatch_id
+    
+    return statusMatch && isMatch
   })
   // sort by numeric document ID ascending
   const sortedDocs = filteredDocs.slice().sort((a, b) => Number(a.maTaiLieu) - Number(b.maTaiLieu))
@@ -92,10 +104,10 @@ export default function QuanTriTaiLieu() {
             </div>
 
             <div className="filter-group search-group">
-              <label>Tìm kiếm:</label>
+              <label>Tìm kiếm thông minh:</label>
               <input
                 type="text"
-                placeholder="Tìm theo tên tài liệu hoặc tác giả..."
+                placeholder="Tìm kiếm tài liệu..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />

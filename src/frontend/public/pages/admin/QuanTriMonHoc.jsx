@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import BoTriQuanTri from '../../components/admin/BoTriQuanTri'
 import { useNotification } from '../../contexts/NotificationContext'
 import { adminService } from '../../api'
+import { searchMatch } from '../../utils/helpers'
 
 export default function QuanTriMonHoc() {
   const { showNotification } = useNotification()
@@ -10,6 +11,7 @@ export default function QuanTriMonHoc() {
   const [isLoading, setIsLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [editingSubject, setEditingSubject] = useState(null)
+  const [searchTerm, setSearchTerm] = useState('')
   const [formData, setFormData] = useState({
     tenMon: '',
     maNganh: ''
@@ -89,6 +91,26 @@ export default function QuanTriMonHoc() {
           </button>
         </div>
 
+        {/* Search Bar */}
+        <div className="admin-filters">
+          <div className="filter-group search-group">
+            <label>Tìm kiếm thông minh:</label>
+            <input
+              type="text"
+              placeholder="Tìm kiếm môn học..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <div className="filter-stats">
+            <span>Tổng: <strong>{subjects.filter(s => 
+              searchMatch(s.tenMon, searchTerm) || 
+              searchMatch(s.tenNganh, searchTerm) ||
+              String(s.maMon).includes(searchTerm.trim())
+            ).length}</strong> môn học</span>
+          </div>
+        </div>
+
         <div className="admin-card">
           {isLoading ? (
             <div className="empty-state" style={{ padding: '40px', textAlign: 'center' }}>
@@ -107,12 +129,22 @@ export default function QuanTriMonHoc() {
                   </tr>
                 </thead>
                 <tbody>
-                  {subjects.length === 0 ? (
+                  {subjects.filter(s => 
+                    searchMatch(s.tenMon, searchTerm) || 
+                    searchMatch(s.tenNganh, searchTerm) ||
+                    String(s.maMon).includes(searchTerm.trim())
+                  ).length === 0 ? (
                     <tr>
-                      <td colSpan="4" className="empty-state">Chưa có môn học nào</td>
+                      <td colSpan="4" className="empty-state">
+                        {searchTerm ? 'Không tìm thấy môn học phù hợp' : 'Chưa có môn học nào'}
+                      </td>
                     </tr>
                   ) : (
-                    subjects.map(subject => (
+                    subjects.filter(s => 
+                      searchMatch(s.tenMon, searchTerm) || 
+                      searchMatch(s.tenNganh, searchTerm) ||
+                      String(s.maMon).includes(searchTerm.trim())
+                    ).map(subject => (
                       <tr key={subject.maMon}>
                         <td><strong>#{subject.maMon}</strong></td>
                         <td>{subject.tenMon}</td>

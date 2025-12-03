@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import BoTriQuanTri from '../../components/admin/BoTriQuanTri'
 import { adminService } from '../../api'
 import { useNotification } from '../../contexts/NotificationContext'
@@ -6,14 +7,34 @@ import { formatDate } from '../../utils/helpers'
 
 export default function QuanTriBaoCao() {
   const { showNotification } = useNotification()
+  const [searchParams] = useSearchParams()
+  const highlightId = searchParams.get('highlight')
   const [reports, setReports] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [filterStatus, setFilterStatus] = useState('all')
   const [filterType, setFilterType] = useState('all')
+  const reportRefs = useRef({})
 
   useEffect(() => {
     loadReports()
   }, [filterStatus, filterType])
+
+  useEffect(() => {
+    // Scroll to highlighted report after reports are loaded
+    if (highlightId && reports.length > 0) {
+      setTimeout(() => {
+        const reportElement = reportRefs.current[highlightId]
+        if (reportElement) {
+          reportElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          reportElement.classList.add('highlighted')
+          // Remove highlight after 3 seconds
+          setTimeout(() => {
+            reportElement.classList.remove('highlighted')
+          }, 3000)
+        }
+      }, 300)
+    }
+  }, [highlightId, reports])
 
   const loadReports = async () => {
     try {
@@ -157,7 +178,11 @@ export default function QuanTriBaoCao() {
                 </thead>
                 <tbody>
                   {filteredReports.map(report => (
-                    <tr key={report.maBaoCao}>
+                    <tr 
+                      key={report.maBaoCao}
+                      ref={el => reportRefs.current[report.maBaoCao] = el}
+                      className={highlightId === String(report.maBaoCao) ? 'highlight-row' : ''}
+                    >
                       <td>
                         <div className="report-target-cell">
                           <strong>

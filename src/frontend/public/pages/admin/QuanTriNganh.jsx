@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import BoTriQuanTri from '../../components/admin/BoTriQuanTri'
 import { useNotification } from '../../contexts/NotificationContext'
 import { adminService } from '../../api'
+import { searchMatch } from '../../utils/helpers'
 
 export default function QuanTriNganh() {
   const { showNotification } = useNotification()
@@ -9,6 +10,7 @@ export default function QuanTriNganh() {
   const [isLoading, setIsLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [editingMajor, setEditingMajor] = useState(null)
+  const [searchTerm, setSearchTerm] = useState('')
   const [formData, setFormData] = useState({ tenNganh: '' })
 
   useEffect(() => {
@@ -80,6 +82,25 @@ export default function QuanTriNganh() {
           </button>
         </div>
 
+        {/* Search Bar */}
+        <div className="admin-filters">
+          <div className="filter-group search-group">
+            <label>Tìm kiếm thông minh:</label>
+            <input
+              type="text"
+              placeholder="Tìm kiếm ngành..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <div className="filter-stats">
+            <span>Tổng: <strong>{majors.filter(m => 
+              searchMatch(m.tenNganh, searchTerm) ||
+              String(m.maNganh).includes(searchTerm.trim())
+            ).length}</strong> ngành</span>
+          </div>
+        </div>
+
         <div className="admin-card">
           {isLoading ? (
             <div className="empty-state" style={{ padding: '40px', textAlign: 'center' }}>
@@ -97,10 +118,18 @@ export default function QuanTriNganh() {
                   </tr>
                 </thead>
                 <tbody>
-                  {majors.length === 0 ? (
-                    <tr><td colSpan="3" className="empty-state">Chưa có ngành nào</td></tr>
+                  {majors.filter(m => 
+                    searchMatch(m.tenNganh, searchTerm) ||
+                    String(m.maNganh).includes(searchTerm.trim())
+                  ).length === 0 ? (
+                    <tr><td colSpan="3" className="empty-state">
+                      {searchTerm ? 'Không tìm thấy ngành phù hợp' : 'Chưa có ngành nào'}
+                    </td></tr>
                   ) : (
-                    majors.map(major => (
+                    majors.filter(m => 
+                      searchMatch(m.tenNganh, searchTerm) ||
+                      String(m.maNganh).includes(searchTerm.trim())
+                    ).map(major => (
                       <tr key={major.maNganh}>
                         <td><strong>#{major.maNganh}</strong></td>
                         <td>{major.tenNganh}</td>

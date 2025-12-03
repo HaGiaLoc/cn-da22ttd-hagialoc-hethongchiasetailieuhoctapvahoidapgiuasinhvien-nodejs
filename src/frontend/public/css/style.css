@@ -3614,6 +3614,108 @@ input, textarea, select {
     gap: 1rem;
 }
 
+/* Reports Grid - Dashboard */
+.reports-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+}
+
+@media (max-width: 1024px) {
+    .reports-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .reports-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.report-card {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.report-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+    border-color: var(--primary-color);
+}
+
+.report-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.report-type {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.report-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.report-target {
+    font-size: 1rem;
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.report-card .report-reason {
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    line-height: 1.5;
+    margin: 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+.report-card .report-reason i {
+    color: var(--warning-color);
+    margin-top: 0.2rem;
+    flex-shrink: 0;
+}
+
+.report-card .report-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.report-card .report-meta span {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.report-card .report-meta i {
+    width: 14px;
+    color: var(--text-secondary);
+}
+
 .report-item,
 .doc-item {
     display: flex;
@@ -3746,6 +3848,21 @@ input, textarea, select {
 
 .admin-table tbody tr:hover {
     background: var(--bg-secondary);
+}
+
+.admin-table tbody tr.highlighted,
+.admin-table tbody tr.highlight-row {
+    background: #fef3c7 !important;
+    animation: highlightFade 3s ease-out;
+}
+
+@keyframes highlightFade {
+    0% {
+        background: #fef3c7;
+    }
+    100% {
+        background: transparent;
+    }
 }
 
 .admin-table .empty-state {

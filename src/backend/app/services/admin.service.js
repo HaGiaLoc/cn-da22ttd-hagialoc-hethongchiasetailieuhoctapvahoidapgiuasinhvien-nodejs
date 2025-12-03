@@ -418,9 +418,15 @@ class AdminService {
   // Thống kê
   static async getStatistics() {
     const [[users]] = await db.execute('SELECT COUNT(*) as count FROM sinhvien');
+    const [[activeUsers]] = await db.execute("SELECT COUNT(*) as count FROM sinhvien WHERE trangThaiTK = 'active'");
+    const [[blockedUsers]] = await db.execute("SELECT COUNT(*) as count FROM sinhvien WHERE trangThaiTK = 'blocked'");
     const [[docs]] = await db.execute('SELECT COUNT(*) as count FROM tailieu');
     const [[questions]] = await db.execute("SELECT COUNT(*) as count FROM cauhoi");
+    const [[visibleQuestions]] = await db.execute("SELECT COUNT(*) as count FROM cauhoi WHERE trangThaiCH = 'show'");
+    const [[hiddenQuestions]] = await db.execute("SELECT COUNT(*) as count FROM cauhoi WHERE trangThaiCH = 'hidden'");
     const [[answers]] = await db.execute('SELECT COUNT(*) as count FROM cautraloi');
+    const [[visibleAnswers]] = await db.execute("SELECT COUNT(*) as count FROM cautraloi WHERE trangThaiCTL = 'show'");
+    const [[hiddenAnswers]] = await db.execute("SELECT COUNT(*) as count FROM cautraloi WHERE trangThaiCTL = 'hidden'");
     const [[pending]] = await db.execute("SELECT COUNT(*) as count FROM tailieu WHERE trangThaiTL = 'hidden'");
     const [[approved]] = await db.execute("SELECT COUNT(*) as count FROM tailieu WHERE trangThaiTL = 'show'");
     const rejected = { count: 0 };
@@ -433,9 +439,15 @@ class AdminService {
 
     return {
       totalUsers: users.count || 0,
+      activeUsers: activeUsers.count || 0,
+      blockedUsers: blockedUsers.count || 0,
       totalDocuments: docs.count || 0,
       totalQuestions: questions.count || 0,
+      visibleQuestions: visibleQuestions.count || 0,
+      hiddenQuestions: hiddenQuestions.count || 0,
       totalAnswers: answers.count || 0,
+      visibleAnswers: visibleAnswers.count || 0,
+      hiddenAnswers: hiddenAnswers.count || 0,
       pendingDocuments: pending.count || 0,
       approvedDocuments: approved.count || 0,
       rejectedDocuments: rejected.count || 0,

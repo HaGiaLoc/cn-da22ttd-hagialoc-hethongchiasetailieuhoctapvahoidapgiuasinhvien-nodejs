@@ -8,9 +8,15 @@ export default function QuanTriThongKe() {
   const { showNotification } = useNotification()
   const [stats, setStats] = useState({
     totalUsers: 0,
+    activeUsers: 0,
+    blockedUsers: 0,
     totalDocuments: 0,
     totalQuestions: 0,
+    visibleQuestions: 0,
+    hiddenQuestions: 0,
     totalAnswers: 0,
+    visibleAnswers: 0,
+    hiddenAnswers: 0,
     pendingDocuments: 0,
     approvedDocuments: 0,
     rejectedDocuments: 0,
@@ -31,11 +37,17 @@ export default function QuanTriThongKe() {
     setIsLoading(true)
     try {
       const res = await adminService.getStatistics()
-      setStats(res.data || {
+      const data = res.data || {
         totalUsers: 0,
+        activeUsers: 0,
+        blockedUsers: 0,
         totalDocuments: 0,
         totalQuestions: 0,
+        visibleQuestions: 0,
+        hiddenQuestions: 0,
         totalAnswers: 0,
+        visibleAnswers: 0,
+        hiddenAnswers: 0,
         pendingDocuments: 0,
         approvedDocuments: 0,
         rejectedDocuments: 0,
@@ -45,7 +57,9 @@ export default function QuanTriThongKe() {
         pendingReports: 0,
         approvedReports: 0,
         rejectedReports: 0
-      })
+      }
+      
+      setStats(data)
     } catch (error) {
       showNotification('Không thể tải thống kê', 'error', 3000)
     } finally {
@@ -122,6 +136,146 @@ export default function QuanTriThongKe() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
               <div className="admin-card">
                 <div style={{ padding: '20px', borderBottom: '1px solid #eee' }}>
+                  <h3 style={{ margin: 0, fontSize: '18px' }}>Trạng thái tài liệu</h3>
+                </div>
+                <div style={{ padding: '24px' }}>
+                  <div style={{ marginBottom: '16px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <span>Tổng tài liệu</span>
+                      <strong style={{ color: '#1976d2' }}>{formatNumber(stats.totalDocuments)}</strong>
+                    </div>
+                    <div style={{ height: '8px', background: '#f5f5f5', borderRadius: '4px', overflow: 'hidden' }}>
+                      <div style={{ width: '100%', height: '100%', background: '#1976d2' }}></div>
+                    </div>
+                  </div>
+                  <div style={{ marginBottom: '16px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <span>Tài liệu đang hiện</span>
+                      <strong style={{ color: '#4caf50' }}>{formatNumber(stats.approvedDocuments)}</strong>
+                    </div>
+                    <div style={{ height: '8px', background: '#f5f5f5', borderRadius: '4px', overflow: 'hidden' }}>
+                      <div style={{ width: `${stats.totalDocuments ? (stats.approvedDocuments / stats.totalDocuments * 100) : 0}%`, height: '100%', background: '#4caf50' }}></div>
+                    </div>
+                  </div>
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <span>Tài liệu đã ẩn</span>
+                      <strong style={{ color: '#ff9800' }}>{formatNumber(stats.pendingDocuments)}</strong>
+                    </div>
+                    <div style={{ height: '8px', background: '#f5f5f5', borderRadius: '4px', overflow: 'hidden' }}>
+                      <div style={{ width: `${stats.totalDocuments ? (stats.pendingDocuments / stats.totalDocuments * 100) : 0}%`, height: '100%', background: '#ff9800' }}></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="admin-card">
+                <div style={{ padding: '20px', borderBottom: '1px solid #eee' }}>
+                  <h3 style={{ margin: 0, fontSize: '18px' }}>Trạng thái câu hỏi</h3>
+                </div>
+                <div style={{ padding: '24px' }}>
+                  <div style={{ marginBottom: '16px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <span>Tổng câu hỏi</span>
+                      <strong style={{ color: '#f57c00' }}>{formatNumber(stats.totalQuestions)}</strong>
+                    </div>
+                    <div style={{ height: '8px', background: '#f5f5f5', borderRadius: '4px', overflow: 'hidden' }}>
+                      <div style={{ width: '100%', height: '100%', background: '#f57c00' }}></div>
+                    </div>
+                  </div>
+                  <div style={{ marginBottom: '16px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <span>Câu hỏi đang hiện</span>
+                      <strong style={{ color: '#4caf50' }}>{formatNumber(stats.visibleQuestions || 0)}</strong>
+                    </div>
+                    <div style={{ height: '8px', background: '#f5f5f5', borderRadius: '4px', overflow: 'hidden' }}>
+                      <div style={{ width: `${stats.totalQuestions ? ((stats.visibleQuestions || 0) / stats.totalQuestions * 100) : 0}%`, height: '100%', background: '#4caf50' }}></div>
+                    </div>
+                  </div>
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <span>Câu hỏi đã ẩn</span>
+                      <strong style={{ color: '#ff9800' }}>{formatNumber(stats.hiddenQuestions || 0)}</strong>
+                    </div>
+                    <div style={{ height: '8px', background: '#f5f5f5', borderRadius: '4px', overflow: 'hidden' }}>
+                      <div style={{ width: `${stats.totalQuestions ? ((stats.hiddenQuestions || 0) / stats.totalQuestions * 100) : 0}%`, height: '100%', background: '#ff9800' }}></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="admin-card">
+                <div style={{ padding: '20px', borderBottom: '1px solid #eee' }}>
+                  <h3 style={{ margin: 0, fontSize: '18px' }}>Trạng thái câu trả lời</h3>
+                </div>
+                <div style={{ padding: '24px' }}>
+                  <div style={{ marginBottom: '16px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <span>Tổng câu trả lời</span>
+                      <strong style={{ color: '#7b1fa2' }}>{formatNumber(stats.totalAnswers)}</strong>
+                    </div>
+                    <div style={{ height: '8px', background: '#f5f5f5', borderRadius: '4px', overflow: 'hidden' }}>
+                      <div style={{ width: '100%', height: '100%', background: '#7b1fa2' }}></div>
+                    </div>
+                  </div>
+                  <div style={{ marginBottom: '16px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <span>Câu trả lời đang hiện</span>
+                      <strong style={{ color: '#4caf50' }}>{formatNumber(stats.visibleAnswers || 0)}</strong>
+                    </div>
+                    <div style={{ height: '8px', background: '#f5f5f5', borderRadius: '4px', overflow: 'hidden' }}>
+                      <div style={{ width: `${stats.totalAnswers ? ((stats.visibleAnswers || 0) / stats.totalAnswers * 100) : 0}%`, height: '100%', background: '#4caf50' }}></div>
+                    </div>
+                  </div>
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <span>Câu trả lời đã ẩn</span>
+                      <strong style={{ color: '#ff9800' }}>{formatNumber(stats.hiddenAnswers || 0)}</strong>
+                    </div>
+                    <div style={{ height: '8px', background: '#f5f5f5', borderRadius: '4px', overflow: 'hidden' }}>
+                      <div style={{ width: `${stats.totalAnswers ? ((stats.hiddenAnswers || 0) / stats.totalAnswers * 100) : 0}%`, height: '100%', background: '#ff9800' }}></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="admin-card">
+                <div style={{ padding: '20px', borderBottom: '1px solid #eee' }}>
+                  <h3 style={{ margin: 0, fontSize: '18px' }}>Trạng thái người dùng</h3>
+                </div>
+                <div style={{ padding: '24px' }}>
+                  <div style={{ marginBottom: '16px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <span>Tổng người dùng</span>
+                      <strong style={{ color: '#1976d2' }}>{formatNumber(stats.totalUsers)}</strong>
+                    </div>
+                    <div style={{ height: '8px', background: '#f5f5f5', borderRadius: '4px', overflow: 'hidden' }}>
+                      <div style={{ width: '100%', height: '100%', background: '#1976d2' }}></div>
+                    </div>
+                  </div>
+                  <div style={{ marginBottom: '16px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <span>Tài khoản hoạt động</span>
+                      <strong style={{ color: '#4caf50' }}>{formatNumber(stats.activeUsers || 0)}</strong>
+                    </div>
+                    <div style={{ height: '8px', background: '#f5f5f5', borderRadius: '4px', overflow: 'hidden' }}>
+                      <div style={{ width: `${stats.totalUsers ? ((stats.activeUsers || 0) / stats.totalUsers * 100) : 0}%`, height: '100%', background: '#4caf50' }}></div>
+                    </div>
+                  </div>
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <span>Tài khoản bị khóa</span>
+                      <strong style={{ color: '#f44336' }}>{formatNumber(stats.blockedUsers || 0)}</strong>
+                    </div>
+                    <div style={{ height: '8px', background: '#f5f5f5', borderRadius: '4px', overflow: 'hidden' }}>
+                      <div style={{ width: `${stats.totalUsers ? ((stats.blockedUsers || 0) / stats.totalUsers * 100) : 0}%`, height: '100%', background: '#f44336' }}></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="admin-card">
+                <div style={{ padding: '20px', borderBottom: '1px solid #eee' }}>
                   <h3 style={{ margin: 0, fontSize: '18px' }}>Trạng thái báo cáo</h3>
                 </div>
                 <div style={{ padding: '24px' }}>
@@ -150,41 +304,6 @@ export default function QuanTriThongKe() {
                     </div>
                     <div style={{ height: '8px', background: '#f5f5f5', borderRadius: '4px', overflow: 'hidden' }}>
                       <div style={{ width: `${stats.totalReports ? (stats.rejectedReports / stats.totalReports * 100) : 0}%`, height: '100%', background: '#f44336' }}></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="admin-card">
-                <div style={{ padding: '20px', borderBottom: '1px solid #eee' }}>
-                  <h3 style={{ margin: 0, fontSize: '18px' }}>Trạng thái tài liệu</h3>
-                </div>
-                <div style={{ padding: '24px' }}>
-                  <div style={{ marginBottom: '16px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                      <span>Chờ duyệt</span>
-                      <strong style={{ color: '#ff9800' }}>{formatNumber(stats.pendingDocuments)}</strong>
-                    </div>
-                    <div style={{ height: '8px', background: '#f5f5f5', borderRadius: '4px', overflow: 'hidden' }}>
-                      <div style={{ width: `${stats.totalDocuments ? (stats.pendingDocuments / stats.totalDocuments * 100) : 0}%`, height: '100%', background: '#ff9800' }}></div>
-                    </div>
-                  </div>
-                  <div style={{ marginBottom: '16px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                      <span>Đã duyệt</span>
-                      <strong style={{ color: '#4caf50' }}>{formatNumber(stats.approvedDocuments)}</strong>
-                    </div>
-                    <div style={{ height: '8px', background: '#f5f5f5', borderRadius: '4px', overflow: 'hidden' }}>
-                      <div style={{ width: `${stats.totalDocuments ? (stats.approvedDocuments / stats.totalDocuments * 100) : 0}%`, height: '100%', background: '#4caf50' }}></div>
-                    </div>
-                  </div>
-                  <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                      <span>Từ chối</span>
-                      <strong style={{ color: '#f44336' }}>{formatNumber(stats.rejectedDocuments)}</strong>
-                    </div>
-                    <div style={{ height: '8px', background: '#f5f5f5', borderRadius: '4px', overflow: 'hidden' }}>
-                      <div style={{ width: `${stats.totalDocuments ? (stats.rejectedDocuments / stats.totalDocuments * 100) : 0}%`, height: '100%', background: '#f44336' }}></div>
                     </div>
                   </div>
                 </div>

@@ -9,11 +9,9 @@ export default function QuanTriDashboard() {
     totalDocuments: 0,
     totalQuestions: 0,
     totalStudents: 0,
-    pendingReports: 0,
-    pendingDocuments: 0
+    pendingReports: 0
   })
   const [recentReports, setRecentReports] = useState([])
-  const [pendingDocs, setPendingDocs] = useState([])
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -32,8 +30,7 @@ export default function QuanTriDashboard() {
           totalDocuments: data.data.totalDocuments || 0,
           totalQuestions: data.data.totalQuestions || 0,
           totalStudents: data.data.totalStudents || 0,
-          pendingReports: data.data.pendingReports || 0,
-          pendingDocuments: data.data.pendingDocuments || 0
+          pendingReports: data.data.pendingReports || 0
         })
       }
 
@@ -41,12 +38,6 @@ export default function QuanTriDashboard() {
       const reportsResponse = await adminService.getAllReports('pending', null, 1, 5)
       if (reportsResponse.data && reportsResponse.data.reports) {
         setRecentReports(reportsResponse.data.reports)
-      }
-
-      // Lấy tài liệu chờ duyệt
-      const docsResponse = await adminService.getPendingDocuments(1, 5)
-      if (docsResponse.data && docsResponse.data.documents) {
-        setPendingDocs(docsResponse.data.documents)
       }
     } catch (error) {
       console.error('Error loading dashboard:', error)
@@ -117,107 +108,64 @@ export default function QuanTriDashboard() {
             </div>
           </div>
 
-          {/* Content Grid */}
-          <div className="admin-content-grid">
-            {/* Báo cáo mới */}
-            <div className="admin-card">
-              <div className="card-header">
-                <h2><i className="fas fa-flag"></i> Báo cáo vi phạm mới nhất</h2>
-                <Link to="/admin/reports" className="btn btn-sm btn-outline">
-                  Xem tất cả
-                </Link>
-              </div>
-              <div className="card-body">
-                {recentReports.length > 0 ? (
-                  <div className="reports-list">
-                    {recentReports.map(report => (
-                      <div key={report.maBaoCao} className="report-item">
-                        <div className="report-icon">
-                          <i className="fas fa-flag"></i>
-                        </div>
-                        <div className="report-info">
-                          <h4>{report.loaiBaoCao || 'Báo cáo vi phạm'}</h4>
-                          <p className="report-reason">{report.lyDo}</p>
-                          <span className="report-meta">
-                            Bởi {report.hoTenSV} - {new Date(report.ngayBC).toLocaleDateString('vi-VN')}
-                          </span>
-                        </div>
+          {/* Báo cáo vi phạm mới nhất */}
+          <div className="admin-card">
+            <div className="card-header">
+              <h2><i className="fas fa-flag"></i> Báo cáo vi phạm mới nhất</h2>
+              <Link to="/admin/reports" className="btn btn-sm btn-outline">
+                Xem tất cả
+              </Link>
+            </div>
+            <div className="card-body">
+              {recentReports.length > 0 ? (
+                <div className="reports-grid">
+                  {recentReports.map(report => (
+                    <Link 
+                      key={report.maBaoCao} 
+                      to={`/admin/reports?highlight=${report.maBaoCao}`}
+                      className="report-card"
+                    >
+                      <div className="report-card-header">
+                        <span className="report-type">
+                          {report.loaiBaoCao === 'document' ? 'Tài liệu' :
+                           report.loaiBaoCao === 'question' ? 'Câu hỏi' : 'Câu trả lời'}
+                        </span>
                         <span className={`badge badge-${
                           report.trangThaiBC === 'pending' ? 'warning' :
-                          report.trangThaiBC === 'reviewing' ? 'info' : 'success'
+                          report.trangThaiBC === 'approved' ? 'success' : 'danger'
                         }`}>
                           {report.trangThaiBC === 'pending' ? 'Chờ xử lý' :
-                           report.trangThaiBC === 'reviewing' ? 'Đang xem xét' : 'Đã xử lý'}
+                           report.trangThaiBC === 'approved' ? 'Đã duyệt' : 'Từ chối'}
                         </span>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="empty-state">Không có báo cáo nào</p>
-                )}
-              </div>
-            </div>
-
-            {/* Tài liệu chờ duyệt */}
-            <div className="admin-card">
-              <div className="card-header">
-                <h2><i className="fas fa-clock"></i> Tài liệu chờ duyệt</h2>
-                <Link to="/admin/documents" className="btn btn-sm btn-outline">
-                  Xem tất cả
-                </Link>
-              </div>
-              <div className="card-body">
-                {pendingDocs.length > 0 ? (
-                  <div className="pending-docs-list">
-                    {pendingDocs.map(doc => (
-                      <div key={doc.maTaiLieu} className="doc-item">
-                        <div className="doc-icon">
-                          <i className="fas fa-file-pdf"></i>
+                      <div className="report-card-body">
+                        <div className="report-target">
+                          {report.loaiBaoCao === 'document' && (
+                            report.tieuDeTL || `Tài liệu #${report.maTaiLieu || 'N/A'}`
+                          )}
+                          {report.loaiBaoCao === 'question' && (
+                            report.tieuDeCH || `Câu hỏi #${report.maCauHoi || 'N/A'}`
+                          )}
+                          {report.loaiBaoCao === 'answer' && (
+                            report.noiDungTraLoi 
+                              ? `${String(report.noiDungTraLoi).slice(0, 60)}${String(report.noiDungTraLoi).length > 60 ? '...' : ''}`
+                              : `Câu trả lời #${report.maCauTraLoi || 'N/A'}`
+                          )}
                         </div>
-                        <div className="doc-info">
-                          <h4>{doc.tieuDeTL}</h4>
-                          <span className="doc-meta">
-                            Tải lên bởi {doc.hoTenSV} - {new Date(doc.ngayTai).toLocaleDateString('vi-VN')}
-                          </span>
-                        </div>
-                        <div className="doc-actions">
-                          <button className="btn btn-sm btn-success">
-                            <i className="fas fa-check"></i> Duyệt
-                          </button>
-                          <button className="btn btn-sm btn-danger">
-                            <i className="fas fa-times"></i> Từ chối
-                          </button>
+                        <p className="report-reason">
+                          <i className="fas fa-exclamation-circle"></i> {report.lyDo}
+                        </p>
+                        <div className="report-meta">
+                          <span><i className="fas fa-user"></i> {report.hoTenSV}</span>
+                          <span><i className="fas fa-calendar"></i> {new Date(report.ngayBC).toLocaleDateString('vi-VN')}</span>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="empty-state">Không có tài liệu chờ duyệt</p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Quick Actions */}
-          <div className="quick-actions">
-            <h2>Thao tác nhanh</h2>
-            <div className="actions-grid">
-              <Link to="/admin/documents" className="action-card">
-                <i className="fas fa-file-alt"></i>
-                <span>Quản lý tài liệu</span>
-              </Link>
-              <Link to="/admin/reports" className="action-card">
-                <i className="fas fa-flag"></i>
-                <span>Xử lý báo cáo</span>
-              </Link>
-              <Link to="/admin/users" className="action-card">
-                <i className="fas fa-users"></i>
-                <span>Quản lý người dùng</span>
-              </Link>
-              <Link to="/documents" className="action-card">
-                <i className="fas fa-chart-bar"></i>
-                <span>Thống kê</span>
-              </Link>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <p className="empty-state">Không có báo cáo nào</p>
+              )}
             </div>
           </div>
       </section>
