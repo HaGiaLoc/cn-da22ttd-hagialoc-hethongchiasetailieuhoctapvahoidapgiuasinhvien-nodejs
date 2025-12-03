@@ -1,10 +1,11 @@
 # Ignore database files
+# Track directories but ignore all contents except .gitkeep
 data/documents/*
-!data/documents/
+!data/documents/.gitkeep
 data/pictures/avatars/*
-!data/pictures/avatars/
+!data/pictures/avatars/.gitkeep
 data/pictures/images/*
-!data/pictures/images/
+!data/pictures/images/.gitkeep
 
 # Dependencies
 node_modules/
