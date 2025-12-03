@@ -42,7 +42,6 @@ services:
       PORT: 5000
     command: >
       sh -c "
-        echo 'Đang đợi MySQL khởi động...';
         while ! nc -z mysql 3306; do
           echo 'Đang đợi MySQL...';
           sleep 5;
@@ -83,7 +82,6 @@ services:
       VITE_API_URL: http://localhost:5000
     command: >
       sh -c "
-        echo 'Đang đợi Backend khởi động...';
         while ! nc -z backend 5000; do
           echo 'Đang đợi Backend...';
           sleep 5;
