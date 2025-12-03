@@ -27,8 +27,8 @@ app.use(express.urlencoded({ extended: true }));
 
 // Static files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-app.use('/db/documents', express.static(path.join(__dirname, 'db/documents')));
-app.use('/db/pictures', express.static(path.join(__dirname, 'db/pictures')));
+app.use('/data/documents', express.static(path.join(__dirname, 'data/documents')));
+app.use('/data/pictures', express.static(path.join(__dirname, 'data/pictures')));
 
 // API Routes
 app.use('/api/auth', authRoutes);

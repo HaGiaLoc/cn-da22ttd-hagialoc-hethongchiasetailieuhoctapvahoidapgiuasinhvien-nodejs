@@ -150,11 +150,13 @@ export function AuthProvider({ children }) {
         email: userData.emailSV || userData.emailQTV,
         role: role,
         token: token,
-        avatar: generateAvatar(userData.hoTenSV || userData.hoTenQTV),
+        avatar: userData.avatarPath ? `http://localhost:5000/${userData.avatarPath}` : generateAvatar(userData.hoTenSV || userData.hoTenQTV),
         ...(role === 'student' && {
           maSinhVien: userData.maSinhVien,
-          MSSV: userData.MSSV,
-          Nganh: userData.Nganh
+          maNganh: userData.maNganh,
+          truongHoc: userData.truongHoc,
+          trangThaiTK: userData.trangThaiTK,
+          ngayTao: userData.ngayTao
         })
       }
       

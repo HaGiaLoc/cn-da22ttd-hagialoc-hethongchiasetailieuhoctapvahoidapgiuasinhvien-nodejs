@@ -122,7 +122,7 @@ export default function ChinhSuaHoSo() {
           email: updatedStudent.emailSV || formData.email,
           truongHoc: updatedStudent.truongHoc || formData.truongHoc,
           nganh: updatedStudent.maNganh || updatedStudent.tenNganh || formData.nganh,
-          avatar: updatedStudent.avatarPath ? `/db/pictures/avatars/${updatedStudent.avatarPath.split('/').pop()}` : avatarPreview
+          avatar: updatedStudent.avatarPath ? `http://localhost:5000/${updatedStudent.avatarPath}` : getAvatarUrl(null, formData.hoTenSinhVien)
         }
 
         setUser(newUser)

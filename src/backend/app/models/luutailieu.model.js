@@ -25,13 +25,19 @@ class LuuTaiLieuModel {
   // Lấy tài liệu đã lưu của sinh viên
   static async getSavedDocuments(maSinhVien, limit = 20, offset = 0) {
     const query = `
-      SELECT t.*, s.hoTenSV, l.ngayLuu
+      SELECT t.maTaiLieu, t.maLoai, t.maDinhDang, t.maSinhVien, 
+             t.tieuDeTL, t.ngayChiaSe, t.trangThaiTL, t.filePath, 
+             t.fileSizes, t.soLanLuu, t.luotTaiXuong,
+             ANY_VALUE(s.hoTenSV) as hoTenSV, 
+             MAX(l.ngayLuu) as ngayLuu
       FROM luutailieu l
       LEFT JOIN tailieu t ON l.maTaiLieu = t.maTaiLieu
       LEFT JOIN sinhvien s ON t.maSinhVien = s.maSinhVien
       WHERE l.maSinhVien = ?
-      GROUP BY t.maTaiLieu
-      ORDER BY l.ngayLuu DESC
+      GROUP BY t.maTaiLieu, t.maLoai, t.maDinhDang, t.maSinhVien, 
+               t.tieuDeTL, t.ngayChiaSe, t.trangThaiTL, t.filePath, 
+               t.fileSizes, t.soLanLuu, t.luotTaiXuong
+      ORDER BY ngayLuu DESC
       LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}
     `;
     const [rows] = await db.execute(query, [maSinhVien]);

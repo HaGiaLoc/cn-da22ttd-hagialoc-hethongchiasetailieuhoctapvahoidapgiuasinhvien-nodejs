@@ -17,6 +17,7 @@ export default function HoSo() {
   const [userAnswers, setUserAnswers] = useState([])
   const [savedDocuments, setSavedDocuments] = useState([])
   const [isLoading, setIsLoading] = useState(true)
+  const [majors, setMajors] = useState([])
 
   useEffect(() => {
     if (loading) return
@@ -24,8 +25,19 @@ export default function HoSo() {
       navigate('/login', { state: { from: location } })
     } else {
       loadUserData()
+      loadMajors()
     }
   }, [user, navigate, loading])
+
+  const loadMajors = async () => {
+    try {
+      const res = await cauHoiService.getNganh()
+      const items = res?.data || res || []
+      setMajors(items)
+    } catch (err) {
+      console.error('Error loading majors:', err)
+    }
+  }
 
   const loadUserData = async () => {
     try {
@@ -61,7 +73,12 @@ export default function HoSo() {
     answers: userAnswers.length
   }
 
-  const student = { nganh: 'Chưa cập nhật', truongHoc: 'Chưa cập nhật' }
+  // Lấy tên ngành từ mã ngành
+  const getMajorName = () => {
+    if (!user?.maNganh) return 'Chưa cập nhật'
+    const major = majors.find(m => m.maNganh === user.maNganh)
+    return major ? major.tenNganh : `Ngành ${user.maNganh}`
+  }
 
   return (
     <BoTri>
@@ -75,8 +92,9 @@ export default function HoSo() {
                 <h1>{user?.name}</h1>
                 <p>{user?.email}</p>
                 <div className="profile-meta">
-                  <span><i className="fas fa-graduation-cap"></i> {student?.nganh || 'Chưa cập nhật'}</span>
-                  <span><i className="fas fa-university"></i> {student?.truongHoc || 'Chưa cập nhật'}</span>
+                  <span><i className="fas fa-graduation-cap"></i> {getMajorName()}</span>
+                  <span><i className="fas fa-university"></i> {user?.truongHoc || 'Chưa cập nhật'}</span>
+                  {/* Debug: maNganh={user?.maNganh}, truongHoc={user?.truongHoc} */}
                 </div>
               </div>
               <Link to="/profile/edit" className="btn btn-outline">

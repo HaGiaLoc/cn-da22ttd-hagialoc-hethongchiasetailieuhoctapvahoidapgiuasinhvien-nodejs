@@ -34,6 +34,21 @@ const authService = {
     return response.data;
   },
 
+  // Xác thực email (quên mật khẩu)
+  async verifyEmail(email) {
+    const response = await api.post('/auth/verify-email', { email });
+    return response.data;
+  },
+
+  // Đặt lại mật khẩu (quên mật khẩu)
+  async resetPassword(email, newPassword) {
+    const response = await api.post('/auth/reset-password', {
+      email,
+      newPassword
+    });
+    return response.data;
+  },
+
   // Logout (client-side)
   logout() {
     localStorage.removeItem('user');

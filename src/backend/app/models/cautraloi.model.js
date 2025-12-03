@@ -15,13 +15,17 @@ class CauTraLoiModel {
   // Lấy câu trả lời theo câu hỏi
   static async getByQuestion(maCauHoi) {
     const query = `
-      SELECT ct.*, s.hoTenSV, s.avatarPath,
+      SELECT ct.maCauTraLoi, ct.maSinhVien, ct.maCauHoi, ct.noiDungCTL, 
+             ct.ngayTraLoi, ct.trangThaiCTL,
+             ANY_VALUE(s.hoTenSV) as hoTenSV, 
+             ANY_VALUE(s.avatarPath) as avatarPath,
              COALESCE(SUM(CAST(d.Upvote AS SIGNED) - CAST(d.Downvote AS SIGNED)), 0) as votes
       FROM cautraloi ct
       LEFT JOIN sinhvien s ON ct.maSinhVien = s.maSinhVien
       LEFT JOIN danhgiacautraloi d ON ct.maCauTraLoi = d.maCauTraLoi
       WHERE ct.maCauHoi = ?
-      GROUP BY ct.maCauTraLoi
+      GROUP BY ct.maCauTraLoi, ct.maSinhVien, ct.maCauHoi, ct.noiDungCTL, 
+               ct.ngayTraLoi, ct.trangThaiCTL
       ORDER BY (CASE WHEN ct.trangThaiCTL = 'show' THEN 1 ELSE 0 END) DESC, votes DESC, ct.ngayTraLoi DESC
     `;
     const [rows] = await db.execute(query, [maCauHoi]);
@@ -31,18 +35,21 @@ class CauTraLoiModel {
   // Lấy câu trả lời của một sinh viên
   static async getByStudent(maSinhVien, limit = 20, offset = 0) {
     const query = `
-      SELECT ct.*, q.tieuDeCH, q.maCauHoi,
+      SELECT ct.maCauTraLoi, ct.maSinhVien, ct.maCauHoi, ct.noiDungCTL, 
+             ct.ngayTraLoi, ct.trangThaiCTL,
+             ANY_VALUE(q.tieuDeCH) as tieuDeCH,
              COALESCE(SUM(CAST(d.Upvote AS SIGNED) - CAST(d.Downvote AS SIGNED)), 0) as votes
       FROM cautraloi ct
       LEFT JOIN cauhoi q ON ct.maCauHoi = q.maCauHoi
       LEFT JOIN danhgiacautraloi d ON ct.maCauTraLoi = d.maCauTraLoi
       WHERE ct.maSinhVien = ?
-      GROUP BY ct.maCauTraLoi
+      GROUP BY ct.maCauTraLoi, ct.maSinhVien, ct.maCauHoi, ct.noiDungCTL, 
+               ct.ngayTraLoi, ct.trangThaiCTL
       ORDER BY ct.ngayTraLoi DESC
-      LIMIT ? OFFSET ?
+      LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}
     `;
 
-    const [rows] = await db.execute(query, [maSinhVien, parseInt(limit, 10), parseInt(offset, 10)]);
+    const [rows] = await db.execute(query, [maSinhVien]);
     return rows;
   }
 

@@ -10,8 +10,8 @@ class TaiLieuModel {
 
       // Insert vào bảng tailieu
       const query = `
-        INSERT INTO tailieu (maLoai, maSinhVien, maDinhDang, tieuDeTL, filePath, fileSizes, trangThaiTL, soLanLuu, luotTaiXuong)
-        VALUES (?, ?, ?, ?, ?, ?, ?, 0, 0)
+        INSERT INTO tailieu (maLoai, maSinhVien, maDinhDang, tieuDeTL, filePath, fileSizes, trangThaiTL)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
       `;
       // Normalize bind parameters: mysql2 throws if any are undefined. Use null to represent SQL NULL.
       const params = [maLoai, maSinhVien, maDinhDang, tieuDeTL, filePath, fileSizes, trangThaiTL].map(v => (v === undefined ? null : v));
