@@ -43,10 +43,10 @@ services:
     command: >
       sh -c "
         while ! nc -z mysql 3306; do
-          echo 'Đang đợi MySQL...';
-          sleep 5;
+          echo 'Đang đợi Database...';
+          sleep 10;
         done;
-        echo 'MySQL đã sẵn sàng! Khởi động backend...';
+        echo 'Database đã sẵn sàng! Khởi động Backend...';
         npm run dev
       "
     volumes:
@@ -84,9 +84,9 @@ services:
       sh -c "
         while ! nc -z backend 5000; do
           echo 'Đang đợi Backend...';
-          sleep 5;
+          sleep 10;
         done;
-        echo 'Backend đã sẵn sàng! Khởi động frontend...';
+        echo 'Backend đã sẵn sàng! Khởi động Frontend...';
         npm run dev -- --host 0.0.0.0
       "
     volumes:

@@ -51,6 +51,9 @@ router.put('/:id/status', CauHoiController.updateStatus);
 // Xóa câu hỏi
 router.delete('/:id', CauHoiController.delete);
 
+// Cập nhật câu trả lời
+router.put('/answer/:answerId', CauHoiController.updateAnswer);
+
 // Xóa câu trả lời
 router.delete('/answer/:answerId', CauHoiController.deleteAnswer);
 

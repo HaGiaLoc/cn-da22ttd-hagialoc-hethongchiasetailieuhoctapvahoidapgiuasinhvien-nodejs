@@ -1927,6 +1927,30 @@ input, textarea, select {
     color: var(--text-primary);
     margin-bottom: 0.75rem;
     line-height: 1.3;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.question-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: var(--radius-full);
+    font-size: 0.875rem;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.question-status-badge.answered {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.question-status-badge i {
+    font-size: 1rem;
 }
 
 .question-subject-tags {
@@ -2055,6 +2079,67 @@ input, textarea, select {
     flex: 1;
 }
 
+.answer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.answer-actions {
+    position: relative;
+}
+
+.answer-actions .btn-icon-only {
+    padding: 0.5rem;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: all 0.3s ease;
+}
+
+.answer-actions .btn-icon-only:hover {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.answer-actions .dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    min-width: 180px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    margin-top: 0.25rem;
+}
+
+.answer-actions .dropdown-menu button {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    text-align: left;
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background-color 0.2s;
+}
+
+.answer-actions .dropdown-menu button:hover {
+    background: var(--bg-secondary);
+}
+
+.answer-actions .dropdown-menu button i {
+    width: 1.25rem;
+}
+
 .answer-content p {
     line-height: 1.8;
     color: var(--text-primary);
@@ -2105,6 +2190,18 @@ input, textarea, select {
     .question-voting {
         flex-direction: row;
         justify-content: center;
+    }
+
+    .question-header h1 {
+        font-size: 1.5rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .question-status-badge {
+        font-size: 0.75rem;
+        padding: 0.3rem 0.6rem;
     }
     
     .answer-item {
@@ -3913,9 +4010,86 @@ input, textarea, select {
 
 .report-reason-cell {
     max-width: 300px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.report-reason-cell > span:first-child {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    flex: 1;
+    min-width: 0;
+}
+
+.reason-detail-icon {
+    cursor: help;
+    color: var(--primary-color);
+    font-size: 1em;
+    transition: all 0.2s ease;
+    position: relative;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+}
+
+.reason-detail-icon:hover {
+    color: var(--primary-dark);
+    transform: scale(1.15);
+}
+
+/* Custom tooltip for reason detail - chỉ hiện khi có data-tooltip */
+.reason-detail-icon[data-tooltip]:not([data-tooltip=""])::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 10px);
+    transform: translateX(-50%) scale(0.8);
+    background: rgba(0, 0, 0, 0.95);
+    color: white;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: normal;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    width: max-content;
+    max-width: 320px;
+    min-width: 200px;
+    z-index: 10000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.25s ease;
+    pointer-events: none;
+    line-height: 1.5;
+    text-align: left;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.reason-detail-icon[data-tooltip]:not([data-tooltip=""])::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 4px);
+    transform: translateX(-50%) scale(0.8);
+    border: 6px solid transparent;
+    border-top-color: rgba(0, 0, 0, 0.95);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.25s ease;
+    pointer-events: none;
+    z-index: 10000;
+}
+
+.reason-detail-icon[data-tooltip]:not([data-tooltip=""]):hover::after,
+.reason-detail-icon[data-tooltip]:not([data-tooltip=""]):hover::before {
+    transform: translateX(-50%) scale(1);
+    opacity: 1;
+    visibility: visible;
 }
 
 .report-target-cell {
@@ -4008,6 +4182,7 @@ input, textarea, select {
 
 .report-item-title {
     margin-bottom: 0.5rem;
+    color: var(--text-primary);
 }
 
 .report-type-label {
@@ -4015,10 +4190,21 @@ input, textarea, select {
     color: var(--text-secondary);
 }
 
+.report-type-label .badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background: var(--primary-color);
+    color: white;
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
 .reason-options {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+    margin-top: 0.5rem;
 }
 
 .radio-label {
@@ -4027,6 +4213,7 @@ input, textarea, select {
     gap: 0.75rem;
     padding: 0.75rem;
     background: var(--bg-secondary);
+    border: 2px solid var(--bg-secondary);
     border-radius: var(--radius-md);
     cursor: pointer;
     transition: all 0.2s ease;
@@ -4034,17 +4221,33 @@ input, textarea, select {
 
 .radio-label:hover {
     background: #e8e8e8;
+    border-color: var(--primary-color);
 }
 
 .radio-label input[type="radio"] {
     width: 20px;
     height: 20px;
     cursor: pointer;
+    accent-color: var(--primary-color);
 }
 
-.radio-label input[type="radio"]:checked + span {
+.radio-label input[type="radio"]:checked ~ span {
     font-weight: 600;
     color: var(--primary-color);
+}
+
+.radio-label span {
+    flex: 1;
+    color: var(--text-primary);
+}
+
+.modal-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
 }
 
 .admin-link {

@@ -3,12 +3,12 @@ import db from '../config/database.js';
 class BaoCaoModel {
   // Tạo báo cáo mới
   static async create(baoCaoData) {
-    const { maSinhVien, lyDo, loaiBaoCao } = baoCaoData;
+    const { maSinhVien, lyDo, moTa, loaiBaoCao, maTaiLieu, maCauHoi, maCauTraLoi } = baoCaoData;
     const query = `
-      INSERT INTO baocaovipham (maSinhVien, lyDo, loaiBaoCao, trangThaiBC, maQuanTriVien)
-      VALUES (?, ?, ?, 'pending', 1)
+      INSERT INTO baocaovipham (maSinhVien, lyDo, moTa, loaiBaoCao, maTaiLieu, maCauHoi, maCauTraLoi, trangThaiBC, maQuanTriVien)
+      VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', 1)
     `;
-    const [result] = await db.execute(query, [maSinhVien, lyDo, loaiBaoCao]);
+    const [result] = await db.execute(query, [maSinhVien, lyDo, moTa || null, loaiBaoCao, maTaiLieu || null, maCauHoi || null, maCauTraLoi || null]);
     return result.insertId;
   }
 

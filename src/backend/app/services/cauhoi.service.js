@@ -171,6 +171,31 @@ class CauHoiService {
     return true;
   }
 
+  // Cập nhật câu trả lời
+  static async updateAnswer(id, maSinhVien, updateData) {
+    // Lấy thông tin câu trả lời
+    const [rows] = await CauTraLoiModel.getByQuestion(null);
+    // Tìm câu trả lời cụ thể
+    const query = 'SELECT maSinhVien FROM cautraloi WHERE maCauTraLoi = ?';
+    const db = (await import('../config/database.js')).default;
+    const [answerRows] = await db.execute(query, [id]);
+    
+    if (!answerRows || answerRows.length === 0) {
+      throw new Error('Câu trả lời không tồn tại');
+    }
+    
+    const answer = answerRows[0];
+    
+    // Chỉ cho phép chủ sở hữu cập nhật
+    if (answer.maSinhVien !== maSinhVien) {
+      throw new Error('Bạn không có quyền chỉnh sửa câu trả lời này');
+    }
+
+    const { noiDungCTL } = updateData;
+    await CauTraLoiModel.update(id, { noiDungCTL });
+    return true;
+  }
+
   // Xóa câu trả lời
   static async deleteAnswer(id, maSinhVien, role) {
     await CauTraLoiModel.delete(id);

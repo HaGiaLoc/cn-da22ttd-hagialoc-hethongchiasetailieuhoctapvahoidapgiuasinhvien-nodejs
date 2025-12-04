@@ -2,8 +2,8 @@ import api from '../utils/axiosConfig';
 
 const baoCaoService = {
   // Tạo báo cáo
-  async create(lyDo) {
-    const response = await api.post('/baocao', { lyDo });
+  async create(reportData) {
+    const response = await api.post('/baocao', reportData);
     return response.data;
   },
 

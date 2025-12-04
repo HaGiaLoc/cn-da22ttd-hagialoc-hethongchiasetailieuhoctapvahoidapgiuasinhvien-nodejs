@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 03, 2025 at 01:57 PM
+-- Generation Time: Dec 04, 2025 at 03:52 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -20,6 +20,8 @@ SET time_zone = "+00:00";
 --
 -- Database: `kef_db`
 --
+CREATE DATABASE IF NOT EXISTS `kef_db` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE `kef_db`;
 
 -- --------------------------------------------------------
 
@@ -35,6 +37,7 @@ CREATE TABLE `baocaovipham` (
   `maCauHoi` int(11) DEFAULT NULL,
   `maCauTraLoi` int(11) DEFAULT NULL,
   `lyDo` text NOT NULL,
+  `moTa` text DEFAULT NULL,
   `ngayBC` datetime NOT NULL DEFAULT current_timestamp(),
   `trangThaiBC` enum('pending','approved','rejected') NOT NULL,
   `loaiBaoCao` enum('document','question','answer') NOT NULL
@@ -190,6 +193,14 @@ CREATE TABLE `quantrivien` (
   `emailQTV` varchar(255) NOT NULL,
   `matKhauQTV` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_vietnamese_ci;
+
+--
+-- Dumping data for table `quantrivien`
+--
+
+INSERT INTO `quantrivien` (`maQuanTriVien`, `hoTenQTV`, `emailQTV`, `matKhauQTV`) VALUES
+(1, 'Admin 1', 'admin1@gmail.com', '$2a$10$G.4fWcGZjNkJJ2TbvU7tPOtORW5owAnZ9COexVEgZM9ExTUNqkBWK'),
+(2, 'Admin 2', 'admin2@gmail.com', '$2a$10$MrZcWJor99G8.5mwPXBoBu9baQmKZ4AV8dp2..OAgafpnUx6wfhJi');
 
 -- --------------------------------------------------------
 
@@ -409,7 +420,7 @@ ALTER TABLE `nganh`
 -- AUTO_INCREMENT for table `quantrivien`
 --
 ALTER TABLE `quantrivien`
-  MODIFY `maQuanTriVien` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `maQuanTriVien` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `sinhvien`

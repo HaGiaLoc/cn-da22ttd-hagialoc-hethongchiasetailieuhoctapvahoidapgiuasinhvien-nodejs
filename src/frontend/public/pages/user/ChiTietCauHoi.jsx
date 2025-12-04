@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom'
 import BoTri from '../../components/BoTri'
 import BaoCaoModal from '../../components/user/BaoCaoModal'
 import EditQuestionModal from '../../components/user/EditQuestionModal'
+import EditAnswerModal from '../../components/user/EditAnswerModal'
 import { cauHoiService } from '../../api'
 import { useNotification } from '../../contexts/NotificationContext'
 import { useAuth } from '../../contexts/AuthContext'
@@ -19,7 +20,11 @@ export default function ChiTietCauHoi() {
   const [answer, setAnswer] = useState('')
   const [showReportModal, setShowReportModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
+  const [showEditAnswerModal, setShowEditAnswerModal] = useState(false)
+  const [editingAnswer, setEditingAnswer] = useState(null)
   const [showDropdown, setShowDropdown] = useState(false)
+  const [reportTarget, setReportTarget] = useState({ type: 'question', id: null, title: '' })
+  const [answerDropdowns, setAnswerDropdowns] = useState({})
   const dropdownRef = useRef(null)
 
   useEffect(() => {
@@ -44,16 +49,26 @@ export default function ChiTietCauHoi() {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setShowDropdown(false)
       }
+      
+      // Close answer dropdowns when clicking outside
+      const clickedInsideAnyDropdown = Object.keys(answerDropdowns).some(key => {
+        const element = document.querySelector(`[data-answer-id="${key}"]`)
+        return element && element.contains(event.target)
+      })
+      
+      if (!clickedInsideAnyDropdown) {
+        setAnswerDropdowns({})
+      }
     }
 
-    if (showDropdown) {
+    if (showDropdown || Object.values(answerDropdowns).some(v => v)) {
       document.addEventListener('mousedown', handleClickOutside)
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
     }
-  }, [showDropdown])
+  }, [showDropdown, answerDropdowns])
 
   if (!question) return <BoTri><div>Loading...</div></BoTri>
 
@@ -135,6 +150,62 @@ export default function ChiTietCauHoi() {
     }
   }
 
+  const handleReportQuestion = () => {
+    setReportTarget({
+      type: 'question',
+      id: question.maCauHoi,
+      title: question.tieuDeCH
+    })
+    setShowReportModal(true)
+    setShowDropdown(false)
+  }
+
+  const handleReportAnswer = (answerId, answerContent) => {
+    setReportTarget({
+      type: 'answer',
+      id: answerId,
+      title: answerContent.substring(0, 50) + (answerContent.length > 50 ? '...' : '')
+    })
+    setShowReportModal(true)
+    setAnswerDropdowns({})
+  }
+
+  const toggleAnswerDropdown = (answerId) => {
+    setAnswerDropdowns(prev => ({
+      ...prev,
+      [answerId]: !prev[answerId]
+    }))
+  }
+
+  const handleEditAnswer = (answer) => {
+    setEditingAnswer(answer)
+    setShowEditAnswerModal(true)
+    setAnswerDropdowns({})
+  }
+
+  const handleSaveAnswer = async (formData) => {
+    try {
+      await cauHoiService.updateAnswer(editingAnswer.maCauTraLoi, formData)
+      showNotification('Cập nhật câu trả lời thành công', 'success', 2000)
+      setShowEditAnswerModal(false)
+      setEditingAnswer(null)
+      await loadQuestion()
+    } catch (error) {
+      showNotification(error.message || 'Không thể cập nhật câu trả lời', 'error')
+    }
+  }
+
+  const handleMarkAsAnswered = async () => {
+    try {
+      await cauHoiService.updateStatus(id, 'answered')
+      showNotification('Đã đánh dấu câu hỏi là "Đã trả lời"', 'success', 2000)
+      setShowDropdown(false)
+      await loadQuestion()
+    } catch (error) {
+      showNotification(error.message || 'Không thể cập nhật trạng thái', 'error')
+    }
+  }
+
   return (
     <BoTri>
       <section className="question-detail-section">
@@ -179,16 +250,19 @@ export default function ChiTietCauHoi() {
                               <i className="fas fa-edit"></i>
                               Chỉnh sửa câu hỏi
                             </button>
+                            {question.trangThaiCH !== 'answered' && answers.length > 0 && (
+                              <button onClick={handleMarkAsAnswered}>
+                                <i className="fas fa-check-circle"></i>
+                                Đánh dấu đã trả lời
+                              </button>
+                            )}
                             <button onClick={handleToggleStatus}>
                               <i className={`fas fa-${question.trangThaiCH === 'show' ? 'eye-slash' : 'eye'}`}></i>
                               {question.trangThaiCH === 'show' ? 'Ẩn câu hỏi' : 'Hiển thị câu hỏi'}
                             </button>
                           </>
                         )}
-                        <button onClick={() => {
-                          setShowReportModal(true)
-                          setShowDropdown(false)
-                        }}>
+                        <button onClick={handleReportQuestion}>
                           <i className="fas fa-flag"></i>
                           Báo cáo vi phạm
                         </button>
@@ -196,7 +270,14 @@ export default function ChiTietCauHoi() {
                     )}
                   </div>
                 </div>
-                <h1>{question.tieuDeCH}</h1>
+                <h1>
+                  {question.tieuDeCH}
+                  {question.trangThaiCH === 'answered' && (
+                    <span className="question-status-badge answered">
+                      <i className="fas fa-check-circle"></i> Đã trả lời
+                    </span>
+                  )}
+                </h1>
                 <div className="question-subject-tags">
                   <span className="subject-tag"><i className="fas fa-book"></i> {question.tenMon}</span>
                   <span className="major-tag"><i className="fas fa-graduation-cap"></i> {question.tenNganh}</span>
@@ -264,11 +345,35 @@ export default function ChiTietCauHoi() {
                         </button>
                       </div>
                       <div className="answer-content">
-                        <p>{ans.noiDungCTL}</p>
-                        <div className="answer-meta">
-                          <span>Trả lời bởi {ans.hoTenSV}</span>
-                          <span>{formatDate(ans.ngayTraLoi)}</span>
+                        <div className="answer-header">
+                          <div className="answer-meta">
+                            <span>Trả lời bởi {ans.hoTenSV}</span>
+                            <span>{formatDate(ans.ngayTraLoi)}</span>
+                          </div>
+                          <div className="answer-actions" data-answer-id={ans.maCauTraLoi}>
+                            <button 
+                              className="btn-icon-only"
+                              onClick={() => toggleAnswerDropdown(ans.maCauTraLoi)}
+                            >
+                              <i className="fas fa-ellipsis-v"></i>
+                            </button>
+                            {answerDropdowns[ans.maCauTraLoi] && (
+                              <div className="dropdown-menu">
+                                {user && user.id === ans.maSinhVien && (
+                                  <button onClick={() => handleEditAnswer(ans)}>
+                                    <i className="fas fa-edit"></i>
+                                    Chỉnh sửa
+                                  </button>
+                                )}
+                                <button onClick={() => handleReportAnswer(ans.maCauTraLoi, ans.noiDungCTL)}>
+                                  <i className="fas fa-flag"></i>
+                                  Báo cáo vi phạm
+                                </button>
+                              </div>
+                            )}
+                          </div>
                         </div>
+                        <p>{ans.noiDungCTL}</p>
                       </div>
                     </div>
                   ))}
@@ -310,9 +415,9 @@ export default function ChiTietCauHoi() {
       <BaoCaoModal 
         isOpen={showReportModal}
         onClose={() => setShowReportModal(false)}
-        reportType="question"
-        reportedId={question?.maCauHoi}
-        reportedTitle={question?.tieuDeCH}
+        reportType={reportTarget.type}
+        reportedId={reportTarget.id}
+        reportedTitle={reportTarget.title}
       />
 
       {showEditModal && (
@@ -320,6 +425,17 @@ export default function ChiTietCauHoi() {
           question={question}
           onClose={() => setShowEditModal(false)}
           onSave={handleSaveEdit}
+        />
+      )}
+
+      {showEditAnswerModal && (
+        <EditAnswerModal
+          answer={editingAnswer}
+          onClose={() => {
+            setShowEditAnswerModal(false)
+            setEditingAnswer(null)
+          }}
+          onSave={handleSaveAnswer}
         />
       )}
     </BoTri>

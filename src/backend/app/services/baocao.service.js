@@ -2,8 +2,8 @@ import BaoCaoModel from '../models/baocao.model.js';
 
 class BaoCaoService {
   // Tạo báo cáo
-  static async create(maSinhVien, lyDo) {
-    const baoCaoId = await BaoCaoModel.create({ maSinhVien, lyDo });
+  static async create(baoCaoData) {
+    const baoCaoId = await BaoCaoModel.create(baoCaoData);
     return baoCaoId;
   }
 

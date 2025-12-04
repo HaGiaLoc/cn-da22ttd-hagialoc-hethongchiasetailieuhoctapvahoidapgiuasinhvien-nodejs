@@ -1,9 +1,11 @@
 import { Link } from 'react-router-dom'
 import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { formatDate, formatNumber, generateAvatar } from '../../utils/helpers'
 import { useAuth } from '../../contexts/AuthContext'
 import { useNotification } from '../../contexts/NotificationContext'
 import { taiLieuService } from '../../api'
+import BaoCaoModal from './BaoCaoModal'
 
 export default function TheTaiLieu({ document: taiLieu, onSaveChange }) {
   const { user } = useAuth()
@@ -136,62 +138,75 @@ export default function TheTaiLieu({ document: taiLieu, onSaveChange }) {
   }
 
   return (
-    <div className="document-card">
-      <div className="document-thumbnail">
-        <i className="fas fa-file-pdf"></i>
-        {user?.role === 'student' && (
-          <button 
-            className="report-btn"
-            onClick={handleReport}
-            title="Báo cáo tài liệu"
-          >
-            <i className="fas fa-flag"></i>
-          </button>
-        )}
-      </div>
-      <div className="document-info">
-        <div className="document-header-actions">
-          <span className="document-type">{taiLieu.loaiTaiLieu || taiLieu.tenLoai || taiLieu.tenDinhDang || 'Tài liệu'}</span>
+    <>
+      <div className="document-card">
+        <div className="document-thumbnail">
+          <i className="fas fa-file-pdf"></i>
           {user?.role === 'student' && (
             <button 
-              className={`save-btn ${isSaved ? 'saved' : ''}`}
-              onClick={handleSave}
-              title={isSaved ? 'Bỏ lưu' : 'Lưu tài liệu'}
+              className="report-btn"
+              onClick={handleReport}
+              title="Báo cáo tài liệu"
             >
-              <i className={`${isSaved ? 'fas' : 'far'} fa-bookmark`}></i>
+              <i className="fas fa-flag"></i>
             </button>
           )}
         </div>
-        <h3 className="document-title">{taiLieu.tieuDeTL}</h3>
-        <div className="document-author">
-          <div className="author-info">
-            <img
-              src={authorAvatar}
-              alt={taiLieu.hoTenSV || 'Tác giả'}
-              className="author-avatar-small"
-            />
-            <span>{taiLieu.hoTenSV || taiLieu.tenSV || taiLieu.author || 'Tác giả'}</span>
+        <div className="document-info">
+          <div className="document-header-actions">
+            <span className="document-type">{taiLieu.loaiTaiLieu || taiLieu.tenLoai || taiLieu.tenDinhDang || 'Tài liệu'}</span>
+            {user?.role === 'student' && (
+              <button 
+                className={`save-btn ${isSaved ? 'saved' : ''}`}
+                onClick={handleSave}
+                title={isSaved ? 'Bỏ lưu' : 'Lưu tài liệu'}
+              >
+                <i className={`${isSaved ? 'fas' : 'far'} fa-bookmark`}></i>
+              </button>
+            )}
           </div>
-          <span className="document-date">{formatDate(taiLieu.ngayChiaSe)}</span>
-        </div>
-        <div className="document-meta">
-          <div className="meta-stats">
-            <span>
-              <i className="fas fa-bookmark"></i> {formatNumber(taiLieu.soLanLuu || 0)}
-            </span>
-            <span>
-              <i className="fas fa-download"></i> {formatNumber(taiLieu.luotTaiXuong || 0)}
-            </span>
+          <h3 className="document-title">{taiLieu.tieuDeTL}</h3>
+          <div className="document-author">
+            <div className="author-info">
+              <img
+                src={authorAvatar}
+                alt={taiLieu.hoTenSV || 'Tác giả'}
+                className="author-avatar-small"
+              />
+              <span>{taiLieu.hoTenSV || taiLieu.tenSV || taiLieu.author || 'Tác giả'}</span>
+            </div>
+            <span className="document-date">{formatDate(taiLieu.ngayChiaSe)}</span>
           </div>
-          <button 
-            className="btn btn-sm btn-primary download-btn"
-            onClick={handleDownload}
-            title="Tải xuống"
-          >
-            <i className="fas fa-download"></i>
-          </button>
+          <div className="document-meta">
+            <div className="meta-stats">
+              <span>
+                <i className="fas fa-bookmark"></i> {formatNumber(taiLieu.soLanLuu || 0)}
+              </span>
+              <span>
+                <i className="fas fa-download"></i> {formatNumber(taiLieu.luotTaiXuong || 0)}
+              </span>
+            </div>
+            <button 
+              className="btn btn-sm btn-primary download-btn"
+              onClick={handleDownload}
+              title="Tải xuống"
+            >
+              <i className="fas fa-download"></i>
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+
+      {showReportModal && createPortal(
+        <BaoCaoModal 
+          isOpen={showReportModal}
+          onClose={() => setShowReportModal(false)}
+          reportType="document"
+          reportedId={taiLieu.maTaiLieu || taiLieu.id}
+          reportedTitle={taiLieu.tieuDeTL}
+        />,
+        document.body
+      )}
+    </>
   )
 }

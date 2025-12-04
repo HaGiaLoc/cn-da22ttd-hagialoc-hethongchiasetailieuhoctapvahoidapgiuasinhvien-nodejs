@@ -91,18 +91,6 @@ export default function QuanTriBaoCao() {
     }
   }
 
-  const getReasonText = (reason) => {
-    const reasons = {
-      'invalid_content': 'Nội dung không phù hợp',
-      'spam': 'Spam',
-      'copyrigth_violation': 'Vi phạm bản quyền',
-      'misinformation': 'Thông tin sai lệch',
-      'inapproriate_language': 'Ngôn ngữ không phù hợp',
-      'other': 'Khác'
-    }
-    return reasons[reason] || reason
-  }
-
   const filteredReports = reports.filter(r => {
     const typeMatch = filterType === 'all' || r.loaiBaoCao === filterType
     return typeMatch
@@ -222,7 +210,16 @@ export default function QuanTriBaoCao() {
                       </td>
                       <td>
                         <div className="report-reason-cell">
-                          {getReasonText(report.lyDo)}
+                          <span>{report.lyDo}</span>
+                          {report.moTa && (
+                            <span 
+                              className="reason-detail-icon"
+                              data-tooltip={report.moTa}
+                              title={report.moTa}
+                            >
+                              <i className="fas fa-info-circle"></i>
+                            </span>
+                          )}
                         </div>
                       </td>
                       <td>{report.hoTenSV || 'N/A'}</td>

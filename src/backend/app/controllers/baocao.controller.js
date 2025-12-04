@@ -4,10 +4,18 @@ class BaoCaoController {
   // Tạo báo cáo
   static async create(req, res, next) {
     try {
-      const { lyDo } = req.body;
+      const { lyDo, moTa, loaiBaoCao, maTaiLieu, maCauHoi, maCauTraLoi } = req.body;
       const maSinhVien = req.user.id;
 
-      const baoCaoId = await BaoCaoService.create(maSinhVien, lyDo);
+      const baoCaoId = await BaoCaoService.create({
+        maSinhVien,
+        lyDo,
+        moTa,
+        loaiBaoCao,
+        maTaiLieu,
+        maCauHoi,
+        maCauTraLoi
+      });
 
       res.status(201).json({
         success: true,

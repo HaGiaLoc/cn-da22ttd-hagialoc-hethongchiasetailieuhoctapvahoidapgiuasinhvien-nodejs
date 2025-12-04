@@ -48,24 +48,27 @@ export default function BaoCaoModal({ isOpen, onClose, reportType, reportedId, r
       return
     }
 
-    const finalReason = selectedReason === 'Lý do khác' ? reason : selectedReason
-
-    if (!finalReason.trim()) {
-      showNotification('Vui lòng chọn hoặc nhập lý do báo cáo', 'error', 2000)
+    if (!selectedReason) {
+      showNotification('Vui lòng chọn lý do báo cáo', 'error', 2000)
       return
     }
 
-    const newReport = {
-      maSinhVien: user.id,
-      reportType,
-      reportedId,
-      lyDo: finalReason,
-      ngayBaoCao: new Date(),
-      trangThaiBaoCao: 'pending'
+    if (selectedReason === 'Lý do khác' && !reason.trim()) {
+      showNotification('Vui lòng nhập chi tiết lý do báo cáo', 'error', 2000)
+      return
+    }
+
+    const reportData = {
+      lyDo: selectedReason,
+      moTa: selectedReason === 'Lý do khác' ? reason : null,
+      loaiBaoCao: reportType,
+      ...(reportType === 'document' && { maTaiLieu: reportedId }),
+      ...(reportType === 'question' && { maCauHoi: reportedId }),
+      ...(reportType === 'answer' && { maCauTraLoi: reportedId })
     }
 
     try {
-      await baoCaoService.create(newReport)
+      await baoCaoService.create(reportData)
     } catch (error) {
       console.error('Error creating report:', error)
       showNotification('Có lỗi xảy ra khi gửi báo cáo', 'error', 2000)

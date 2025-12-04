@@ -81,6 +81,12 @@ const cauHoiService = {
     return response.data;
   },
 
+  // Cập nhật câu trả lời
+  async updateAnswer(answerId, updateData) {
+    const response = await api.put(`/cauhoi/answer/${answerId}`, updateData);
+    return response.data;
+  },
+
   // Xóa câu trả lời
   async deleteAnswer(answerId) {
     const response = await api.delete(`/cauhoi/answer/${answerId}`);

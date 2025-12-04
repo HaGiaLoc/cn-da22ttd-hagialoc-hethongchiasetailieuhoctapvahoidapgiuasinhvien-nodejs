@@ -234,6 +234,24 @@ class CauHoiController {
     }
   }
 
+  // Cập nhật câu trả lời
+  static async updateAnswer(req, res, next) {
+    try {
+      const { answerId } = req.params;
+      const { noiDungCTL } = req.body;
+      const maSinhVien = req.user.id;
+
+      await CauHoiService.updateAnswer(answerId, maSinhVien, { noiDungCTL });
+
+      res.json({
+        success: true,
+        message: 'Cập nhật câu trả lời thành công'
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   // Xóa câu trả lời
   static async deleteAnswer(req, res, next) {
     try {
