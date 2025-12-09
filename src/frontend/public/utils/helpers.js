@@ -140,3 +140,49 @@ export function getAvatarUrl(avatarPath, fullName) {
   const cleanPath = avatarPath.startsWith('/') ? avatarPath : `/${avatarPath}`
   return `${baseUrl}${cleanPath}`
 }
+
+// Map enum values (lưu trong DB) sang nhãn tiếng Việt hiển thị trên giao diện
+export function getEnumLabel(type, value) {
+  if (!value) return ''
+  const v = String(value).toLowerCase()
+
+  const maps = {
+    questionStatus: {
+      show: 'Đang hiển thị',
+      answered: 'Đã trả lời',
+      hidden: 'Đã ẩn'
+    },
+    answerStatus: {
+      show: 'Đang hiển thị',
+      hidden: 'Đã ẩn'
+    },
+    documentStatus: {
+      show: 'Hiển thị',
+      hidden: 'Ẩn'
+    },
+    reportStatus: {
+      pending: 'Chờ xử lý',
+      approved: 'Đã duyệt',
+      rejected: 'Từ chối'
+    },
+    reportReason: {
+      copyright: 'Vi phạm bản quyền',
+      misinformation: 'Thông tin sai lệch',
+      inappropriate_content: 'Nội dung không phù hợp',
+      spam: 'Spam',
+      other: 'Khác'
+    },
+    reportType: {
+      document: 'Tài liệu',
+      question: 'Câu hỏi',
+      answer: 'Câu trả lời'
+    },
+    userStatus: {
+      active: 'Hoạt động',
+      locked: 'Bị khóa'
+    }
+  }
+
+  const map = maps[type]
+  return map?.[v] || value
+}

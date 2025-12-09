@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import BoTriQuanTri from '../../components/admin/BoTriQuanTri'
 import { adminService } from '../../api'
 import { useNotification } from '../../contexts/NotificationContext'
-import { formatDate } from '../../utils/helpers'
+import { formatDate, getEnumLabel } from '../../utils/helpers'
 
 export default function QuanTriBaoCao() {
   const { showNotification } = useNotification()
@@ -173,11 +173,7 @@ export default function QuanTriBaoCao() {
                     >
                       <td>
                         <div className="report-target-cell">
-                          <strong>
-                            {report.loaiBaoCao === 'document' ? 'Tài liệu' :
-                             report.loaiBaoCao === 'question' ? 'Câu hỏi' :
-                             report.loaiBaoCao === 'answer' ? 'Câu trả lời' : 'Khác'}
-                          </strong>
+                          <strong>{getEnumLabel('reportType', report.loaiBaoCao) || 'Khác'}</strong>
                           <div className="report-target-id">
                             {report.loaiBaoCao === 'document' && (
                               <>
@@ -202,15 +198,11 @@ export default function QuanTriBaoCao() {
                         </div>
                       </td>
                       <td>
-                        <span className="badge badge-info">
-                          {report.loaiBaoCao === 'document' ? 'Tài liệu' :
-                           report.loaiBaoCao === 'question' ? 'Câu hỏi' :
-                           report.loaiBaoCao === 'answer' ? 'Câu trả lời' : 'Khác'}
-                        </span>
+                        <span className="badge badge-info">{getEnumLabel('reportType', report.loaiBaoCao) || 'Khác'}</span>
                       </td>
                       <td>
                         <div className="report-reason-cell">
-                          <span>{report.lyDo}</span>
+                          <span>{getEnumLabel('reportReason', report.lyDo) || report.lyDo}</span>
                           {report.moTa && (
                             <span 
                               className="reason-detail-icon"
@@ -229,8 +221,7 @@ export default function QuanTriBaoCao() {
                           report.trangThaiBC === 'pending' ? 'warning' :
                           report.trangThaiBC === 'approved' ? 'success' : 'danger'
                         }`}>
-                          {report.trangThaiBC === 'pending' ? 'Chờ xử lý' :
-                           report.trangThaiBC === 'approved' ? 'Đã duyệt' : 'Từ chối'}
+                          {getEnumLabel('reportStatus', report.trangThaiBC)}
                         </span>
                       </td>
                       <td>

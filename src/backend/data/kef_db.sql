@@ -3,10 +3,11 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 04, 2025 at 03:52 AM
+-- Generation Time: Dec 09, 2025 at 12:10 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
+SET FOREIGN_KEY_CHECKS=0;
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
@@ -36,7 +37,7 @@ CREATE TABLE `baocaovipham` (
   `maSinhVien` int(11) NOT NULL,
   `maCauHoi` int(11) DEFAULT NULL,
   `maCauTraLoi` int(11) DEFAULT NULL,
-  `lyDo` text NOT NULL,
+  `lyDo` enum('copyright','misinformation','inappropriate_content','spam','other') NOT NULL,
   `moTa` text DEFAULT NULL,
   `ngayBC` datetime NOT NULL DEFAULT current_timestamp(),
   `trangThaiBC` enum('pending','approved','rejected') NOT NULL,
@@ -200,7 +201,8 @@ CREATE TABLE `quantrivien` (
 
 INSERT INTO `quantrivien` (`maQuanTriVien`, `hoTenQTV`, `emailQTV`, `matKhauQTV`) VALUES
 (1, 'Admin 1', 'admin1@gmail.com', '$2a$10$G.4fWcGZjNkJJ2TbvU7tPOtORW5owAnZ9COexVEgZM9ExTUNqkBWK'),
-(2, 'Admin 2', 'admin2@gmail.com', '$2a$10$MrZcWJor99G8.5mwPXBoBu9baQmKZ4AV8dp2..OAgafpnUx6wfhJi');
+(2, 'Admin 2', 'admin2@gmail.com', '$2a$10$MrZcWJor99G8.5mwPXBoBu9baQmKZ4AV8dp2..OAgafpnUx6wfhJi'),
+(3, 'Admin 3', 'admin3@gmail.com', '$2a$10$ks2vyQPHuD99qlLbzb.5LOowzvkKJGLW81LuEFCGaFC0c0eGm43Hq');
 
 -- --------------------------------------------------------
 
@@ -420,7 +422,7 @@ ALTER TABLE `nganh`
 -- AUTO_INCREMENT for table `quantrivien`
 --
 ALTER TABLE `quantrivien`
-  MODIFY `maQuanTriVien` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `maQuanTriVien` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `sinhvien`
@@ -522,6 +524,7 @@ ALTER TABLE `tailieu`
   ADD CONSTRAINT `fk_tailieu_dinhdang` FOREIGN KEY (`maDinhDang`) REFERENCES `dinhdang` (`maDinhDang`) ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_tailieu_loaitailieu` FOREIGN KEY (`maLoai`) REFERENCES `loaitailieu` (`maLoai`) ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_tailieu_sinhvien` FOREIGN KEY (`maSinhVien`) REFERENCES `sinhvien` (`maSinhVien`) ON DELETE CASCADE ON UPDATE CASCADE;
+SET FOREIGN_KEY_CHECKS=1;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

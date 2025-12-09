@@ -3,10 +3,11 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 04, 2025 at 03:31 AM
+-- Generation Time: Dec 09, 2025 at 12:10 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
+SET FOREIGN_KEY_CHECKS=0;
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
@@ -29,30 +30,30 @@ USE `kef_db`;
 
 INSERT INTO `baocaovipham` (`maBaoCao`, `maQuanTriVien`, `maTaiLieu`, `maSinhVien`, `maCauHoi`, `maCauTraLoi`, `lyDo`, `moTa`, `ngayBC`, `trangThaiBC`, `loaiBaoCao`) VALUES
 (1, 1, 7, 1, NULL, NULL, 'spam', NULL, '2025-11-18 23:59:00', 'pending', 'document'),
-(2, 1, 3, 2, NULL, NULL, 'invalid_content', NULL, '2025-11-18 23:59:00', 'approved', 'document'),
-(3, 1, 2, 3, NULL, NULL, 'other', NULL, '2025-11-18 23:59:00', 'pending', 'document'),
+(2, 1, 3, 2, NULL, NULL, 'inappropriate_content', NULL, '2025-11-18 23:59:00', 'approved', 'document'),
+(3, 1, 2, 3, NULL, NULL, 'other', 'Test', '2025-11-18 23:59:00', 'pending', 'document'),
 (4, 1, NULL, 1, 8, NULL, 'spam', NULL, '2025-11-18 23:59:00', 'pending', 'question'),
 (5, 1, NULL, 2, 3, NULL, 'misinformation', NULL, '2025-11-18 23:59:00', 'approved', 'question'),
-(6, 1, NULL, 3, 2, NULL, 'other', NULL, '2025-11-18 23:59:00', 'rejected', 'question'),
-(7, 1, 10, 4, NULL, NULL, 'Lý do khác', 'Test', '2025-12-04 03:27:35', 'pending', 'document'),
-(8, 1, NULL, 4, NULL, 31, 'Thông tin sai lệch', NULL, '2025-12-04 03:51:18', 'pending', 'answer'),
-(9, 1, NULL, 4, 11, NULL, 'Spam', NULL, '2025-12-04 03:51:27', 'pending', 'question');
+(6, 1, NULL, 3, 2, NULL, 'copyright', NULL, '2025-11-18 23:59:00', 'rejected', 'question'),
+(7, 1, 10, 4, NULL, NULL, 'other', 'Test 2', '2025-12-04 03:27:35', 'pending', 'document'),
+(8, 1, NULL, 4, NULL, 31, 'misinformation', NULL, '2025-12-04 03:51:18', 'pending', 'answer'),
+(9, 1, NULL, 4, 11, NULL, 'spam', NULL, '2025-12-04 03:51:27', 'pending', 'question');
 
 --
 -- Dumping data for table `cauhoi`
 --
 
 INSERT INTO `cauhoi` (`maCauHoi`, `maSinhVien`, `maMon`, `tieuDeCH`, `noiDungCH`, `ngayDatCH`, `trangThaiCH`, `luotTraLoi`, `imagePath`) VALUES
-(1, 1, 1, 'Khai báo biến trong C như thế nào?', 'Mình mới học lập trình C và còn khá mơ hồ về cách khai báo biến: cú pháp, vị trí khai báo và kiểu dữ liệu. Mọi người có thể giải thích rõ và cho ví dụ minh họa được không?', '2025-11-18 22:11:00', 'show', 3, ''),
-(2, 2, 2, 'Hướng dẫn thiết kế cơ sở dữ liệu từ đầu?', 'Mình đang muốn tự thiết kế một cơ sở dữ liệu đơn giản cho bài tập nhóm. Không biết quy trình chuẩn để bắt đầu từ phân tích tới thiết kế bảng như thế nào. Ai có thể chia sẻ quy trình chi tiết?', '2025-11-18 22:12:00', 'show', 3, ''),
-(3, 3, 3, 'Thuật toán QuickSort hoạt động như thế nào?', 'Mình biết đây là thuật toán sắp xếp nhanh nhưng vẫn chưa hiểu được cơ chế chia mảng, chọn pivot và cách đệ quy hoạt động. Mong mọi người giải thích chi tiết giúp.', '2025-11-18 22:13:00', 'show', 3, ''),
-(4, 1, 4, 'Khái niệm cơ bản trong Nguyên lý kế toán?', 'Môn Nguyên lý kế toán có nhiều khái niệm như tài sản, nguồn vốn, nợ phải trả... Bạn nào có tài liệu hoặc lời giải thích dễ hiểu cho người mới học không?', '2025-11-18 22:14:00', 'show', 3, ''),
-(5, 2, 5, 'Cách tính thuế GTGT đầu ra và đầu vào?', 'Mình đang làm bài tập kế toán và bị rối phần tính thuế GTGT. Không biết công thức tính thuế đầu ra – đầu vào như thế nào. Ai có thể giải thích bằng ví dụ?', '2025-11-18 22:15:00', 'show', 3, ''),
-(6, 3, 7, 'Phân biệt âm hữu thanh và vô thanh trong tiếng Anh?', 'Mình học môn Ngữ âm học và gặp phần âm hữu thanh (voiced) và vô thanh (voiceless). Khó nhất là phân biệt khi phát âm. Ai có cách nhớ dễ không?', '2025-11-18 22:16:00', 'show', 3, ''),
-(7, 1, 8, 'Hỏi về cách dịch câu tiếng Anh đúng ngữ cảnh?', 'Mình đang tập dịch các câu trong bài tập nhưng không biết phải dựa vào những yếu tố nào để dịch đúng ý và tự nhiên. Ai có các mẹo căn bản chỉ giúp mình?', '2025-11-18 22:17:00', 'show', 3, ''),
-(8, 2, 10, 'Marketing Mix (4P) gồm những nội dung gì?', 'Trong môn Marketing căn bản, nhóm mình được giao thuyết trình về mô hình 4P nhưng thông tin hơi rối. Mong mọi người giải thích dễ hiểu về 4P.', '2025-11-18 22:18:00', 'show', 3, ''),
-(9, 3, 11, 'Khái niệm quản trị là gì?', 'Mình học Quản trị học và muốn hiểu đúng khái niệm quản trị, vai trò và chức năng của nhà quản trị. Ai giải thích gọn giúp mình?', '2025-11-18 22:19:00', 'show', 3, ''),
-(10, 1, 13, 'Quy trình trồng lúa từ lúc làm đất đến thu hoạch?', 'Mình làm bài tập môn Khoa học cây trồng nhưng chưa rõ từng bước quy trình trồng lúa. Ai có thể mô tả ngắn gọn các giai đoạn chính?', '2025-11-18 22:20:00', 'show', 3, ''),
+(1, 1, 1, 'Khai báo biến trong C như thế nào?', 'Mình mới học lập trình C và còn khá mơ hồ về cách khai báo biến: cú pháp, vị trí khai báo và kiểu dữ liệu. Mọi người có thể giải thích rõ và cho ví dụ minh họa được không?', '2025-11-18 22:11:00', 'show', 3, NULL),
+(2, 2, 2, 'Hướng dẫn thiết kế cơ sở dữ liệu từ đầu?', 'Mình đang muốn tự thiết kế một cơ sở dữ liệu đơn giản cho bài tập nhóm. Không biết quy trình chuẩn để bắt đầu từ phân tích tới thiết kế bảng như thế nào. Ai có thể chia sẻ quy trình chi tiết?', '2025-11-18 22:12:00', 'show', 3, NULL),
+(3, 3, 3, 'Thuật toán QuickSort hoạt động như thế nào?', 'Mình biết đây là thuật toán sắp xếp nhanh nhưng vẫn chưa hiểu được cơ chế chia mảng, chọn pivot và cách đệ quy hoạt động. Mong mọi người giải thích chi tiết giúp.', '2025-11-18 22:13:00', 'show', 3, NULL),
+(4, 1, 4, 'Khái niệm cơ bản trong Nguyên lý kế toán?', 'Môn Nguyên lý kế toán có nhiều khái niệm như tài sản, nguồn vốn, nợ phải trả... Bạn nào có tài liệu hoặc lời giải thích dễ hiểu cho người mới học không?', '2025-11-18 22:14:00', 'show', 3, NULL),
+(5, 2, 5, 'Cách tính thuế GTGT đầu ra và đầu vào?', 'Mình đang làm bài tập kế toán và bị rối phần tính thuế GTGT. Không biết công thức tính thuế đầu ra – đầu vào như thế nào. Ai có thể giải thích bằng ví dụ?', '2025-11-18 22:15:00', 'show', 3, NULL),
+(6, 3, 7, 'Phân biệt âm hữu thanh và vô thanh trong tiếng Anh?', 'Mình học môn Ngữ âm học và gặp phần âm hữu thanh (voiced) và vô thanh (voiceless). Khó nhất là phân biệt khi phát âm. Ai có cách nhớ dễ không?', '2025-11-18 22:16:00', 'show', 3, NULL),
+(7, 1, 8, 'Hỏi về cách dịch câu tiếng Anh đúng ngữ cảnh?', 'Mình đang tập dịch các câu trong bài tập nhưng không biết phải dựa vào những yếu tố nào để dịch đúng ý và tự nhiên. Ai có các mẹo căn bản chỉ giúp mình?', '2025-11-18 22:17:00', 'show', 3, NULL),
+(8, 2, 10, 'Marketing Mix (4P) gồm những nội dung gì?', 'Trong môn Marketing căn bản, nhóm mình được giao thuyết trình về mô hình 4P nhưng thông tin hơi rối. Mong mọi người giải thích dễ hiểu về 4P.', '2025-11-18 22:18:00', 'show', 3, NULL),
+(9, 3, 11, 'Khái niệm quản trị là gì?', 'Mình học Quản trị học và muốn hiểu đúng khái niệm quản trị, vai trò và chức năng của nhà quản trị. Ai giải thích gọn giúp mình?', '2025-11-18 22:19:00', 'show', 3, NULL),
+(10, 1, 13, 'Quy trình trồng lúa từ lúc làm đất đến thu hoạch?', 'Mình làm bài tập môn Khoa học cây trồng nhưng chưa rõ từng bước quy trình trồng lúa. Ai có thể mô tả ngắn gọn các giai đoạn chính?', '2025-11-18 22:20:00', 'show', 3, NULL),
 (11, 4, 2, 'Test', 'Test', '2025-12-04 03:46:34', 'show', 0, NULL);
 
 --
@@ -60,9 +61,6 @@ INSERT INTO `cauhoi` (`maCauHoi`, `maSinhVien`, `maMon`, `tieuDeCH`, `noiDungCH`
 --
 
 INSERT INTO `cautraloi` (`maCauTraLoi`, `maSinhVien`, `maCauHoi`, `noiDungCTL`, `ngayTraLoi`, `trangThaiCTL`) VALUES
-(1, 1, 1, 'Bạn có thể khai báo biến bằng cú pháp: <kiểu dữ liệu> <tên biến>; Ví dụ: int a; float b; Việc khai báo nên thực hiện ở đầu hàm để tránh lỗi.', '2025-11-18 23:01:00', 'show'),
-(2, 2, 1, 'Trong C, biến phải khai báo trước khi sử dụng. Các kiểu phổ biến: int, float, double, char. Ví dụ: char c = ''A'';', '2025-11-18 23:02:00', 'show'),
-(3, 3, 1, 'Bạn xem lại phần khai báo biến trong giáo trình chương 2, trong đó có giải thích rõ về phạm vi biến và khai báo nhiều biến cùng lúc.', '2025-11-18 23:03:00', 'show'),
 (4, 1, 2, 'Thiết kế CSDL nên bắt đầu bằng xác định yêu cầu, sau đó vẽ mô hình thực thể – liên kết (ERD), rồi mới chuyển sang mô hình quan hệ.', '2025-11-18 23:04:00', 'show'),
 (5, 2, 2, 'Bạn nên chuẩn hóa dữ liệu đến 3NF để giảm dư thừa. Các bước: xác định khóa chính, loại bỏ phụ thuộc bắc cầu...', '2025-11-18 23:05:00', 'show'),
 (6, 3, 2, 'Dùng MySQL Workbench để mô hình hóa rất tiện. Bạn chỉ cần kéo thả để tạo bảng và quan hệ.', '2025-11-18 23:06:00', 'show'),
@@ -97,13 +95,10 @@ INSERT INTO `cautraloi` (`maCauTraLoi`, `maSinhVien`, `maCauHoi`, `noiDungCTL`, 
 --
 
 INSERT INTO `danhgiacauhoi` (`maSinhVien`, `maCauHoi`, `Upvote`, `Downvote`) VALUES
-(1, 1, '1', '0'),
 (1, 2, '1', '0'),
 (1, 3, '0', '0'),
-(2, 1, '1', '0'),
 (2, 2, '0', '1'),
 (2, 3, '0', '0'),
-(3, 1, '0', '1'),
 (3, 2, '1', '0'),
 (3, 3, '1', '0');
 
@@ -112,11 +107,8 @@ INSERT INTO `danhgiacauhoi` (`maSinhVien`, `maCauHoi`, `Upvote`, `Downvote`) VAL
 --
 
 INSERT INTO `danhgiacautraloi` (`maSinhVien`, `maCauTraLoi`, `Upvote`, `Downvote`) VALUES
-(1, 1, '1', '0'),
 (1, 4, '1', '0'),
-(2, 1, '0', '0'),
 (2, 4, '1', '0'),
-(3, 1, '0', '1'),
 (3, 4, '0', '0');
 
 --
@@ -124,8 +116,8 @@ INSERT INTO `danhgiacautraloi` (`maSinhVien`, `maCauTraLoi`, `Upvote`, `Downvote
 --
 
 INSERT INTO `danhsachtag` (`maTag`, `maCauHoi`) VALUES
-(1, 1),
 (2, 2),
+(2, 11),
 (3, 3),
 (4, 4),
 (5, 5),
@@ -134,7 +126,6 @@ INSERT INTO `danhsachtag` (`maTag`, `maCauHoi`) VALUES
 (8, 8),
 (9, 9),
 (10, 10),
-(2, 11),
 (11, 11);
 
 --
@@ -209,7 +200,6 @@ INSERT INTO `nganh` (`maNganh`, `tenNganh`) VALUES
 (4, 'Quản trị kinh doanh'),
 (5, 'Nông nghiệp');
 
-
 --
 -- Dumping data for table `sinhvien`
 --
@@ -224,7 +214,7 @@ INSERT INTO `sinhvien` (`maSinhVien`, `maNganh`, `hoTenSV`, `emailSV`, `matKhauS
 -- Dumping data for table `tag`
 --
 
-INSERT INTO `tag`(`maTag`, `tenTag`) VALUES
+INSERT INTO `tag` (`maTag`, `tenTag`) VALUES
 (1, 'C'),
 (2, 'SQL'),
 (3, 'Algorithm'),
@@ -241,7 +231,7 @@ INSERT INTO `tag`(`maTag`, `tenTag`) VALUES
 -- Dumping data for table `tailieu`
 --
 
-INSERT INTO `tailieu`(`maTaiLieu`, `maLoai`, `maDinhDang`, `maSinhVien`, `tieuDeTL`, `ngayChiaSe`, `trangThaiTL`, `filePath`, `fileSizes`, `soLanLuu`, `luotTaiXuong`) VALUES
+INSERT INTO `tailieu` (`maTaiLieu`, `maLoai`, `maDinhDang`, `maSinhVien`, `tieuDeTL`, `ngayChiaSe`, `trangThaiTL`, `filePath`, `fileSizes`, `soLanLuu`, `luotTaiXuong`) VALUES
 (1, 1, 1, 1, 'Giáo trình C căn bản', '2025-11-18 22:20:04', 'show', 'tl1.pdf', 50000, 10, 5),
 (2, 2, 3, 2, 'Slide CSDL chương 1', '2025-11-18 22:21:45', 'show', 'tl2.pptx', 30000, 4, 3),
 (3, 3, 1, 3, 'Đề thi lập trình C', '2025-11-18 22:22:13', 'show', 'tl3.pdf', 20000, 2, 1),
@@ -252,7 +242,7 @@ INSERT INTO `tailieu`(`maTaiLieu`, `maLoai`, `maDinhDang`, `maSinhVien`, `tieuDe
 (8, 1, 1, 2, 'Giáo trình kế toán', '2025-11-18 23:10:00', 'show', 'tl8.pdf', 45000, 1, 1),
 (9, 2, 4, 3, 'Slide Marketing', '2025-11-18 23:20:00', 'show', 'tl9.ppt', 30000, 0, 0),
 (10, 4, 1, 1, 'Tài liệu dịch thuật', '2025-11-18 23:30:00', 'show', 'tl10.pdf', 38000, 9, 7);
-
+SET FOREIGN_KEY_CHECKS=1;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
