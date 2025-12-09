@@ -15,6 +15,8 @@ export default function DangKy() {
     confirmPassword: ''
   })
   const [errors, setErrors] = useState({})
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -94,25 +96,45 @@ export default function DangKy() {
 
                   <div className="form-group">
                     <label>Mật khẩu *</label>
-                    <input
-                      type="password"
-                      value={formData.password}
-                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                      placeholder="••••••••"
-                      autoComplete="new-password"
-                    />
+                    <div className="password-input-wrapper">
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        value={formData.password}
+                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                        placeholder="••••••••"
+                        autoComplete="new-password"
+                      />
+                      <button
+                        type="button"
+                        className="password-toggle"
+                        onClick={() => setShowPassword(!showPassword)}
+                        aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                      >
+                        <i className={showPassword ? "fas fa-eye-slash" : "fas fa-eye"}></i>
+                      </button>
+                    </div>
                     {errors.password && <span className="error-text">{errors.password}</span>}
                   </div>
 
                   <div className="form-group">
                     <label>Xác nhận mật khẩu *</label>
-                    <input
-                      type="password"
-                      value={formData.confirmPassword}
-                      onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                      placeholder="••••••••"
-                      autoComplete="new-password"
-                    />
+                    <div className="password-input-wrapper">
+                      <input
+                        type={showConfirmPassword ? "text" : "password"}
+                        value={formData.confirmPassword}
+                        onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                        placeholder="••••••••"
+                        autoComplete="new-password"
+                      />
+                      <button
+                        type="button"
+                        className="password-toggle"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        aria-label={showConfirmPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                      >
+                        <i className={showConfirmPassword ? "fas fa-eye-slash" : "fas fa-eye"}></i>
+                      </button>
+                    </div>
                     {errors.confirmPassword && <span className="error-text">{errors.confirmPassword}</span>}
                   </div>
 
@@ -121,18 +143,6 @@ export default function DangKy() {
                   </button>
                 </form>
 
-                <div className="divider">
-                  <span>hoặc đăng ký với</span>
-                </div>
-
-                <div className="social-login">
-                  <button className="btn btn-social btn-google">
-                    <i className="fab fa-google"></i> Google
-                  </button>
-                  <button className="btn btn-social btn-facebook">
-                    <i className="fab fa-facebook"></i> Facebook
-                  </button>
-                </div>
               </div>
             </div>
           </div>

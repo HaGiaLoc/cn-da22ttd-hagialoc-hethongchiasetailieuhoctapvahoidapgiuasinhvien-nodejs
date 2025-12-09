@@ -42,7 +42,7 @@ api.interceptors.response.use(
       localStorage.removeItem('tabCount');
       sessionStorage.removeItem('user');
       sessionStorage.removeItem('isTemporarySession');
-      window.location.href = '/dang-nhap';
+      window.location.href = '/login';
     }
     return Promise.reject(error.response?.data || error);
   }

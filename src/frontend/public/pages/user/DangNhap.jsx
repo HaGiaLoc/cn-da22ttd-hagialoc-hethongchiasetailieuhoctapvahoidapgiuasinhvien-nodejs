@@ -15,6 +15,7 @@ export default function DangNhap() {
     rememberMe: false
   })
   const [errors, setErrors] = useState({})
+  const [showPassword, setShowPassword] = useState(false)
 
   // Lấy trang trước đó từ location state, mặc định là trang chủ
   const from = location.state?.from?.pathname || '/'
@@ -86,13 +87,23 @@ export default function DangNhap() {
 
                   <div className="form-group">
                     <label>Mật khẩu</label>
-                    <input
-                      type="password"
-                      value={formData.password}
-                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                      placeholder="••••••••"
-                      autoComplete="on"
-                    />
+                    <div className="password-input-wrapper">
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        value={formData.password}
+                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                        placeholder="••••••••"
+                        autoComplete="on"
+                      />
+                      <button
+                        type="button"
+                        className="password-toggle"
+                        onClick={() => setShowPassword(!showPassword)}
+                        aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                      >
+                        <i className={showPassword ? "fas fa-eye-slash" : "fas fa-eye"}></i>
+                      </button>
+                    </div>
                     {errors.password && <span className="error-text">{errors.password}</span>}
                   </div>
 
@@ -113,18 +124,6 @@ export default function DangNhap() {
                   </button>
                 </form>
 
-                <div className="divider">
-                  <span>hoặc đăng nhập với</span>
-                </div>
-
-                <div className="social-login">
-                  <button className="btn btn-social btn-google">
-                    <i className="fab fa-google"></i> Google
-                  </button>
-                  <button className="btn btn-social btn-facebook">
-                    <i className="fab fa-facebook"></i> Facebook
-                  </button>
-                </div>
               </div>
             </div>
           </div>

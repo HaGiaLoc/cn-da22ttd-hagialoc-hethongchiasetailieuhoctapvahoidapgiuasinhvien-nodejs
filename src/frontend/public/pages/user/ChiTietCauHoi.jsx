@@ -93,6 +93,8 @@ export default function ChiTietCauHoi() {
     }
   }
 
+    const canVote = user?.role === 'student'
+
   const handleTextareaFocus = () => {
     if (!user) {
       showNotification('Vui lòng đăng nhập để trả lời câu hỏi', 'warning')
@@ -287,21 +289,19 @@ export default function ChiTietCauHoi() {
               <div className="question-body">
                 <div className="question-voting">
                   <button 
-                    onClick={() => user?.role === 'student' && handleVote('up', 'question')}
+                    onClick={() => canVote && handleVote('up', 'question')}
                     className={user && question.userVote?.Upvote ? 'active' : ''}
                     title={!user ? 'Đăng nhập để vote' : user?.role === 'admin' ? 'Quản trị viên không thể đánh giá' : 'Upvote'}
-                    disabled={!user || user?.role === 'admin'}
-                    style={user?.role === 'admin' ? { cursor: 'not-allowed', opacity: 0.5 } : {}}
+                    disabled={!canVote}
                   >
                     <i className="fas fa-arrow-up"></i>
                   </button>
                   <span className="vote-count">{question.votes || 0}</span>
                   <button 
-                    onClick={() => user?.role === 'student' && handleVote('down', 'question')}
+                    onClick={() => canVote && handleVote('down', 'question')}
                     className={user && question.userVote?.Downvote ? 'active' : ''}
                     title={!user ? 'Đăng nhập để vote' : user?.role === 'admin' ? 'Quản trị viên không thể đánh giá' : 'Downvote'}
-                    disabled={!user || user?.role === 'admin'}
-                    style={user?.role === 'admin' ? { cursor: 'not-allowed', opacity: 0.5 } : {}}
+                    disabled={!canVote}
                   >
                     <i className="fas fa-arrow-down"></i>
                   </button>
@@ -327,19 +327,17 @@ export default function ChiTietCauHoi() {
                     <div key={ans.maCauTraLoi} className="answer-item">
                       <div className="answer-voting">
                         <button 
-                          onClick={() => user?.role === 'student' && handleVote('up', 'answer', ans.maCauTraLoi)}
+                          onClick={() => canVote && handleVote('up', 'answer', ans.maCauTraLoi)}
                           title={!user ? 'Đăng nhập để vote' : user?.role === 'admin' ? 'Quản trị viên không thể đánh giá' : 'Upvote'}
-                          disabled={!user || user?.role === 'admin'}
-                          style={user?.role === 'admin' ? { cursor: 'not-allowed', opacity: 0.5 } : {}}
+                          disabled={!canVote}
                         >
                           <i className="fas fa-arrow-up"></i>
                         </button>
                         <span className="vote-count">{ans.votes || 0}</span>
                         <button 
-                          onClick={() => user?.role === 'student' && handleVote('down', 'answer', ans.maCauTraLoi)}
+                          onClick={() => canVote && handleVote('down', 'answer', ans.maCauTraLoi)}
                           title={!user ? 'Đăng nhập để vote' : user?.role === 'admin' ? 'Quản trị viên không thể đánh giá' : 'Downvote'}
-                          disabled={!user || user?.role === 'admin'}
-                          style={user?.role === 'admin' ? { cursor: 'not-allowed', opacity: 0.5 } : {}}
+                          disabled={!canVote}
                         >
                           <i className="fas fa-arrow-down"></i>
                         </button>
@@ -402,7 +400,7 @@ export default function ChiTietCauHoi() {
                     </form>
                   ) : (
                     <div className="login-prompt">
-                      <p>Vui lòng <Link to="/dang-nhap">đăng nhập</Link> để trả lời câu hỏi</p>
+                      <p>Vui lòng <Link to="/login">đăng nhập</Link> để trả lời câu hỏi</p>
                     </div>
                   )}
                 </div>
