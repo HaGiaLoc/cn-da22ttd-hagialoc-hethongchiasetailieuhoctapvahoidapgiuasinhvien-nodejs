@@ -40,6 +40,20 @@ class MonModel {
     return result.insertId;
   }
 
+  // Kiểm tra trùng tên môn trong cùng ngành
+  static async existsInMajor(tenMon, maNganh, excludeId = null) {
+    let query = 'SELECT maMon FROM mon WHERE LOWER(tenMon) = LOWER(?) AND maNganh = ?';
+    const params = [tenMon, maNganh];
+
+    if (excludeId) {
+      query += ' AND maMon <> ?';
+      params.push(excludeId);
+    }
+
+    const [rows] = await db.execute(query, params);
+    return rows.length > 0;
+  }
+
   // Cập nhật môn học
   static async update(id, monData) {
     const { maNganh, tenMon } = monData;

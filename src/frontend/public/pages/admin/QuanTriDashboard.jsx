@@ -50,7 +50,7 @@ export default function QuanTriDashboard() {
     <BoTriQuanTri>
       <section className="admin-section">
         <div className="admin-header">
-          <h1><i className="fas fa-tachometer-alt"></i> Bảng điều khiển quản trị</h1>
+          <h1><i className="fas fa-tachometer-alt"></i> Dashboard</h1>
         </div>
 
         {/* Stats Cards */}

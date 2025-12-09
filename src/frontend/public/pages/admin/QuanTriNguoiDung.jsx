@@ -219,31 +219,37 @@ export default function QuanTriNguoiDung() {
                     />
                   </div>
                   <div className="form-group">
-                    <label>Họ tên</label>
+                    <label>Họ tên *</label>
                     <input
                       type="text"
                       value={editingStudent.hoTenSV}
                       onChange={(e) => setEditingStudent({ ...editingStudent, hoTenSV: e.target.value })}
                       className="form-control"
+                      autoComplete="off"
+                      placeholder="Nhập họ tên sinh viên"
+                      required
                     />
                   </div>
                   <div className="form-group">
-                    <label>Email</label>
+                    <label>Email *</label>
                     <input
                       type="email"
                       value={editingStudent.emailSV}
-                      onChange={(e) => setEditingStudent({ ...editingStudent, emailSV: e.target.value })}
                       className="form-control"
+                      autoComplete="off"
+                      placeholder="student@example.com"
                     />
                   </div>
                   <div className="form-group">
-                    <label>Mật khẩu (để trống nếu không đổi)</label>
+                    <label>Mật khẩu</label>
                     <input
                       type="password"
                       value={editingStudent.password || ''}
                       onChange={(e) => setEditingStudent({ ...editingStudent, password: e.target.value })}
                       className="form-control"
-                      placeholder="Nhập mật khẩu mới"
+                      placeholder="Để trống nếu không muốn thay đổi"
+                      autoComplete="off"
+                      minLength="6"
                     />
                   </div>
                   <div className="form-group">

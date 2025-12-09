@@ -112,15 +112,16 @@ export default function BaoCaoModal({ isOpen, onClose, reportType, reportedId, r
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label>Lý do báo cáo *</label>
-              <div className="reason-options">
+              <div className="reason-options" style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '12px' }}>
                 {reasons.map((r, index) => (
-                  <label key={index} className="radio-label">
+                  <label key={index} className="radio-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                     <input
                       type="radio"
                       name="reason"
                       value={r}
                       checked={selectedReason === r}
                       onChange={(e) => setSelectedReason(e.target.value)}
+                      style={{ cursor: 'pointer' }}
                     />
                     <span>{r}</span>
                   </label>

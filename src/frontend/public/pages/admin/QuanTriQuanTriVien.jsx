@@ -179,15 +179,15 @@ export default function QuanTriQuanTriVien() {
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       className="form-control"
-                      disabled={editingAdmin !== null}
+                      //disabled={editingAdmin !== null}
                       autoComplete="off"
+                      placeholder="admin@example.com"
                       required
                     />
-                    {editingAdmin && <small className="form-text">Email không thể thay đổi</small>}
                   </div>
 
                   <div className="form-group">
-                    <label>Mật khẩu {!editingAdmin && '*'}</label>
+                    <label>Mật khẩu {!editingAdmin ? '*' : ''}</label>
                     <input
                       type="password"
                       value={formData.matKhau}
@@ -195,9 +195,9 @@ export default function QuanTriQuanTriVien() {
                       className="form-control"
                       required={!editingAdmin}
                       autoComplete="off"
+                      placeholder={editingAdmin ? 'Để trống nếu không muốn thay đổi' : 'Nhập mật khẩu'}
                       minLength="6"
                     />
-                    {editingAdmin && <small className="form-text">Để trống nếu không muốn thay đổi</small>}
                   </div>
 
                   <div className="form-group">

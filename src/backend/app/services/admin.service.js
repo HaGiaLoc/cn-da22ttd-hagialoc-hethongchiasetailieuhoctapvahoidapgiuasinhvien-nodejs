@@ -199,11 +199,36 @@ class AdminService {
   }
 
   static async createSubject(data) {
-    return await MonModel.create(data);
+    const tenMon = String(data.tenMon || '').trim();
+    const maNganh = Number(data.maNganh);
+
+    if (!tenMon || Number.isNaN(maNganh)) {
+      throw new Error('Vui lòng nhập đầy đủ tên môn và ngành');
+    }
+
+    // Tránh trùng tên môn trong cùng ngành
+    const exists = await MonModel.existsInMajor(tenMon, maNganh);
+    if (exists) {
+      throw new Error('Môn học đã tồn tại trong ngành này');
+    }
+
+    return await MonModel.create({ tenMon, maNganh });
   }
 
   static async updateSubject(id, data) {
-    const result = await MonModel.update(id, data);
+    const tenMon = String(data.tenMon || '').trim();
+    const maNganh = Number(data.maNganh);
+
+    if (!tenMon || Number.isNaN(maNganh)) {
+      throw new Error('Vui lòng nhập đầy đủ tên môn và ngành');
+    }
+
+    const exists = await MonModel.existsInMajor(tenMon, maNganh, id);
+    if (exists) {
+      throw new Error('Môn học đã tồn tại trong ngành này');
+    }
+
+    const result = await MonModel.update(id, { tenMon, maNganh });
     if (!result) throw new Error('Môn học không tồn tại');
     return true;
   }

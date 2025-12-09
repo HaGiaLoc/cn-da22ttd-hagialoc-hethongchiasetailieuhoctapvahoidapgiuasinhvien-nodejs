@@ -41,11 +41,21 @@ export default function QuanTriMonHoc() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
+      const payload = {
+        tenMon: formData.tenMon.trim(),
+        maNganh: Number(formData.maNganh)
+      }
+
+      if (!payload.tenMon || Number.isNaN(payload.maNganh)) {
+        showNotification('Vui lòng nhập tên môn và chọn ngành', 'error', 3000)
+        return
+      }
+
       if (editingSubject) {
-        await adminService.updateSubject(editingSubject.maMon, formData)
+        await adminService.updateSubject(editingSubject.maMon, payload)
         showNotification('Đã cập nhật môn học', 'success', 2000)
       } else {
-        await adminService.createSubject(formData)
+        await adminService.createSubject(payload)
         showNotification('Đã thêm môn học mới', 'success', 2000)
       }
       setShowModal(false)
@@ -53,7 +63,8 @@ export default function QuanTriMonHoc() {
       setFormData({ tenMon: '', maNganh: '' })
       loadData()
     } catch (error) {
-      showNotification('Thao tác thất bại', 'error', 3000)
+      const msg = error?.message || error?.data?.message || 'Thao tác thất bại'
+      showNotification(msg, 'error', 3000)
     }
   }
 

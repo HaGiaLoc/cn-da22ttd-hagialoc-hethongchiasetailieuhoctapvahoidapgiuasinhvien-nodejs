@@ -261,6 +261,9 @@ class AdminController {
       const id = await AdminService.createSubject(req.body);
       res.json({ success: true, message: 'Thêm môn học thành công', data: { id } });
     } catch (error) {
+      if (error.message?.includes('Vui lòng') || error.message?.includes('tồn tại')) {
+        return res.status(400).json({ success: false, message: error.message });
+      }
       next(error);
     }
   }
@@ -270,6 +273,9 @@ class AdminController {
       await AdminService.updateSubject(req.params.id, req.body);
       res.json({ success: true, message: 'Cập nhật môn học thành công' });
     } catch (error) {
+      if (error.message?.includes('Vui lòng') || error.message?.includes('tồn tại')) {
+        return res.status(400).json({ success: false, message: error.message });
+      }
       next(error);
     }
   }
