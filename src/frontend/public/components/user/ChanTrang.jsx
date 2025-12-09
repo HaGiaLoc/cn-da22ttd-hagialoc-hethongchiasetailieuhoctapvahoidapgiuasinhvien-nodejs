@@ -25,20 +25,10 @@ export default function ChanTrang() {
           <div className="footer-section">
             <h4>Hỗ trợ</h4>
             <ul>
-              <li><a href="#">Hướng dẫn sử dụng</a></li>
-              <li><a href="#">Câu hỏi thường gặp</a></li>
-              <li><a href="#">Liên hệ</a></li>
+              <li><Link to="/support/guide">Hướng dẫn sử dụng</Link></li>
+              <li><Link to="/support/faq">Câu hỏi thường gặp</Link></li>
+              <li><Link to="/support/contact">Liên hệ</Link></li>
             </ul>
-          </div>
-          
-          <div className="footer-section">
-            <h4>Theo dõi</h4>
-            <div className="social-links">
-              <a href="#"><i className="fab fa-facebook"></i></a>
-              <a href="#"><i className="fab fa-twitter"></i></a>
-              <a href="#"><i className="fab fa-youtube"></i></a>
-              <a href="#"><i className="fab fa-instagram"></i></a>
-            </div>
           </div>
         </div>
         

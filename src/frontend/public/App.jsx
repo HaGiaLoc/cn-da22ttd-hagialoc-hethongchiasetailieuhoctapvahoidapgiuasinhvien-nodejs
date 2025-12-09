@@ -20,6 +20,9 @@ import ChinhSuaHoSo from './pages/user/ChinhSuaHoSo'
 import DoiMatKhau from './pages/user/DoiMatKhau'
 import QuenMatKhau from './pages/user/QuenMatKhau'
 import DatLaiMatKhau from './pages/user/DatLaiMatKhau'
+import HuongDan from './pages/user/HuongDan'
+import CauHoiThuongGap from './pages/user/CauHoiThuongGap'
+import LienHe from './pages/user/LienHe'
 
 // Admin Pages
 import QuanTriDashboard from './pages/admin/QuanTriDashboard'
@@ -56,6 +59,9 @@ function App() {
           <Route path="/profile" element={<StudentRoute><HoSo /></StudentRoute>} />
           <Route path="/profile/edit" element={<StudentRoute><ChinhSuaHoSo /></StudentRoute>} />
           <Route path="/change-password" element={<StudentRoute><DoiMatKhau /></StudentRoute>} />
+          <Route path="/support/guide" element={<HuongDan />} />
+          <Route path="/support/faq" element={<CauHoiThuongGap />} />
+          <Route path="/support/contact" element={<LienHe />} />
           
           {/* Admin Routes - Protected */}
           <Route path="/admin" element={<AdminRoute><QuanTriDashboard /></AdminRoute>} />

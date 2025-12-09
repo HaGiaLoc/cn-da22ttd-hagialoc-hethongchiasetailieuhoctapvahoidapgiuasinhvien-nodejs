@@ -13,6 +13,30 @@ export default function TheTaiLieu({ document: taiLieu, onSaveChange }) {
   const [isSaved, setIsSaved] = useState(false)
   const [showReportModal, setShowReportModal] = useState(false)
 
+  // Derive document type/extension for thumbnail badge
+  const rawPath = (taiLieu.filePath || '').toString()
+  const extMatch = rawPath.match(/\.([^.\/?]+)(?:[?#]|$)/i)
+  const inferredExt = (extMatch?.[1] || '').toLowerCase()
+  const normalizedExt = (taiLieu.tenDinhDang || inferredExt || '').toString().replace('.', '').toLowerCase()
+
+  const typeMap = {
+    pdf: { color: '#e53935', icon: 'fa-file-pdf', label: 'PDF' },
+    doc: { color: '#1a73e8', icon: 'fa-file-word', label: 'DOC' },
+    docx: { color: '#1a73e8', icon: 'fa-file-word', label: 'DOCX' },
+    ppt: { color: '#d24726', icon: 'fa-file-powerpoint', label: 'PPT' },
+    pptx: { color: '#d24726', icon: 'fa-file-powerpoint', label: 'PPTX' },
+    xls: { color: '#0f9d58', icon: 'fa-file-excel', label: 'XLS' },
+    xlsx: { color: '#0f9d58', icon: 'fa-file-excel', label: 'XLSX' },
+    txt: { color: '#6d4c41', icon: 'fa-file-alt', label: 'TXT' },
+    zip: { color: '#8e24aa', icon: 'fa-file-archive', label: 'ZIP' },
+    rar: { color: '#8e24aa', icon: 'fa-file-archive', label: 'RAR' },
+    csv: { color: '#0f9d58', icon: 'fa-file-csv', label: 'CSV' },
+    default: { color: '#5c6bc0', icon: 'fa-file', label: (normalizedExt || 'file').toUpperCase() }
+  }
+
+  const typeConfig = typeMap[normalizedExt] || typeMap.default
+  const thumbGradient = `linear-gradient(135deg, ${typeConfig.color} 0%, ${typeConfig.color}cc 100%)`
+
   // Prefer backend avatarPath when it's a usable URL/path; otherwise generate an avatar
   const hasAvatarPath = taiLieu.avatarPath && (String(taiLieu.avatarPath).startsWith('http') || String(taiLieu.avatarPath).startsWith('/'))
   const authorAvatar = hasAvatarPath ? taiLieu.avatarPath : generateAvatar(taiLieu.hoTenSV)
@@ -140,8 +164,11 @@ export default function TheTaiLieu({ document: taiLieu, onSaveChange }) {
   return (
     <>
       <div className="document-card">
-        <div className="document-thumbnail">
-          <i className="fas fa-file-pdf"></i>
+        <div className="document-thumbnail" style={{ background: thumbGradient }}>
+          <div className="thumb-badge">
+            <i className={`fas ${typeConfig.icon}`}></i>
+            <span>{typeConfig.label}</span>
+          </div>
           {user?.role === 'student' && (
             <button 
               className="report-btn"

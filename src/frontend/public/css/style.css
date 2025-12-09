@@ -53,8 +53,12 @@ body {
 
 a {
     text-decoration: none;
-    color: inherit;
+    color: #1d4ed8;
     transition: var(--transition);
+}
+
+a:hover {
+    color: #7c3aed;
 }
 
 img {
@@ -314,24 +318,6 @@ input, textarea, select {
     width: 100%;
 }
 
-.btn-social {
-    border: 1px solid var(--border-color);
-    background: white;
-    color: var(--text-primary);
-}
-
-.btn-google:hover {
-    background: #DB4437;
-    color: white;
-    border-color: #DB4437;
-}
-
-.btn-facebook:hover {
-    background: #1877F2;
-    color: white;
-    border-color: #1877F2;
-}
-
 /* ==================== HERO SECTION ==================== */
 .hero {
     background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
@@ -573,6 +559,32 @@ input, textarea, select {
     color: white;
     font-size: 3rem;
     position: relative;
+    overflow: hidden;
+}
+
+.thumb-badge {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    padding: 0.65rem 0.9rem;
+    border-radius: 16px;
+    background: rgba(0, 0, 0, 0.12);
+    backdrop-filter: blur(2px);
+    text-align: center;
+    min-width: 110px;
+}
+
+.thumb-badge i {
+    font-size: 1.75rem;
+}
+
+.thumb-badge span {
+    font-weight: 700;
+    letter-spacing: 0.05em;
 }
 
 .document-info {
@@ -1013,6 +1025,40 @@ input, textarea, select {
     box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
 }
 
+.password-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-input-wrapper input {
+    width: 100%;
+    padding-right: 3rem;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 0.75rem;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+    z-index: 1;
+}
+
+.password-toggle:hover {
+    color: var(--primary-color);
+}
+
+.password-toggle i {
+    font-size: 1.1rem;
+}
+
 .input-group {
     position: relative;
     display: flex;
@@ -1229,6 +1275,22 @@ input, textarea, select {
 .page-header h1 {
     font-size: 2rem;
     margin-bottom: 0.5rem;
+}
+
+.support-content {
+    font-size: 1.05rem;
+    line-height: 1.7;
+}
+
+.support-content h2,
+.support-content h3 {
+    margin: 0 0 0.5rem;
+}
+
+.support-content ul {
+    margin: 0.25rem 0 0.75rem 1.1rem;
+    padding: 0;
+    line-height: 1.6;
 }
 
 /* ==================== PAGINATION ==================== */
@@ -2014,6 +2076,15 @@ input, textarea, select {
     background: var(--primary-light);
     border-color: var(--primary-color);
     color: var(--primary-color);
+}
+
+.question-voting button:disabled,
+.answer-voting button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
 }
 
 .vote-count {
