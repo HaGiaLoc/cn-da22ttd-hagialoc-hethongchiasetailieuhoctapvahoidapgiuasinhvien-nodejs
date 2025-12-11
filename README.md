@@ -4,15 +4,8 @@
 - [Giới thiệu](#giới-thiệu)
 - [Công nghệ](#công-nghệ)
 - [Tính năng](#tính-năng)
-- [Giới thiệu về repositories của tôi](#giới-thiệu-về-repositories-của-tôi)
+- [Giới thiệu về repository](#giới-thiệu-về-repository)
 - [Cài đặt](#cài-đặt)
-- [Chạy bằng Docker (khuyến nghị)](#chạy-bằng-docker-khuyến-nghị)
-- [Chạy thủ công](#chạy-thủ-công)
-- [Cấu hình `.env`](#cấu-hình-env)
-- [Dữ liệu mẫu](#dữ-liệu-mẫu)
-- [Lưu ý bảo mật](#lưu-ý-bảo-mật)
-- [Scripts hữu ích](#scripts-hữu-ích)
-- [Kiểm tra sau khi khởi động](#kiểm-tra-sau-khi-khởi-động)
 - [Giấy phép](#giấy-phép)
 
 ---
@@ -38,7 +31,7 @@ Hệ thống được phát triển nhằm hỗ trợ sinh viên trong việc ch
 
 ---
 
-## Giới thiệu về repositories của tôi
+## Giới thiệu về repository
 Repository này lưu toàn bộ mã nguồn của hệ thống và các tài liệu liên quan đến đồ án. Tất cả thư mục đều nằm trong branch **main**. Cấu trúc chính gồm:
 
 - **src:** Chứa toàn bộ mã nguồn backend, frontend và cấu hình cơ sở dữ liệu.
@@ -123,5 +116,5 @@ Repository này lưu toàn bộ mã nguồn của hệ thống và các tài li�
    - Đảm bảo backend trả `200` cho `GET /api/health`.
    - Thử đăng nhập admin bằng một tài khoản đã seed trong DB (hoặc tạo admin mới bằng script tạo hash).
 
-   ## Giấy phép
-   Đây là một hệ thống được tạo ra chỉ vì đồ án chuyên ngành không vì bất kỳ lợi ích thương mại hay kiếm tiền.
+## Giấy phép
+Đây là một hệ thống được tạo ra chỉ vì đồ án chuyên ngành không vì bất kỳ lợi ích thương mại hay kiếm tiền.
