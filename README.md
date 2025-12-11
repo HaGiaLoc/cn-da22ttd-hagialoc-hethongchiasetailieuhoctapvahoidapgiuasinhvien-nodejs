@@ -1,4 +1,4 @@
-# HỆ THỐNG CHIA SẺ TÀI LIỆU VÀ HỎI ĐÁP GIỮA SINH VIÊN (KEF)
+# HỆ THỐNG CHIA SẺ TÀI LIỆU VÀ HỎI ĐÁP GIỮA SINH VIÊN
 
 ## Mục lục
 - [Giới thiệu](#giới-thiệu)
@@ -18,7 +18,6 @@ Hệ thống được phát triển nhằm hỗ trợ sinh viên trong việc ch
 ## Công nghệ
 - **Backend:** Node.js, Express, MySQL2, JWT, Multer, bcryptjs, express-validator.
 - **Frontend:** React 18, Vite, React Router, Axios.
-- **Hạ tầng:** Docker Compose (MySQL 8, backend, frontend).
 
 ---
 
@@ -27,7 +26,6 @@ Hệ thống được phát triển nhằm hỗ trợ sinh viên trong việc ch
 - **Quản lý tài liệu**: Sinh viên có thể upload tài liệu, phân loại theo môn học hoặc chủ đề, lưu trữ và tải về khi cần.
 - **Hỏi đáp**: Cho phép đặt câu hỏi, trả lời, chỉnh sửa nội dung và đánh dấu câu hỏi đã được giải đáp.
 - **Báo cáo và quản trị**: Người dùng có thể báo cáo nội dung vi phạm; phía quản trị có thể duyệt báo cáo, quản lý tài liệu và tài khoản.
-- **Lưu trữ file bền vững**: Tài liệu được lưu qua Docker volumes để đảm bảo không bị mất khi hệ thống khởi động lại.
 
 ---
 
@@ -83,7 +81,7 @@ Repository này lưu toàn bộ mã nguồn của hệ thống và các tài li�
    ```
 
    ## Cấu hình `.env`
-   Đặt file `.env` trong `src/backend` và `src/frontend` (hoặc sử dụng thiết lập mẫu trong `.env.example`).
+   Đặt file `.env` trong `src/backend` và `src/frontend` (có thể sử dụng thiết lập mẫu trong `.env.example`).
    
    Backend:
    - `PORT` — cổng backend (mặc định `5000`).
@@ -99,7 +97,6 @@ Repository này lưu toàn bộ mã nguồn của hệ thống và các tài li�
    ## Dữ liệu mẫu
    - Import `src/backend/data/kef_db.sql` để tạo cấu trúc bảng và một số dữ liệu khởi tạo.
    - (Tùy chọn) Import `src/backend/data/kef_db(mock_data).sql` để có dữ liệu demo.
-   - Nếu dùng Docker Compose và bật phpMyAdmin, bạn có thể truy cập giao diện web để kiểm tra dữ liệu. Cổng phpMyAdmin và thông tin đăng nhập phụ thuộc vào `docker-compose.yml`.
 
    Chú ý thực hành khi chạy SQL từ PowerShell: các giá trị bcrypt chứa ký tự `$`. PowerShell có thể interpret `$` như biến — khi chèn hoặc update hash trực tiếp qua lệnh `docker exec mysql -e "..."`, hãy bọc chuỗi SQL trong single quotes hoặc dùng file `.sql` để import để tránh bị cắt/xuyên chuỗi.
 
