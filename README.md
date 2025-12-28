@@ -9,6 +9,7 @@
 - [🎓 HỆ THỐNG CHIA SẺ TÀI LIỆU VÀ HỎI ĐÁP GIỮA SINH VIÊN](#-hệ-thống-chia-sẻ-tài-liệu-và-hỏi-đáp-giữa-sinh-viên)
    - [📚 Mục lục](#-mục-lục)
    - [🔰 Giới thiệu](#giới-thiệu)
+   - [👨‍💻 Thông tin tác giả](#-thông-tin-tác-giả)
    - [🛠️ Công nghệ](#công-nghệ)
    - [🚀 Tính năng](#tính-năng)
    - [📁 Giới thiệu về repository](#giới-thiệu-về-repository)
@@ -19,6 +20,16 @@
 
 ## 🔰 Giới thiệu
 Hệ thống được phát triển nhằm hỗ trợ sinh viên trong việc chia sẻ tài liệu học tập và trao đổi kiến thức một cách thuận tiện. Người dùng có thể đăng tải tài liệu, đặt câu hỏi, trả lời thắc mắc và cùng nhau xây dựng một cộng đồng học thuật cởi mở.
+
+---
+
+## 👨‍💻 Thông tin tác giả
+- Sinh viên thực hiện: Hà Gia Lộc
+- MSSV: 110122103
+- Lớp: DA22TTD
+- Email: 110122103@st.tvu.edu.vn
+- Số điện thoại: 0969707708
+- Giảng viên hướng dẫn: ThS. Hà Thị Thúy Vi
 
 ---
 
